@@ -1,0 +1,106 @@
+{
+  "motor.png": {
+    "width": 1365,
+    "height": 768,
+    "x": 461,
+    "y": 76,
+    "cropWidth": 462,
+    "cropHeight": 632
+  },
+  "properllers.png": {
+    "width": 1365,
+    "height": 768,
+    "x": 318,
+    "y": 186,
+    "cropWidth": 742,
+    "cropHeight": 399
+  },
+  "flight controller.png": {
+    "width": 1365,
+    "height": 768,
+    "x": 353,
+    "y": 111,
+    "cropWidth": 683,
+    "cropHeight": 537
+  },
+  "camera.png": {
+    "width": 1365,
+    "height": 768,
+    "x": 513,
+    "y": 219,
+    "cropWidth": 363,
+    "cropHeight": 341
+  },
+  "frame arms.png": {
+    "width": 1365,
+    "height": 768,
+    "x": 412,
+    "y": 154,
+    "cropWidth": 577,
+    "cropHeight": 452
+  },
+  "screw.png": {
+    "width": 1365,
+    "height": 768,
+    "x": 209,
+    "y": 320,
+    "cropWidth": 146,
+    "cropHeight": 115
+  },
+  "sensor-sensor-wire-fixed.png": {
+    "width": 1672,
+    "height": 941,
+    "x": 340,
+    "y": 69,
+    "cropWidth": 995,
+    "cropHeight": 838
+  },
+  "frame attachement.png": {
+    "width": 1367,
+    "height": 768,
+    "x": 511,
+    "y": 231,
+    "cropWidth": 358,
+    "cropHeight": 323
+  },
+  "body-frame-bare-hd-v1.png": {
+    "width": 1024,
+    "height": 1536,
+    "x": 213,
+    "y": 20,
+    "cropWidth": 598,
+    "cropHeight": 1464
+  },
+  "battery-theme-no-logo-v2.png": {
+    "width": 1672,
+    "height": 941,
+    "x": 156,
+    "y": 34,
+    "cropWidth": 1493,
+    "cropHeight": 907
+  },
+  "aerocadmy-logo.png": {
+    "width": 1000,
+    "height": 400,
+    "x": 50,
+    "y": 77,
+    "cropWidth": 923,
+    "cropHeight": 209
+  },
+  "frame-motors-attached.png": {
+    "width": 504,
+    "height": 368,
+    "x": 0,
+    "y": 0,
+    "cropWidth": 504,
+    "cropHeight": 368
+  },
+  "final-drone.png": {
+    "width": 1448,
+    "height": 1086,
+    "x": 0,
+    "y": 0,
+    "cropWidth": 1448,
+    "cropHeight": 1086
+  }
+}
