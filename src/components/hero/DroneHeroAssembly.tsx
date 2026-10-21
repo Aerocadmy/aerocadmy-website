@@ -1,21 +1,23 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import confetti from "canvas-confetti";
-import { ArrowRight, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowRight, RotateCcw } from "lucide-react";
+import journeyStyles from "./JourneyPanel.module.css";
 import { ASSETS, imageBounds, mountComponentImage } from "@/lib/assets";
 import { LESSONS } from "@/lib/drone-data";
+
+const assemblyScrollDistance = () => window.innerWidth <= 900 ? 2400 : Math.max(2400, window.innerHeight * 3.5);
 
 export const DroneHeroAssembly: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
+  const journeyPanelRef = useRef<HTMLElement>(null);
   const orbitRef = useRef<SVGSVGElement>(null);
 
   const [activeLesson, setActiveLesson] = useState(0);
   const [isJourneyVisible, setIsJourneyVisible] = useState(false);
-  const confettiFired = useRef(false);
 
   // Milestone mapping
   const milestones = ["Understand", "Build", "Program", "Fly"];
@@ -26,7 +28,7 @@ export const DroneHeroAssembly: React.FC = () => {
     const track = containerRef.current;
     const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--nav-h")) || 96;
     const trackTop = track.offsetTop - navH;
-    const scrollDistance = Math.max(4200, window.innerHeight * 6);
+    const scrollDistance = assemblyScrollDistance();
     const targetScroll = trackTop + ([.39, .95, 1.9, 2.9, 3.9, 4.95, 5.9][stepIndex] / 6) * scrollDistance;
 
     window.scrollTo({
@@ -37,7 +39,6 @@ export const DroneHeroAssembly: React.FC = () => {
 
   const resetJourney = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    confettiFired.current = false;
   }, []);
 
   useEffect(() => {
@@ -500,6 +501,7 @@ export const DroneHeroAssembly: React.FC = () => {
     asm.final4 = mkAsm(ASSETS.frameSensor, FIN.w, 5);
     asm.final5 = mkAsm(ASSETS.frameBody, FIN5.w, 5);
     asm.finalDrone = mkAsm(ASSETS.finalDrone, FIN5.w, 8);
+    asm.finalDrone.el.classList.add(journeyStyles.completedDrone);
     asm.body = mkAsm(ASSETS.body, BF.w, 2);
     // Keep the latest body, sensor and battery; complete it with the animated camera and propellers.
     asm.flash5 = mkFx("flash", 460, 9);
@@ -642,45 +644,62 @@ export const DroneHeroAssembly: React.FC = () => {
 
     let s = 1,
       viewportH = 802,
+      mobileCopyHeight = 340,
+      mobileIntroScale = 1,
       journeyBlend = 0,
-      scrollDistance = 4200;
+      scrollDistance = assemblyScrollDistance();
+
+    const mobilePortrait = () => window.innerWidth <= 900 && window.innerHeight > 520;
 
     function fit() {
-      const navH = navHeight();
-      viewportH = Math.max(
-        window.innerHeight - navH,
-        window.innerWidth <= 900 ? 600 : 520
-      );
+      mobileCopyHeight = (journeyPanelRef.current?.offsetHeight || 300) + 36;
+      // CSS uses the small viewport so the phone's browser toolbar cannot resize the build.
+      hero.style.removeProperty("height");
+      viewportH = hero.clientHeight;
       if (hero) hero.style.height = viewportH + "px";
-      scrollDistance = Math.max(4200, window.innerHeight * 6);
+      scrollDistance = assemblyScrollDistance();
       if (track) track.style.height = viewportH + scrollDistance + "px";
       positionStage(journeyBlend);
     }
 
     function positionStage(blend: number) {
-      const mobile = window.innerWidth <= 900;
-      const initialScale = Math.min(window.innerWidth / W, (mobile ? Math.max(220, viewportH - 340) : viewportH) / H);
+      const landscape = window.innerWidth <= 900 && window.innerHeight <= 520;
+      const mobile = window.innerWidth <= 900 && !landscape;
+      const mobileSceneHeight = Math.max(110, viewportH - mobileCopyHeight - 40);
+      const initialScale = mobile
+        ? Math.min((window.innerWidth - 32) / 900, .48)
+        : Math.min((landscape ? window.innerWidth * .5 : window.innerWidth) / W, viewportH / H);
+      mobileIntroScale = initialScale;
       const buildScale = mobile
         ? Math.min(
-            (window.innerWidth - 24) / 1030,
-            Math.max(230, viewportH - 340) / 760
+            (window.innerWidth - 32) / 1100,
+            mobileSceneHeight / 820
           )
         : Math.min((window.innerWidth * 0.58) / W, (viewportH * 0.9) / H);
       s = lerp(initialScale, buildScale, blend);
       stage.style.left =
-        lerp(window.innerWidth * 0.5, window.innerWidth * (mobile ? 0.5 : 0.72), blend) +
+        lerp(window.innerWidth * (landscape ? .74 : .5), window.innerWidth * (mobile ? .5 : .72), blend) +
         "px";
       stage.style.top =
         lerp(
-          mobile ? 340 + (viewportH - 340) * .5 : viewportH * 0.5,
-          mobile ? 340 + (viewportH - 340) * 0.5 : viewportH * 0.5,
+          viewportH * 0.5,
+          mobile ? mobileCopyHeight + mobileSceneHeight * .5 : viewportH * 0.5,
           blend
         ) + "px";
       stage.style.transform = `translate(-50%,-50%) scale(${s})`;
     }
 
     window.addEventListener("resize", fit);
+    const panelObserver = new ResizeObserver(fit);
+    if (journeyPanelRef.current) panelObserver.observe(journeyPanelRef.current);
+    panelObserver.observe(copyEl);
     fit();
+    // The scroll track gains height after hydration; keep incoming section links aligned.
+    const anchorFrameId = requestAnimationFrame(() => {
+      const id = window.location.hash.slice(1);
+      const target = id ? document.getElementById(id) : null;
+      if (target && !track.contains(target)) target.scrollIntoView({ behavior: "instant" });
+    });
 
     const mouse = { x: -9999, y: -9999, nx: 0, ny: 0, on: false };
     const handlePointerMove = (e: PointerEvent) => {
@@ -792,22 +811,6 @@ export const DroneHeroAssembly: React.FC = () => {
       });
       if (lessonIdx !== previousLesson) { previousLesson = lessonIdx; setActiveLesson(lessonIdx); }
 
-      // Trigger completion confetti on final step!
-      if (p < .1) confettiFired.current = false;
-      if (!reduce && p >= 5.8 && !confettiFired.current) {
-        confettiFired.current = true;
-        try {
-          confetti({
-            particleCount: 80,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ["#18CB96", "#0097B2", "#081C2B", "#4a5b68"],
-          });
-        } catch {
-          // ignore if canvas-confetti is not loaded
-        }
-      }
-
       journeyBlend = sm(ph(p, 0, 0.4));
       positionStage(journeyBlend);
 
@@ -875,13 +878,15 @@ export const DroneHeroAssembly: React.FC = () => {
       copyEl.style.opacity = (1 - q1).toFixed(3);
       const mobileCopy = window.innerWidth <= 900;
       const copyScale = mobileCopy ? 1 : Math.min(window.innerWidth / W, viewportH / H);
-      copyEl.style.top = (mobileCopy ? 24 : Math.max(0, (viewportH - H * copyScale) / 2)) + 'px';
+      const phoneCopyTop = Math.max(128, Math.min(200, (viewportH - copyEl.offsetHeight) * .36));
+      copyEl.style.top = (mobilePortrait() ? phoneCopyTop : mobileCopy ? 24 : Math.max(0, (viewportH - H * copyScale) / 2)) + 'px';
       copyEl.style.transformOrigin = 'top center';
       copyEl.style.transform = `translateX(-50%) translateY(${-70 * q1}px) scale(${copyScale})`;
       copyEl.inert = q1 > .5;
       copyEl.style.pointerEvents = q1 > 0.5 ? "none" : "";
       copyEl.setAttribute("aria-hidden", String(q1 > 0.5));
-      orbitClone.style.opacity = (1 - ph(p, 0, 0.15)).toFixed(3);
+      const compactParts = mobilePortrait();
+      orbitClone.style.opacity = compactParts ? "0" : (1 - ph(p, 0, 0.15)).toFixed(3);
 
       nodes.forEach((n) => {
         const p0 = n.p,
@@ -895,8 +900,27 @@ export const DroneHeroAssembly: React.FC = () => {
           eScale = 0.55 + 0.45 * eo;
 
         const fl = role ? 0 : e1;
-        const bx = lerp(p0.cx, p0.fx ?? p0.cx, fl),
-          by = lerp(p0.cy, p0.fy ?? p0.cy, fl);
+        // Keep the phone's text clear, with components in upper and lower bands.
+        const phoneCopyBottom = phoneCopyTop + copyEl.offsetHeight;
+        const topRow = Math.min(60, phoneCopyTop * .36);
+        const bottomRow = phoneCopyBottom + (viewportH - 40 - phoneCopyBottom) * .42;
+        const phonePosition = role === "motor" ? { x: window.innerWidth * .17, y: topRow }
+          : p0.batt ? { x: window.innerWidth * .68, y: topRow + 2 }
+          : p0.prop ? { x: window.innerWidth * .43, y: phoneCopyTop - 44 }
+          : p0.cam ? { x: window.innerWidth * .86, y: phoneCopyTop - 40 }
+          : p0.ctrl ? { x: window.innerWidth * .18, y: bottomRow }
+          : role === "arm" ? { x: window.innerWidth * .81, y: bottomRow }
+          : { x: window.innerWidth * .5, y: bottomRow + 6 };
+        const compactPosition = {
+          x: 800 + (phonePosition.x - window.innerWidth * .5) / mobileIntroScale,
+          y: 401 + (phonePosition.y - viewportH * .5) / mobileIntroScale,
+        };
+        const bx = compactParts
+          ? lerp(compactPosition.x, 800 + ((p0.fx ?? p0.cx) - 800) * .6, fl)
+          : lerp(p0.cx, p0.fx ?? p0.cx, fl);
+        const by = compactParts
+          ? lerp(compactPosition.y, 401 + ((p0.fy ?? p0.cy) - 401) * .7, fl)
+          : lerp(p0.cy, p0.fy ?? p0.cy, fl);
         const baseRot = lerp(p0.rot, p0.frot ?? p0.rot, fl);
         const calm = role ? 1 - q2 : 1;
         const bobY = reduce
@@ -942,7 +966,7 @@ export const DroneHeroAssembly: React.FC = () => {
 
         const Wd = p0.W || p0.w,
           Hd = n.h;
-        const sHero = (p0.w / Wd) * eScale * n.sc * (1 + 0.2 * fl);
+        const sHero = (p0.w / Wd) * eScale * n.sc * (1 + 0.2 * fl) * (compactParts ? lerp(p0.prop ? .85 : 1.25, 1, journeyBlend) : 1);
         const rHero = baseRot + sway + n.rot + eRot;
         const cxp = bx + tx + n.ox + n.px + bobX,
           cyp = by + ty + n.oy + n.py + bobY;
@@ -1019,7 +1043,7 @@ export const DroneHeroAssembly: React.FC = () => {
         n.fin = { ax, ay, wpx: sc * Wd, rt };
         place(n.el, Wd, Hd, anc, ax, ay, sc, rt, 1, 1);
         n.el.style.opacity = (
-          clamp01(e * 3.2) *
+          (compactParts && p0.small ? 0 : 1) * clamp01(e * 3.2) *
           (role
             ? (1 - sw) * (1 - sw2)
             : p0.batt
@@ -1052,7 +1076,7 @@ export const DroneHeroAssembly: React.FC = () => {
             bobY * 0.5
           ).toFixed(2)}px,0) scale(${(1 + k * 0.04).toFixed(3)})`;
           n.tag.style.opacity = (
-            (reduce ? 1 : lo) *
+            (compactParts ? 0 : reduce ? 1 : lo) *
             (1 - ph(p, 0, 0.06))
           ).toFixed(3);
         }
@@ -1230,6 +1254,7 @@ export const DroneHeroAssembly: React.FC = () => {
           1
         );
         fd.el.style.opacity = finalDroneVisible ? "1" : "0";
+        fd.el.dataset.complete = p >= 5.8 ? "true" : "false";
       }
       if (asm.flash5) {
         const fl6 = clamp01(1 - (now - tFlash5) / 260),
@@ -1456,7 +1481,9 @@ export const DroneHeroAssembly: React.FC = () => {
       imageCleanups.forEach(cleanup => cleanup());
       stage.replaceChildren();
       cancelAnimationFrame(animFrameId);
+      cancelAnimationFrame(anchorFrameId);
       window.removeEventListener("resize", fit);
+      panelObserver.disconnect();
       hero.removeEventListener("pointermove", handlePointerMove);
       hero.removeEventListener("pointerleave", handlePointerLeave);
     };
@@ -1475,6 +1502,7 @@ export const DroneHeroAssembly: React.FC = () => {
             "radial-gradient(ellipse 60% 55% at 50% 52%, rgba(24,203,150,.07), transparent 70%), radial-gradient(ellipse 40% 40% at 12% 100%, rgba(0,151,178,.06), transparent 70%), #fbfdfd",
         }}
       >
+        <div className="mobile-hero-atmosphere" aria-hidden="true" />
         {/* Visual Assembly Stage */}
         <div
           ref={stageRef}
@@ -1603,24 +1631,24 @@ export const DroneHeroAssembly: React.FC = () => {
         {/* Center Initial Copy (fades out as user scrolls into the assembly) */}
         <div
           ref={copyRef}
-          className="hero-copy absolute left-1/2 top-0 w-[700px] -translate-x-1/2 text-center pointer-events-auto"
+          className="hero-copy absolute left-1/2 top-0 z-20 w-[700px] -translate-x-1/2 text-center pointer-events-auto"
         >
           {/* Eyebrow */}
           <div className="pt-24 sm:pt-28 flex items-center justify-center gap-3 text-xs sm:text-sm font-semibold tracking-[0.22em] text-[#5a6b77] uppercase">
             <span className="h-0.5 w-7 rounded bg-[#18CB96]" />
-            <span>DRONE TECHNOLOGY EDUCATION</span>
+            <span>UNDERSTAND · BUILD · EXPLORE</span>
             <span className="h-0.5 w-7 rounded bg-[#18CB96]" />
           </div>
 
           {/* Heading */}
-          <h1 className="mt-4 text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight text-[#081C2B] leading-none">
-            Engineered <br />
-            to <span className="text-[#18CB96] italic">inspire.</span>
+          <h1 className="mt-4 text-[clamp(40px,4vw,64px)] font-black tracking-tight text-[#081C2B] leading-[1.12]">
+            <span className="block">Curious about drones?</span>
+            <span className="block text-[.82em] text-[#18CB96]">Your Journey starts here!</span>
           </h1>
 
           {/* Subheading */}
-          <p className="mt-5 mx-auto max-w-lg text-lg sm:text-xl text-[#4a5b68] font-normal leading-relaxed">
-            Learn drone technology — from aerodynamic components and flight electronics to programming and autonomous flight.
+          <p className="mt-5 mx-auto max-w-lg text-lg sm:text-xl text-[#4a5b68] font-normal italic leading-relaxed">
+            <q>Discover the drone technology, explore the science and turn your curiosity into skills that take you beyond the sky</q>
           </p>
 
           {/* Buttons */}
@@ -1633,13 +1661,13 @@ export const DroneHeroAssembly: React.FC = () => {
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </a>
 
-            <button
-              onClick={() => scrollToStep(0)}
+            <a
+              href="#find-your-path"
               className="inline-flex items-center gap-2 rounded-xl border-2 border-[#dfe9eb] bg-white px-6 py-4 text-base sm:text-lg font-semibold text-[#081C2B] hover:border-[#18CB96] hover:text-[#0097B2] hover:-translate-y-1 transition-all"
             >
-              <Sparkles className="h-5 w-5 text-[#18CB96]" />
-              <span>Assemble Drone</span>
-            </button>
+              <span>Find your starting point</span>
+              <ArrowRight className="h-5 w-5 text-[#087957]" aria-hidden="true" />
+            </a>
           </div>
 
           {/* Features list */}
@@ -1652,7 +1680,7 @@ export const DroneHeroAssembly: React.FC = () => {
                 </svg>
               </div>
               <span className="text-sm font-semibold text-[#5b6b76] text-left leading-tight">
-                Hands-on<br />Physical Build
+                Hands-on<br />learning
               </span>
             </div>
 
@@ -1663,7 +1691,7 @@ export const DroneHeroAssembly: React.FC = () => {
                 </svg>
               </div>
               <span className="text-sm font-semibold text-[#5b6b76] text-left leading-tight">
-                Real-world<br />Avionics Code
+                Electronics<br />&amp; coding
               </span>
             </div>
 
@@ -1676,113 +1704,69 @@ export const DroneHeroAssembly: React.FC = () => {
                 </svg>
               </div>
               <span className="text-sm font-semibold text-[#5b6b76] text-left leading-tight">
-                Aerospace<br />Mentorship
+                Career<br />guidance
               </span>
             </div>
           </div>
         </div>
 
-        {/* Learning Journey HUD Card (Fixed in viewport, animated smoothly) */}
+        {/* Open editorial copy beside the assembly. */}
         <aside
-          className={`journey-panel absolute z-20 transition-opacity duration-200 pointer-events-auto ${
-            isJourneyVisible
-              ? "opacity-100 translate-x-0 visible"
-              : "opacity-0 -translate-x-6 invisible pointer-events-none"
-          }`}
+          ref={journeyPanelRef}
+          className={`${journeyStyles.panel} ${isJourneyVisible ? journeyStyles.visible : journeyStyles.hidden}`}
           aria-label="Your building journey"
+          aria-hidden={!isJourneyVisible}
         >
-          <div className="journey-panel-content rounded-2xl border border-[#e3eef0] bg-white/95 p-6 sm:p-7 shadow-xl">
-            {/* HUD Header */}
-            <div className="journey-panel-header flex flex-wrap items-center gap-2 border-b border-[#e3eef0] pb-3 mb-4">
-              <div className="flex items-center gap-2">
-                <span className="flex h-2.5 w-2.5 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#18CB96] opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#18CB96]" />
-                </span>
-                <p className="text-[11px] font-extrabold tracking-[0.2em] text-[#0097B2] uppercase">
-                  BUILD SIMULATION
-                </p>
-              </div>
-              <p className="text-xs font-bold text-[#607580]">
-                {String(activeLesson + 1).padStart(2, "0")} / 07 — {currentLessonData.label}
-              </p>
+          <div className={journeyStyles.chapter}>
+            <span className={journeyStyles.chapterLabel}>The making of a drone</span>
+            <span className={journeyStyles.counter}>
+              <span>{String(activeLesson + 1).padStart(2, "0")}</span>
+              <span className={journeyStyles.counterDivider}>/</span>
+              {String(LESSONS.length).padStart(2, "0")}
+            </span>
+          </div>
+
+          <div className={journeyStyles.content} key={activeLesson}>
+            <p className={journeyStyles.lessonLabel}>
+              <span aria-hidden="true" />{currentLessonData.label}
+            </p>
+            <h2>{currentLessonData.title}</h2>
+            <p className={journeyStyles.description}>{currentLessonData.description}</p>
+            <div className={journeyStyles.componentFocus}>
+              <span className={journeyStyles.focusMark} aria-hidden="true"><span /></span>
+              <span>{currentLessonData.focusComponent}</span>
             </div>
+          </div>
 
-            {/* Current Lesson Title & Copy */}
-            <div className="journey-message min-h-[140px] space-y-2">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#081C2B] tracking-tight leading-tight">
-                {currentLessonData.title}
-              </h2>
-              <p className="text-sm sm:text-base text-[#4a5b68] leading-relaxed">
-                {currentLessonData.description}
-              </p>
-            </div>
+          <ol className={journeyStyles.phases} aria-label="Learning phases">
+            {milestones.map((milestone, index) => (
+              <li key={milestone}
+                aria-current={index === currentLessonData.milestone ? "step" : undefined}
+                className={index === currentLessonData.milestone ? journeyStyles.currentPhase : index < currentLessonData.milestone ? journeyStyles.completedPhase : undefined}>
+                <span className={journeyStyles.phaseIndex}>0{index + 1}</span>
+                <span>{milestone}</span>
+              </li>
+            ))}
+          </ol>
 
-            {/* Milestones stepper */}
-            <div className="mt-5 pt-4 border-t border-[#e3eef0]">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
-                <span>Phase Progress</span>
-                <span className="text-[#0097B2] font-semibold">{currentLessonData.milestoneName}</span>
-              </div>
-              <ol className="flex items-center justify-between gap-1">
-                {milestones.map((m, idx) => {
-                  const isReached = idx <= currentLessonData.milestone;
-                  const isActive = idx === currentLessonData.milestone;
-                  return (
-                    <li
-                      key={m}
-                      className="flex-1 flex flex-col items-center gap-1.5"
-                    >
-                      <div
-                        className={`h-2 w-full rounded-full transition-all duration-300 ${
-                          isActive
-                            ? "bg-[#18CB96] ring-2 ring-[#18CB96]/30 shadow-sm"
-                            : isReached
-                            ? "bg-[#18CB96]"
-                            : "bg-[#e3eef0]"
-                        }`}
-                      />
-                      <span
-                        className={`text-[10px] tracking-wider uppercase font-semibold ${
-                          isActive
-                            ? "text-[#081C2B] font-bold"
-                            : isReached
-                            ? "text-[#18CB96]"
-                            : "text-slate-400"
-                        }`}
-                      >
-                        {m}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
-
-            {/* Step navigation pills */}
-            <div className="mt-5 flex items-center justify-end pt-3">
-
-
-              {activeLesson === 6 ? (
-                <button
-                  onClick={resetJourney}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0097B2] hover:text-[#007f96]"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  <span>Replay</span>
-                </button>
-              ) : (
-                <span className="text-xs text-[#71818b] font-medium">
-                  Scroll to continue ↓
-                </span>
-              )}
-            </div>
+          <div className={journeyStyles.footer}>
+            <span className={journeyStyles.sequence} aria-hidden="true">
+              {LESSONS.map((lesson, index) => <span key={lesson.id} className={index === activeLesson ? journeyStyles.activeTick : index < activeLesson ? journeyStyles.completedTick : undefined} />)}
+            </span>
+            {activeLesson === LESSONS.length - 1 ? (
+              <button type="button" onClick={resetJourney} tabIndex={isJourneyVisible ? 0 : -1} className={journeyStyles.replay}>
+                Replay the build<RotateCcw size={14} aria-hidden="true" />
+              </button>
+            ) : <span className={journeyStyles.scrollHint}>Scroll to discover<ArrowDown size={14} aria-hidden="true" /></span>}
+            <a href="#programs" tabIndex={isJourneyVisible ? 0 : -1} className={journeyStyles.programLink}>
+              Explore programs<ArrowRight size={17} aria-hidden="true" />
+            </a>
           </div>
         </aside>
 
         {/* Scroll hint helper */}
         <div
-          className={`absolute bottom-5 left-1/2 -translate-x-1/2 z-10 transition-opacity duration-300 pointer-events-none ${
+          className={`hero-scroll-cue absolute bottom-5 left-1/2 -translate-x-1/2 z-10 transition-opacity duration-300 pointer-events-none ${
             !isJourneyVisible ? "opacity-100" : "opacity-0"
           }`}
         >

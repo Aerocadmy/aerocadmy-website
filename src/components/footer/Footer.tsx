@@ -1,168 +1,73 @@
 "use client";
 
-import React, { useState } from "react";
 import Link from "next/link";
-import { Send, CheckCircle2, ShieldCheck, Heart, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUp, Mail, Phone } from "lucide-react";
+import { ComponentImage } from "@/components/ui/ComponentImage";
+import { ASSETS } from "@/lib/assets";
+import styles from "./Footer.module.css";
 
-export const Footer: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
+const learningLinks = [
+  { label: "Live drone internship", href: "/programs/drone-technology-internship", live: true },
+  { label: "Drone Technology Fundamentals", href: "/courses/drone-technology-fundamentals" },
+  { label: "Engineering Foundations", href: "/courses?path=engineering" },
+  { label: "Industry Applications", href: "/courses?path=applications" },
+];
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-    setSubscribed(true);
-  };
+const resourceLinks = [
+  { label: "Articles & guides", href: "/articles" },
+  { label: "Drone opportunities", href: "/#why-drone-technology" },
+  { label: "Find your starting point", href: "/#find-your-path" },
+  { label: "Connect with a counsellor", href: "/#counselling" },
+];
+
+export function Footer() {
+  const backToTop = () => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 
   return (
-    <footer className="bg-[#081C2B] text-white pt-20 pb-12 border-t border-[#0b3347]">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-16 border-b border-white/10">
-          {/* Brand Info (2 cols on lg) */}
-          <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl font-black tracking-tight text-white">
-                AERO<span className="text-[#0097B2]">CAD</span><span className="text-[#18CB96]">MY</span>
-              </span>
+    <footer id="footer" className={styles.footer}>
+      <div className={styles.pattern} aria-hidden="true" />
+      <div className={styles.container}>
+        <div className={styles.topline}>
+          <span className={styles.eyebrow}><span aria-hidden="true" />LEARN WITH AEROCADMY</span>
+          <span className={styles.format}>Online learning. Hands-on thinking.</span>
+        </div>
+
+        <div className={styles.grid}>
+          <div className={styles.brand}>
+            <Link href="/" aria-label="Aerocadmy home" className={styles.logo}>
+              <ComponentImage src={ASSETS.logo} alt="Aerocadmy" className={styles.logoImage} />
             </Link>
-            <p className="text-sm text-slate-300 max-w-sm leading-relaxed">
-              Empowering the next generation of aerospace engineers, roboticists, and innovators through hands-on multirotor drone builds, embedded electronics, and autonomous flight.
-            </p>
-
-            <div className="pt-2">
-              <div className="flex items-center gap-2 text-xs text-[#18CB96] font-semibold">
-                <ShieldCheck className="h-4 w-4" />
-                <span>Industry-Compliant Aviation Training Standard</span>
-              </div>
-            </div>
+            <p className={styles.statement}>Learn the systems.<br /><span>Build your skills.</span></p>
+            <p className={styles.description}>Explore drone technology through electronics, programming and practical learning.</p>
+            <Link href="/courses" className={styles.brandAction}>Explore programs<ArrowRight size={17} aria-hidden="true" /></Link>
           </div>
 
-          {/* Column 1: Learning Tracks */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#0097B2] mb-4">
-              Learning Tracks
-            </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-300">
-              <li>
-                <a href="#programs" className="hover:text-[#18CB96] transition-colors">
-                  01 / Drone Fundamentals
-                </a>
-              </li>
-              <li>
-                <a href="#programs" className="hover:text-[#18CB96] transition-colors">
-                  02 / Avionics & Assembly
-                </a>
-              </li>
-              <li>
-                <a href="#programs" className="hover:text-[#18CB96] transition-colors">
-                  03 / Autonomous AI & OpenCV
-                </a>
-              </li>
-              <li>
-                <a href="#programs" className="hover:text-[#18CB96] transition-colors">
-                  University Lab Cohorts
-                </a>
-              </li>
-              <li>
-                <a href="#assembly-track" className="hover:text-[#18CB96] transition-colors">
-                  Interactive 3D Assembly
-                </a>
-              </li>
-            </ul>
-          </div>
+          <nav aria-label="Learning paths" className={styles.linkGroup}>
+            <h2>Start learning<span>01</span></h2>
+            <ul>{learningLinks.map(link => <li key={link.href}><Link href={link.href}>{link.label}{link.live && <span className={styles.liveTag}>LIVE</span>}</Link></li>)}</ul>
+            <p className={styles.courseNote}>Recorded courses are upcoming.</p>
+          </nav>
 
-          {/* Column 2: Hardware & CAD */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#18CB96] mb-4">
-              Hardware & CAD
-            </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-300">
-              <li>
-                <a href="#components" className="hover:text-white transition-colors">
-                  Brushless DC Motors
-                </a>
-              </li>
-              <li>
-                <a href="#components" className="hover:text-white transition-colors">
-                  STM32 Flight Controllers
-                </a>
-              </li>
-              <li>
-                <a href="#components" className="hover:text-white transition-colors">
-                  Graphene LiPo Batteries
-                </a>
-              </li>
-              <li>
-                <a href="#components" className="hover:text-white transition-colors">
-                  Carbon Fiber Airframes
-                </a>
-              </li>
-              <li>
-                <a href="#specs" className="hover:text-white transition-colors">
-                  Aerospace Specs Matrix
-                </a>
-              </li>
-            </ul>
-          </div>
+          <nav aria-label="Resources" className={styles.linkGroup}>
+            <h2>Resources<span>02</span></h2>
+            <ul>{resourceLinks.map(link => <li key={link.href}><Link href={link.href}>{link.label}</Link></li>)}</ul>
+          </nav>
 
-          {/* Column 3: Newsletter */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#0097B2] mb-4">
-              Aero Tech Dispatch
-            </h4>
-            <p className="text-xs text-slate-300 mb-4 leading-relaxed">
-              Get weekly aerospace engineering teardowns, open-source PID tuning tips, and firmware updates.
-            </p>
-            {subscribed ? (
-              <div className="flex items-center gap-2 text-xs font-semibold text-[#18CB96] bg-[#18CB96]/10 p-3 rounded-xl border border-[#18CB96]/20">
-                <CheckCircle2 className="h-4 w-4" />
-                <span>You’re subscribed to the Aero Dispatch!</span>
-              </div>
-            ) : (
-              <form onSubmit={handleSubscribe} className="space-y-2">
-                <div className="relative">
-                  <input
-                    type="email"
-                    aria-label="Email for newsletter"
-                    required
-                    placeholder="engineer@domain.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-xl bg-white/10 px-3.5 py-2.5 text-xs text-white placeholder-slate-400 border border-white/20 focus:border-[#0097B2] focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    aria-label="Subscribe to newsletter"
-                    className="absolute right-1.5 top-1.5 rounded-lg bg-[#0097B2] p-1.5 text-white hover:bg-[#007f96] transition-colors"
-                  >
-                    <Send className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <p className="text-[10px] text-slate-400">Zero spam. Unsubscribe anytime.</p>
-              </form>
-            )}
+          <div className={styles.contact}>
+            <h2>Let’s talk drones.<span>03</span></h2>
+            <p>A question, an idea, or a little direction. Start a conversation.</p>
+            <a href="tel:+919910772656" className={styles.contactLink}><Phone size={17} aria-hidden="true" /><span>+91 9910772656</span></a>
+            <a href="mailto:supportflight@aerocadmy.com" className={styles.contactLink}><Mail size={17} aria-hidden="true" /><span>supportflight@aerocadmy.com</span></a>
+            <Link href="/#counselling" className={styles.counsellorLink}>Talk to a counsellor<ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-          <p>© {new Date().getFullYear()} Aerocadmy Inc. Engineered to inspire. All rights reserved.</p>
-
-          <div className="flex items-center gap-6">
-            <a href="#privacy" className="hover:text-slate-200 transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#terms" className="hover:text-slate-200 transition-colors">
-              Terms of Education
-            </a>
-            <a href="#safety" className="hover:text-slate-200 transition-colors">
-              Aviation Safety Notice
-            </a>
-          </div>
+        <div className={styles.bottom}>
+          <p>© {new Date().getFullYear()} Aerocadmy. All rights reserved.</p>
+          <span className={styles.signature}>Understand. Build. Explore.</span>
+          <button type="button" onClick={backToTop} className={styles.backToTop}>Back to top<span><ArrowUp size={16} aria-hidden="true" /></span></button>
         </div>
       </div>
     </footer>
   );
-};
-
+}

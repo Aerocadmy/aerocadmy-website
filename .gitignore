@@ -2,6 +2,7 @@
 /node_modules
 /.pnp
 .pnp.js
+.aerocadmylms/
 
 # testing
 /coverage
@@ -9,6 +10,7 @@
 # next.js
 /.next/
 /.next-dev/
+/.next-preview/
 /out/
 
 # production
@@ -29,4 +31,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# private waitlist submissions (never serve or commit)
+/.data/
 

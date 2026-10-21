@@ -1,11 +1,10 @@
 import { Navbar } from "@/components/navbar/Navbar";
 import { DroneHeroAssembly } from "@/components/hero/DroneHeroAssembly";
-import { ComponentExplorer } from "@/components/components-explorer/ComponentExplorer";
-import { ProgramsSection } from "@/components/programs/ProgramsSection";
-import { DroneTechSpecs } from "@/components/tech-specs/DroneTechSpecs";
-import { StudentShowcase } from "@/components/testimonials/StudentShowcase";
-import { FAQSection } from "@/components/faq/FAQSection";
 import { Footer } from "@/components/footer/Footer";
+import { DroneOpportunity } from "@/components/opportunity/DroneOpportunity";
+import { CourseCatalogue } from "@/components/programs/CourseCatalogue";
+import { CourseFinder } from "@/components/guidance/CourseFinder";
+import { CounsellorSection } from "@/components/guidance/CounsellorSection";
 
 export default function Home() {
   return (
@@ -16,22 +15,14 @@ export default function Home() {
       {/* Hero with Interactive 3D Scroll Assembly */}
       <DroneHeroAssembly />
 
-      {/* Component & Hardware CAD Explorer */}
-      <ComponentExplorer />
+      <DroneOpportunity />
 
-      {/* Learning Programs & Curriculum Tracks */}
-      <ProgramsSection />
+      <CourseCatalogue />
 
-      {/* Aerospace Specifications Comparison Matrix */}
-      <DroneTechSpecs />
+      <CourseFinder />
 
-      {/* Student & Partner Testimonials */}
-      <StudentShowcase />
+      <CounsellorSection />
 
-      {/* FAQ Accordion */}
-      <FAQSection />
-
-      {/* Production Footer */}
       <Footer />
     </main>
   );
