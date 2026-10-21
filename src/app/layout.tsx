@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     description: "Learn drone technology with interactive 3D assembly and hands-on projects.",
   },
   icons: {
-    icon: ASSETS.logo,
+    icon: "/favicon.png",
   },
 };
 
@@ -65,4 +65,3 @@ export default function RootLayout({
     </html>
   );
 }
-

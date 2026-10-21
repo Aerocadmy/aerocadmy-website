@@ -56,7 +56,7 @@ export function Footer() {
           <div className={styles.contact}>
             <h2>Let’s talk drones.<span>03</span></h2>
             <p>A question, an idea, or a little direction. Start a conversation.</p>
-            <a href="tel:+919910772656" className={styles.contactLink}><Phone size={17} aria-hidden="true" /><span>+91 9910772656</span></a>
+            <a href="tel:+918851478459" className={styles.contactLink}><Phone size={17} aria-hidden="true" /><span>+91 8851478459</span></a>
             <a href="mailto:supportflight@aerocadmy.com" className={styles.contactLink}><Mail size={17} aria-hidden="true" /><span>supportflight@aerocadmy.com</span></a>
             <Link href="/#counselling" className={styles.counsellorLink}>Talk to a counsellor<ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
