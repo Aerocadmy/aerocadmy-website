@@ -47,8 +47,8 @@ The canonical runtime images are the 15 PNGs in `public/component images`. `src/
 
 ## Remaining integration / production gaps
 
-1. Advisor and newsletter submissions simulate success in client state. They do not contact a backend or persist requests.
-2. Footer privacy, terms and aviation-safety links point to sections that have not been implemented.
-3. `npm audit --omit=dev` reports two vulnerable production packages: Next.js (critical) and its nested PostCSS (high). The installed Next.js is 14.2.35. The official Windows-hosted remote-code-execution advisory affects versions >=13.4 and <15.5.24; patched releases listed are 15.5.24 and 16.3.3. A framework upgrade is required before Windows hosting. No major framework migration or forced audit fix was mixed into these UI corrections.
+1. The advisor form now persists requests through `/api/advisor`; there is currently no newsletter form in the application.
+2. Footer privacy, terms and aviation-safety links now resolve to dedicated pages.
+3. The application now uses Next.js 16.4.2, React 19.3.1, PostCSS 8.5.31 and ESLint 9. `npm audit --omit=dev` reports zero production vulnerabilities. Next.js 16 requires Node.js 20.9 or newer.
 
-Sources: [Next.js Windows advisory](https://github.com/vercel/next.js/security/advisories/GHSA-p293-qw3h-jr36), [Next.js 14 public assets](https://nextjs.org/docs/14/app/building-your-application/optimizing/static-assets), [Next.js 14 ESLint](https://nextjs.org/docs/14/app/building-your-application/configuring/eslint), [React effect lifecycle](https://react.dev/reference/react/useEffect).
+Sources: [Next.js Windows advisory](https://github.com/vercel/next.js/security/advisories/GHSA-p293-qw3h-jr36), [Next.js public assets](https://nextjs.org/docs/app/building-your-application/optimizing/static-assets), [Next.js ESLint](https://nextjs.org/docs/app/api-reference/config/eslint), [React effect lifecycle](https://react.dev/reference/react/useEffect).

@@ -17,12 +17,15 @@ function walk(dir) {
   }
 }
 walk('src');
-for (const file of [...sourceFiles, 'index-main.html']) {
+const legacyPath = 'index-main.html';
+for (const file of [...sourceFiles, ...(fs.existsSync(legacyPath) ? [legacyPath] : [])]) {
   const text = fs.readFileSync(file, 'utf8');
   if (/data:image\//.test(text)) throw Error('Embedded raster image remains: ' + file);
 }
-const legacy = fs.readFileSync('index-main.html', 'utf8');
-for (const match of legacy.matchAll(/['"](public\/component%20images\/[^'"]+\.png)['"]/g)) {
-  if (!fs.existsSync(decodeURIComponent(match[1]))) throw Error('Missing legacy image: ' + match[1]);
+if (fs.existsSync(legacyPath)) {
+  const legacy = fs.readFileSync(legacyPath, 'utf8');
+  for (const match of legacy.matchAll(/['"](public\/component%20images\/[^'"]+\.png)['"]/g)) {
+    if (!fs.existsSync(decodeURIComponent(match[1]))) throw Error('Missing legacy image: ' + match[1]);
+  }
 }
-console.log(`Verified ${names.length} public PNG assets and no embedded images in application or legacy HTML.`);
+console.log(`Verified ${names.length} public PNG assets and no embedded images in application${fs.existsSync(legacyPath) ? ' or legacy HTML' : ''}.`);

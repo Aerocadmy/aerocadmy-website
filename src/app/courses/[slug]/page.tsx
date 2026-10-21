@@ -10,14 +10,16 @@ import styles from "@/components/programs/CourseDetail.module.css";
 
 export const dynamicParams = false;
 export function generateStaticParams() { return recordedCourses.map(course => ({ slug: course.slug })); }
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const course = findRecordedCourse(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const course = findRecordedCourse(slug);
   if (!course) return { title: "Course not found | Aerocadmy" };
   return { title: `${course.title} — Course Preview | Aerocadmy`, description: `Explore the proposed outline for ${course.title}. ${course.summary} Join the waitlist for updates.`, alternates: { canonical: `/courses/${course.slug}` } };
 }
 
-export default function RecordedCoursePage({ params }: { params: { slug: string } }) {
-  const course = findRecordedCourse(params.slug);
+export default async function RecordedCoursePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const course = findRecordedCourse(slug);
   if (!course) notFound();
   return <div className={styles.page}>
     <Navbar />

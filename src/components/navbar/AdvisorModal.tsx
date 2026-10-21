@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useId, useRef } from "react";
+import React, { useState, useEffect, useId } from "react";
 import { useDialog } from '@/components/ui/useDialog';
 import { X, CheckCircle2, Send, PhoneCall, Calendar, Sparkles } from "lucide-react";
 
@@ -25,27 +25,39 @@ export const AdvisorModal: React.FC<AdvisorModalProps> = ({
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const dialogRef = useDialog(isOpen, onClose);
   const formId = useId();
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (isOpen) {
       setFormData(previous => ({ ...previous, program: defaultProgram }));
       setSubmitted(false);
       setLoading(false);
+      setError("");
     }
-    return () => { if (timer.current) clearTimeout(timer.current); };
+    return undefined;
   }, [isOpen, defaultProgram]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    timer.current = setTimeout(() => {
+    setError("");
+    try {
+      const response = await fetch("/api/advisor", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "We couldn't save your request. Please try again.");
       setLoading(false);
       setSubmitted(true);
-    }, 700);
+    } catch (submissionError) {
+      setLoading(false);
+      setError(submissionError instanceof Error ? submissionError.message : "We couldn't save your request. Please try again.");
+    }
   };
 
   const handleReset = () => {
@@ -233,6 +245,7 @@ export const AdvisorModal: React.FC<AdvisorModalProps> = ({
                   )}
                 </button>
               </div>
+              {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
             </form>
           )}
         </div>
@@ -240,4 +253,3 @@ export const AdvisorModal: React.FC<AdvisorModalProps> = ({
     </div>
   );
 };
-

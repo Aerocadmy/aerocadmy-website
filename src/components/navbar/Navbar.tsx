@@ -92,8 +92,7 @@ export const Navbar: React.FC = () => {
           <div className={styles.actions}>
             <button type="button" onClick={openSearch} aria-label="Search courses and drone technology" className={styles.searchButton}><Search size={19} aria-hidden="true" /></button>
             <span className={styles.actionDivider} aria-hidden="true" />
-            <Link href="/login" className={styles.login} onClick={closeMenus}>Log in</Link>
-            <Link href="/register" className={`${styles.signup} light-action`} onClick={closeMenus}>Sign up<ArrowRight size={16} aria-hidden="true" /></Link>
+            <Link href="/#counselling" className={`${styles.signup} light-action`} onClick={closeMenus}>Talk to a counsellor<ArrowRight size={16} aria-hidden="true" /></Link>
             <button ref={mobileButtonRef} type="button" className={styles.menuButton} aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" onClick={() => setMobileMenuOpen(open => !open)}>
               {mobileMenuOpen ? <X size={23} /> : <Menu size={23} />}
             </button>
@@ -123,8 +122,6 @@ export const Navbar: React.FC = () => {
             )}
             {sectionLinks.map(({ label, href }) => <Link key={label} href={href} onClick={closeMenus} className={styles.mobileLink}>{label}<ArrowRight size={16} /></Link>)}
             <div className={styles.mobileBottom}>
-              <Link href="/login" onClick={closeMenus}>Log in</Link>
-              <Link href="/register" onClick={closeMenus} className={`${styles.mobileSignup} light-action`}>Sign up<ArrowRight size={16} /></Link>
               <Link href="/#counselling" onClick={closeMenus}>Need help choosing?<ArrowRight size={16} /></Link>
             </div>
           </nav>

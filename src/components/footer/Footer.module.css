@@ -24,6 +24,8 @@
 .linkGroup a:hover, .contactLink:hover, .brandAction:hover { color: #6ce4b7; }
 .liveTag { display: inline-block; flex-shrink: 0; padding: 1px 5px; border: 1px solid #467c665e; border-radius: 3px; color: #8ed6b6; font-size: 8px; letter-spacing: .07em; }
 .courseNote { margin-top: 18px; font-size: 11px; line-height: 1.7; color: #94ada2; }
+.legalLinks { margin-top: 18px; padding-top: 15px; border-top: 1px solid #b4d7c923; }
+.legalLinks a { color: #94ada2; font-size: 11px; }
 .contact > p { color: #afc3bd; font-size: 13px; line-height: 1.85; margin-bottom: 17px; }
 .contactLink { display: flex; align-items: center; gap: 11px; min-height: 44px; padding-block: 9px; color: #c4d8d0; font-size: 12px; line-height: 1.6; transition: color .2s ease; }
 .contactLink svg { color: #81c8a8; flex-shrink: 0; }

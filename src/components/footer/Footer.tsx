@@ -18,6 +18,12 @@ const resourceLinks = [
   { label: "Connect with a counsellor", href: "/#counselling" },
 ];
 
+const legalLinks = [
+  { label: "Privacy policy", href: "/privacy-policy" },
+  { label: "Terms & conditions", href: "/terms-and-conditions" },
+  { label: "Aviation safety", href: "/aviation-safety" },
+];
+
 export function Footer() {
   const backToTop = () => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 
@@ -46,6 +52,7 @@ export function Footer() {
             <h2>Start learning<span>01</span></h2>
             <ul>{learningLinks.map(link => <li key={link.href}><Link href={link.href}>{link.label}{link.live && <span className={styles.liveTag}>LIVE</span>}</Link></li>)}</ul>
             <p className={styles.courseNote}>Recorded courses are upcoming.</p>
+            <ul className={styles.legalLinks}>{legalLinks.map(link => <li key={link.href}><Link href={link.href}>{link.label}</Link></li>)}</ul>
           </nav>
 
           <nav aria-label="Resources" className={styles.linkGroup}>

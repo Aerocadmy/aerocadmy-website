@@ -19,7 +19,7 @@ export function InternshipInstructor() {
 
     <div className={styles.profile}>
       <figure className={styles.portrait}>
-        <Image src="/images/instructors/yash-kansal/portrait.webp" alt="Yash Kansal with FPV goggles and a drone controller" width={1024} height={768} quality={100} sizes="(max-width: 600px) 160px, 180px" />
+        <Image src="/images/instructors/yash-kansal/portrait.webp" alt="Yash Kansal with FPV goggles and a drone controller" width={1024} height={768} quality={100} sizes="(max-width: 600px) 160px, 240px" />
       </figure>
       <div className={styles.bio}>
         <h3>Yash Kansal</h3>

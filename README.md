@@ -1,6 +1,6 @@
 ﻿# Aerocadmy
 
-Next.js 14 App Router website with a continuous, scroll-driven drone assembly and learning journey.
+Next.js 16 App Router website with a continuous, scroll-driven drone assembly and learning journey.
 
 ## Run locally
 
@@ -74,12 +74,23 @@ The Supabase migration also creates `payment_events` for verified Razorpay
 webhook auditing and the `marketing-public` Storage bucket for public brochure
 assets. See `docs/razorpay-setup.md` for environment variables and asset upload.
 
-## Other integration still needed
+## Advisor, legal and production notes
 
 Run only one development server per generated cache directory. The normal server uses `.next-dev`; a separate preview must set `NEXT_DEV_DIR=.next-preview` and use another port. Changing the port alone does not isolate Next.js output. Production builds use `.next`.
 
-The advisor form and newsletter currently simulate successful submission locally. They do not send requests or store data. Connect these to a real backend before offering them to visitors. The footer privacy, terms and safety anchors also have no corresponding pages/sections yet.
+The advisor form sends `POST /api/advisor` and saves the request in the migrated
+`counselling_requests` table. It is intentionally separate from account
+registration, which is not implemented yet. There is currently no newsletter
+form in the application.
 
-The production dependency audit also flags the installed Next.js 14.2.35 and its nested PostCSS. A patched framework upgrade is required before Windows hosting; see the migration review for the official advisory and patch versions.
+The footer links to `/privacy-policy`, `/terms-and-conditions`, and
+`/aviation-safety`. These pages provide the site's current public policies and
+educational safety guidance; they should be reviewed by the business before
+launch.
+
+The production dependency audit is clean with Next.js 16.4.2 and PostCSS 8.5.31.
+Next.js 16 requires Node.js 20.9 or newer. React 18 remains supported for this
+release. The application uses React 19.3.1 and the matching React type
+packages.
 
 See `docs/review/migration-review.md` for the migration findings and validation.
