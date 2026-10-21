@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       if (!input) return NextResponse.json({ error: "Please complete your name, email, and phone number correctly." }, { status: 400 });
       return NextResponse.json(await createOrder(v.id, v.token, input), { headers: { "Cache-Control": "no-store" } });
     }
-    const row = getRegistration(v.id, v.token);
+    const row = await getRegistration(v.id, v.token);
     if (v.action === "status") {
       if (row.status === "paid") return NextResponse.json({ status: "paid", reference: row.id });
       if (row.order_id) {

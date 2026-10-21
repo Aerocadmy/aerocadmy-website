@@ -8,8 +8,11 @@ import { InternshipInstructor } from "@/components/programs/InternshipInstructor
 import { InternshipEnrolment } from "@/components/programs/InternshipEnrolment";
 import { InternshipEnrollButton } from "@/components/programs/InternshipEnrollButton";
 import styles from "@/components/programs/CourseDetail.module.css";
+import { publicStorageUrl } from "@/lib/supabase";
 
 export const metadata: Metadata = { title: "Six-week Live Drone Technology Internship | Aerocadmy", description: "Explore Aerocadmy’s six-week live online drone technology internship. ₹6,999 including an ESP32 drone kit to keep. Next batch starts 15 November 2026." };
+const brochureUrl = publicStorageUrl("internships/drone-technology/Aerocadmy_Internship_Details.pdf");
+const brochurePreviewUrl = publicStorageUrl("internships/drone-technology/brochure-preview.jpg");
 const weeks = [
   { title: "Drone foundations & airspace", topics: ["Drone types & components", "Lift, thrust & stability", "Introduction to DGCA rules & Digital Sky", "Mission planning & waypoints", "Live quiz & airspace exploration"] },
   { title: "Aerodynamics & virtual drone design", topics: ["Thrust-to-weight ratio", "Motor, propeller & battery selection", "Frame layouts, weight distribution & balance", "3D modelling in Tinkercad", "Virtual flight physics experiments"] },
@@ -50,8 +53,8 @@ export default function InternshipPage() {
         <CourseCurriculum modules={weeks} label="Week" />
       </section>
       <section id="brochure" className={styles.brochure} aria-labelledby="brochure-title">
-        <a className={styles.brochurePreview} href="/Aerocadmy_Internship_Details.pdf" target="_blank" rel="noreferrer" aria-label="Open the internship brochure PDF">
-          <Image src="/images/internship-brochure-preview.jpg" alt="Cropped 16:9 preview of the Aerocadmy six-week drone internship brochure cover" width={1620} height={911} quality={95} sizes="(max-width: 600px) 100vw, (max-width: 900px) 80vw, 40vw" />
+        <a className={styles.brochurePreview} href={brochureUrl} target="_blank" rel="noreferrer" aria-label="Open the internship brochure PDF">
+          <Image src={brochurePreviewUrl} alt="Cropped 16:9 preview of the Aerocadmy six-week drone internship brochure cover" width={1620} height={911} quality={100} sizes="(max-width: 600px) 100vw, (max-width: 900px) 80vw, 40vw" />
           <span>Preview brochure</span>
         </a>
         <div className={styles.brochureCopy}>
@@ -59,7 +62,7 @@ export default function InternshipPage() {
           <h2 id="brochure-title">Your internship, at a glance.</h2>
           <p>See the six-week plan, learning activities and program highlights in the brochure.</p>
           <div className={styles.brochureActions}>
-            <a className={styles.brochureDownload} href="/Aerocadmy_Internship_Details.pdf" download="Aerocadmy_Internship_Brochure.pdf"><span>Download brochure</span><Download size={18} aria-hidden="true" /></a>
+            <a className={styles.brochureDownload} href={brochureUrl} download="Aerocadmy_Internship_Brochure.pdf"><span>Download brochure</span><Download size={18} aria-hidden="true" /></a>
             <span className={styles.brochureMeta}>PDF · 7.3 MB</span>
           </div>
         </div>

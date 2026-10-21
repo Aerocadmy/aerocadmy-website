@@ -19,7 +19,7 @@ export function InternshipInstructor() {
 
     <div className={styles.profile}>
       <figure className={styles.portrait}>
-        <Image src="/images/instructors/yash-kansal/portrait.webp" alt="Yash Kansal with FPV goggles and a drone controller" width={1024} height={768} quality={95} sizes="(max-width: 600px) 160px, 180px" />
+        <Image src="/images/instructors/yash-kansal/portrait.webp" alt="Yash Kansal with FPV goggles and a drone controller" width={1024} height={768} quality={100} sizes="(max-width: 600px) 160px, 180px" />
       </figure>
       <div className={styles.bio}>
         <h3>Yash Kansal</h3>
@@ -38,7 +38,7 @@ export function InternshipInstructor() {
       <h3>Teaching in practice</h3>
       <p>A look at his previous in-person workshops. Your Aerocadmy internship is delivered online.</p>
       <div className={styles.gallery}>{workshops.map(workshop => <figure key={workshop.title}>
-          <div className={styles.workshopPhoto}><Image src={workshop.image} alt={workshop.alt} width={workshop.width} height={workshop.height} quality={95} sizes="(max-width: 600px) 90vw, (max-width: 900px) 44vw, 360px" /></div>
+          <div className={styles.workshopPhoto}><Image src={workshop.image} alt={workshop.alt} width={workshop.width} height={workshop.height} quality={100} sizes="(max-width: 600px) 90vw, (max-width: 900px) 44vw, 360px" /></div>
           <figcaption><span><strong>{workshop.title}</strong><span>{workshop.topic}</span></span></figcaption>
       </figure>)}</div>
       <p className={styles.credit}>Examples of the instructor’s previous in-person workshops.</p>

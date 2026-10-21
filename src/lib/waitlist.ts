@@ -1,7 +1,5 @@
-import { randomUUID } from "node:crypto";
-import { appendFile, mkdir } from "node:fs/promises";
-import path from "node:path";
 import { findRecordedCourse } from "@/data/courses";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export type WaitlistInput = { name: string; email: string; phone: string; courseSlug: string };
 
@@ -24,8 +22,8 @@ export function validateWaitlist(value: unknown): WaitlistInput | null {
 export async function saveWaitlist(input: WaitlistInput) {
   const course = findRecordedCourse(input.courseSlug);
   if (!course) throw new Error("Unknown recorded course");
-  const directory = process.env.WAITLIST_STORAGE_DIR || path.join(process.cwd(), ".data");
-  await mkdir(directory, { recursive: true, mode: 0o700 });
-  const entry = { id: randomUUID(), createdAt: new Date().toISOString(), ...input, courseTitle: course.title, source: "course-waitlist" };
-  await appendFile(path.join(directory, "waitlist.jsonl"), JSON.stringify(entry) + "\n", { encoding: "utf8", mode: 0o600 });
+  const { error } = await supabaseAdmin().from("waitlist_entries").insert({
+    course_slug: input.courseSlug, course_title: course.title, name: input.name, email: input.email, phone: input.phone,
+  });
+  if (error) throw new Error("Could not save waitlist entry.");
 }

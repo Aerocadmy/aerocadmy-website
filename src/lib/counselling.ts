@@ -1,7 +1,5 @@
-import { randomUUID } from "node:crypto";
-import { appendFile, mkdir } from "node:fs/promises";
-import path from "node:path";
 import { callbackWindows, droneExperience, learningFormats, learningGoals, learningInterests, professions, type CounsellingInput } from "@/data/guidance";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export function validateCounselling(value: unknown): CounsellingInput | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
@@ -22,8 +20,10 @@ export function validateCounselling(value: unknown): CounsellingInput | null {
 }
 
 export async function saveCounselling(input: CounsellingInput) {
-  const directory = process.env.COUNSELLING_STORAGE_DIR || process.env.WAITLIST_STORAGE_DIR || path.join(process.cwd(), ".data");
-  await mkdir(directory, { recursive: true, mode: 0o700 });
-  const entry = { id: randomUUID(), createdAt: new Date().toISOString(), ...input, callbackTimezone: "Asia/Kolkata", source: "homepage-counselling", contactRequested: true };
-  await appendFile(path.join(directory, "counselling.jsonl"), JSON.stringify(entry) + "\n", { encoding: "utf8", mode: 0o600 });
+  const { error } = await supabaseAdmin().from("counselling_requests").insert({
+    profession: input.profession, field_of_work: input.fieldOfWork, experience: input.experience,
+    interest: input.interest, goal: input.goal, format: input.format, name: input.name, phone: input.phone,
+    email: input.email, callback_window: input.callbackWindow, questions: input.questions,
+  });
+  if (error) throw new Error("Could not save counselling request.");
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { confirmPayment, validSignature } from "@/lib/enrolment";
+import { supabaseAdmin } from "@/lib/supabase";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -11,6 +12,13 @@ export async function POST(request: Request) {
     const raw = Buffer.concat(chunks).toString("utf8");
     if (!validSignature(raw, request.headers.get("x-razorpay-signature") || "", secret)) return new Response(null, { status: 401 });
     const event = JSON.parse(raw);
+    const { error: eventError } = await supabaseAdmin().from("payment_events").insert({
+      event_type: typeof event.event === "string" ? event.event : "unknown",
+      order_id: typeof event.payload?.payment?.entity?.order_id === "string" ? event.payload.payment.entity.order_id : null,
+      payment_id: typeof event.payload?.payment?.entity?.id === "string" ? event.payload.payment.entity.id : null,
+      payload: event, signature_verified: true, processed_at: new Date().toISOString(),
+    });
+    if (eventError) throw new Error("Payment event could not be recorded.");
     if (event.event === "payment.captured" || event.event === "order.paid") {
       const payment = event.payload?.payment?.entity;
       if (payment?.order_id && payment?.id) await confirmPayment(payment.order_id, payment.id);

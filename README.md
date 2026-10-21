@@ -46,18 +46,11 @@ waitlist. The live internship is a separate `/programs/drone-technology-internsh
 page. No recorded-course prices, durations, release dates, or certificates are set.
 
 `POST /api/waitlist` validates name, email, phone, and a known `courseSlug`. It
-returns 201 only after appending a private submission to `waitlist.jsonl`. Set
-`WAITLIST_STORAGE_DIR` to a private persistent server directory; the default is
-`.data/` under the project, excluded from Git and outside `public/`. There is no
-public endpoint for reading submissions, and submitting does not send email or SMS.
-Back up the storage directory. A serverless or ephemeral filesystem needs a durable
-database or storage adapter before deployment; local files will not persist there.
-
-To check a running production server using an isolated test directory, start it
-with `WAITLIST_STORAGE_DIR` pointing to `.data/catalogue-check`, then run
-`node scripts/check-catalogue.cjs` with `CATALOGUE_CHECK_URL` set to that server and
-`CATALOGUE_CHECK_STORAGE_DIR` pointing to the same absolute directory. The check
-adds a synthetic `.invalid` email entry only to that isolated store.
+returns 201 only after saving the submission to the Supabase
+`waitlist_entries` table. The server-only Supabase service-role key is required;
+there is no public endpoint for reading submissions, and submitting does not send
+email or SMS. Apply the SQL migration in
+`supabase/migrations/20261022000000_initial.sql` before starting the app.
 
 ## Learning direction and counselling
 
@@ -72,18 +65,14 @@ optional callback window, and optional questions. Answers persist when moving
 between the three steps. The stated callback window is a preference in IST, not
 a booked appointment. Success appears only after a server save.
 
-`POST /api/counselling` validates the choices and contact details and writes
-`counselling.jsonl` to `COUNSELLING_STORAGE_DIR`, falling back to
-`WAITLIST_STORAGE_DIR` or private `.data/`. Each record includes the complete
-answers, contact request, timestamp, and callback timezone. No public reading
-endpoint, automatic phone call, email, or SMS is provided. The same persistent
-storage requirement described for waitlists applies before deployment.
+`POST /api/counselling` validates the choices and contact details and saves the
+complete answers to the Supabase `counselling_requests` table, including the
+contact request, timestamp, and callback timezone. No public reading endpoint,
+automatic phone call, email, or SMS is provided.
 
-`node scripts/check-guidance.cjs` uses the same isolated server and environment
-variables as the catalogue check. It verifies validation, complete saved context,
-payload limits, private storage, and learning-path filters. Optionally set
-`GUIDANCE_FAILURE_CHECK_URL` to a test server configured with an unavailable store
-to verify that a failed write never reports success.
+The Supabase migration also creates `payment_events` for verified Razorpay
+webhook auditing and the `marketing-public` Storage bucket for public brochure
+assets. See `docs/razorpay-setup.md` for environment variables and asset upload.
 
 ## Other integration still needed
 
