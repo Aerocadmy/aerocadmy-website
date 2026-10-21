@@ -59,7 +59,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={dmSans.variable}>
+    <html lang="en" className={dmSans.variable} data-scroll-behavior="smooth">
       <body className="min-h-screen bg-[#fbfdfd] text-[#081C2B] antialiased">
         {children}
         <WhatsAppFloat />
