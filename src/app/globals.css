@@ -3,6 +3,8 @@
 @tailwind utilities;
 
 :root {
+  --button-hover-bg: #18cb96;
+  --button-hover-text: #000;
   --blue: #11B786;
   --blue-hover: #0e9f75;
   --green: #11B786;
@@ -114,13 +116,13 @@ section[id], footer[id] { scroll-margin-top: var(--nav-h); }
 button:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
 
 @media (max-width: 900px) {
-  .drone-hero { min-height: 400px; }
+  .drone-hero { height: calc(100dvh - var(--nav-h)); min-height: 400px; }
   .hero-copy { width: calc(100% - 48px); }
   .hero-copy > div:first-child { padding-top: 0; font-size: 9px; letter-spacing: .12em; gap: 8px; }
-  .hero-copy h1 { font-size: clamp(23px, 6.6vw, 48px); line-height: 1.05; }
+  .hero-copy h1 { font-size: clamp(26px, 7vw, 52px); line-height: 1.05; }
   .hero-copy > p { font-size: 15px; line-height: 1.55; margin-top: 14px; }
   .hero-copy > .mt-8 { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); max-width: 430px; margin: 18px auto 0; gap: 10px; }
-  .hero-copy > .mt-8 a { justify-content: center; min-width: 0; padding: 10px 9px; font-size: 13px; line-height: 1.3; min-height: 50px; border-radius: 9px; box-shadow: none; }
+  .hero-copy > .mt-8 a { justify-content: center; min-width: 0; padding: 8px 8px; font-size: 13px; line-height: 1.3; min-height: 44px; border-radius: 9px; box-shadow: none; }
   .hero-copy > .mt-8 a svg { flex-shrink: 0; width: 14px; height: 14px; }
   .hero-copy a, .hero-copy button { min-height: 46px; font-size: 14px; padding: 11px 16px; gap: 8px; }
   .hero-copy a svg, .hero-copy button svg { width: 16px; height: 16px; }
@@ -136,7 +138,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-
 @media (max-width: 540px) {
   .hero-copy { width: calc(100% - 40px); }
   .hero-copy > .mt-8 { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; max-width: none; }
-  .hero-copy > .mt-8 a { min-height: 50px; padding: 10px 8px; font-size: 12px; gap: 6px; }
+  .hero-copy > .mt-8 a { min-height: 44px; padding: 8px 7px; font-size: 12px; gap: 6px; }
   .hero-copy > p { max-width: 100%; }
   .hero-copy > .mt-10 { display: none; }
   .hero-copy > .mt-10 > div { min-width: 0; }

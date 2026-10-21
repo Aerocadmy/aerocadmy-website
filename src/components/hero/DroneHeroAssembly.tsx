@@ -63,6 +63,8 @@ export const DroneHeroAssembly: React.FC = () => {
 
     let animFrameId = 0;
     let disposed = false;
+    let heroInViewport = false;
+    let imagesReady = false;
     const imageCleanups: Array<() => void> = [];
     const navHeight = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue("--nav-h")) || 96;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -72,7 +74,7 @@ export const DroneHeroAssembly: React.FC = () => {
     const sm = (t: number) => t * t * (3 - 2 * t);
     const ph = (p: number, a: number, b: number) => clamp01((p - a) / (b - a));
     const easeOutBack = (t: number) => {
-      const c1 = 1.25,
+      const c1 = 0.8,
         c3 = c1 + 1;
       return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
     };
@@ -399,7 +401,7 @@ export const DroneHeroAssembly: React.FC = () => {
         rot: d.rot || 0,
         from: d.from,
         ph: Math.random() * 6.28,
-        delay: 500 + i * 110,
+        delay: 180 + i * 80,
         ox: 0,
         oy: 0,
         vx: 0,
@@ -584,6 +586,7 @@ export const DroneHeroAssembly: React.FC = () => {
         el.insertAdjacentHTML("beforeend", pinsSVG);
       } else if (p.img) {
         imgEl = mountComponentImage(el, p.img, p.W || p.w);
+        imgEl.dataset.initialAsset = "true";
         el.dataset.component = p.tag?.title || p.role || 'Hardware';
 
       }
@@ -631,8 +634,8 @@ export const DroneHeroAssembly: React.FC = () => {
         sc: 1,
         phase: Math.random() * 6.28,
         sp: 0.7 + Math.random() * 0.6,
-        delay: 200 + i * 140,
-        dur: 1500,
+        delay: 180 + i * 95,
+        dur: 1250,
         f: 0,
         vx: 0,
         vy: 0,
@@ -645,6 +648,7 @@ export const DroneHeroAssembly: React.FC = () => {
     let s = 1,
       viewportH = 802,
       mobileCopyHeight = 340,
+      copyTextHeight = copyEl.offsetHeight,
       mobileIntroScale = 1,
       journeyBlend = 0,
       scrollDistance = assemblyScrollDistance();
@@ -653,10 +657,10 @@ export const DroneHeroAssembly: React.FC = () => {
 
     function fit() {
       mobileCopyHeight = (journeyPanelRef.current?.offsetHeight || 300) + 36;
-      // CSS uses the small viewport so the phone's browser toolbar cannot resize the build.
+      copyTextHeight = copyEl.offsetHeight;
+      // Let CSS follow the visible mobile viewport as the browser toolbar hides.
       hero.style.removeProperty("height");
       viewportH = hero.clientHeight;
-      if (hero) hero.style.height = viewportH + "px";
       scrollDistance = assemblyScrollDistance();
       if (track) track.style.height = viewportH + scrollDistance + "px";
       positionStage(journeyBlend);
@@ -665,7 +669,7 @@ export const DroneHeroAssembly: React.FC = () => {
     function positionStage(blend: number) {
       const landscape = window.innerWidth <= 900 && window.innerHeight <= 520;
       const mobile = window.innerWidth <= 900 && !landscape;
-      const mobileSceneHeight = Math.max(110, viewportH - mobileCopyHeight - 40);
+      const mobileSceneHeight = Math.max(110, viewportH - mobileCopyHeight - 32);
       const initialScale = mobile
         ? Math.min((window.innerWidth - 32) / 900, .48)
         : Math.min((landscape ? window.innerWidth * .5 : window.innerWidth) / W, viewportH / H);
@@ -683,7 +687,7 @@ export const DroneHeroAssembly: React.FC = () => {
       stage.style.top =
         lerp(
           viewportH * 0.5,
-          mobile ? mobileCopyHeight + mobileSceneHeight * .5 : viewportH * 0.5,
+          mobile ? mobileCopyHeight + mobileSceneHeight * .54 : viewportH * 0.5,
           blend
         ) + "px";
       stage.style.transform = `translate(-50%,-50%) scale(${s})`;
@@ -691,9 +695,37 @@ export const DroneHeroAssembly: React.FC = () => {
 
     window.addEventListener("resize", fit);
     const panelObserver = new ResizeObserver(fit);
+    panelObserver.observe(hero);
     if (journeyPanelRef.current) panelObserver.observe(journeyPanelRef.current);
     panelObserver.observe(copyEl);
     fit();
+
+    function scheduleFrame() {
+      if (!disposed && imagesReady && heroInViewport && !document.hidden && !animFrameId) {
+        animFrameId = requestAnimationFrame(frame);
+      }
+    }
+
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      heroInViewport = entry.isIntersecting;
+      if (heroInViewport) {
+        scheduleFrame();
+      } else if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = 0;
+      }
+    });
+    visibilityObserver.observe(hero);
+
+    const handleDocumentVisibility = () => {
+      if (document.hidden && animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = 0;
+      } else {
+        scheduleFrame();
+      }
+    };
+    document.addEventListener("visibilitychange", handleDocumentVisibility);
     // The scroll track gains height after hydration; keep incoming section links aligned.
     const anchorFrameId = requestAnimationFrame(() => {
       const id = window.location.hash.slice(1);
@@ -767,7 +799,7 @@ export const DroneHeroAssembly: React.FC = () => {
       const [vx, vy] = entryVector(n.p.cx, n.p.cy, n.p.from);
       n.vx = vx;
       n.vy = vy;
-      n.spin0 = (n.p.from === "left" ? -1 : 1) * (n.p.small ? 520 : 70);
+      n.spin0 = (n.p.from === "left" ? -1 : 1) * (n.p.small ? 150 : 55);
     });
 
     decos.forEach((d) => {
@@ -796,6 +828,7 @@ export const DroneHeroAssembly: React.FC = () => {
     let t0 = performance.now();
 
     function frame(now: number) {
+      animFrameId = 0;
       if (disposed) return;
       const t = now - t0,
         sec = now / 1000;
@@ -878,7 +911,7 @@ export const DroneHeroAssembly: React.FC = () => {
       copyEl.style.opacity = (1 - q1).toFixed(3);
       const mobileCopy = window.innerWidth <= 900;
       const copyScale = mobileCopy ? 1 : Math.min(window.innerWidth / W, viewportH / H);
-      const phoneCopyTop = Math.max(128, Math.min(200, (viewportH - copyEl.offsetHeight) * .36));
+      const phoneCopyTop = Math.max(128, Math.min(200, (viewportH - copyTextHeight) * .36));
       copyEl.style.top = (mobilePortrait() ? phoneCopyTop : mobileCopy ? 24 : Math.max(0, (viewportH - H * copyScale) / 2)) + 'px';
       copyEl.style.transformOrigin = 'top center';
       copyEl.style.transform = `translateX(-50%) translateY(${-70 * q1}px) scale(${copyScale})`;
@@ -901,7 +934,7 @@ export const DroneHeroAssembly: React.FC = () => {
 
         const fl = role ? 0 : e1;
         // Keep the phone's text clear, with components in upper and lower bands.
-        const phoneCopyBottom = phoneCopyTop + copyEl.offsetHeight;
+        const phoneCopyBottom = phoneCopyTop + copyTextHeight;
         const topRow = Math.min(60, phoneCopyTop * .36);
         const bottomRow = phoneCopyBottom + (viewportH - 40 - phoneCopyBottom) * .42;
         const phonePosition = role === "motor" ? { x: window.innerWidth * .17, y: topRow }
@@ -1459,11 +1492,11 @@ export const DroneHeroAssembly: React.FC = () => {
         ).toFixed(2)}deg) scale(${(1 + f * 0.35).toFixed(3)})`;
       });
 
-      animFrameId = requestAnimationFrame(frame);
+      scheduleFrame();
     }
 
     // Start only after image dimensions are available. Strict Mode cleanup cancels stale loads.
-    const images = Array.from(stage.querySelectorAll('img'));
+    const images = Array.from(stage.querySelectorAll<HTMLImageElement>('img[data-initial-asset]'));
     const ready = images.map(image => image.complete ? Promise.resolve() : new Promise<void>(resolve => {
       const done = () => { image.removeEventListener('load', done); image.removeEventListener('error', done); resolve(); };
       image.addEventListener('load', done); image.addEventListener('error', done);
@@ -1473,7 +1506,8 @@ export const DroneHeroAssembly: React.FC = () => {
       if (disposed) return;
       nodes.forEach(n => { n.h = n.el.offsetHeight || n.h; });
       t0 = performance.now();
-      animFrameId = requestAnimationFrame(frame);
+      imagesReady = true;
+      scheduleFrame();
     });
 
     return () => {
@@ -1483,6 +1517,8 @@ export const DroneHeroAssembly: React.FC = () => {
       cancelAnimationFrame(animFrameId);
       cancelAnimationFrame(anchorFrameId);
       window.removeEventListener("resize", fit);
+      document.removeEventListener("visibilitychange", handleDocumentVisibility);
+      visibilityObserver.disconnect();
       panelObserver.disconnect();
       hero.removeEventListener("pointermove", handlePointerMove);
       hero.removeEventListener("pointerleave", handlePointerLeave);

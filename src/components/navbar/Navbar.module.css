@@ -18,7 +18,7 @@
 .login { font-size: 14px; font-weight: 500; color: #2d454c; white-space: nowrap; }
 .login:hover { color: #076447; }
 .signup { display: inline-flex; align-items: center; justify-content: center; gap: 18px; min-height: 44px; padding: 0 20px; border: 1px solid #16bf8d; border-radius: 7px; background: #18cb96; color: #092e28; font-size: 14px; font-weight: 600; white-space: nowrap; transition: background .2s ease; }
-.signup:hover { background: #12ba88; }
+.signup:hover { background: var(--button-hover-bg); border-color: var(--button-hover-bg); color: var(--button-hover-text); }
 .signup svg { transition: transform .2s ease; }
 .signup:hover svg { transform: translateX(3px); }
 .menuButton { display: none; }

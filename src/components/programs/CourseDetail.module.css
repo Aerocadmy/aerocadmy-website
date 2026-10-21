@@ -46,6 +46,9 @@
 .module[open] .moduleChevron { transform: rotate(180deg); }
 .moduleBody { padding: 0 24px 23px 54px; background: #f4f9f5; }
 .moduleBody p { padding-top: 17px; border-top: 1px solid #dce9e0; font-size: 14px; }
+.moduleTopics { display: grid; gap: 13px; padding: 19px 0 0 18px; margin: 0; border-top: 1px solid #dce9e0; list-style: disc; color: #132636; font-size: 14px; line-height: 1.65; }
+.moduleTopics li { padding-left: 4px; }
+.moduleTopics li::marker { color: #087957; }
 .curriculumNote { margin-top: 16px; font-size: 12px !important; }
 .project { position: relative; overflow: hidden; display: grid; grid-template-columns: 60px minmax(0,1fr); gap: 24px; padding: 30px; border: 1px solid #d7e8dc; border-radius: 8px; background: linear-gradient(120deg,#f2f8f3,#eaf6ef); }
 .projectIcon { display: grid; place-items: center; width: 60px; height: 60px; border: 1px solid #bddccc; border-radius: 12px; color: #087957; background: #ffffffa8; }
@@ -63,16 +66,22 @@
 .cardVisual { margin: 0; position: relative; }
 .cardVisual > div { border-radius: 0; aspect-ratio: 16 / 9; }
 .cardVisual figcaption { position: absolute; inset: auto 0 0; padding: 18px 14px 8px; color: #fff; background: linear-gradient(transparent,#102a32bd); font-size: 9px; line-height: 1.5; }
+.featuredSummaryCard { border-color: #c8ded2; box-shadow: 0 18px 48px #123d2b16; }
+.featuredCardVisual figcaption { padding: 30px 18px 13px; font-size: 10px; background: linear-gradient(transparent,#102a32d9); }
 .cardBody { padding: 25px; }
 .cardBody .eyebrow { margin-bottom: 7px; font-size: 9px; }
 .cardTitle { font-size: 23px; font-weight: 500; letter-spacing: -.025em; line-height: 1.3; }
 .cardDescription { color: #697d7c; font-size: 12px; line-height: 1.8; margin-top: 9px; }
+.discountPrice { display: flex; align-items: baseline; gap: 10px; margin-top: 4px; }
+.oldPrice { color: #718078; font-size: 15px; text-decoration-color: #9d665e; text-decoration-thickness: 1.5px; }
 .heroAction, .secondaryAction { display: flex; justify-content: space-between; gap: 12px; align-items: center; min-height: 48px; padding: 13px 17px; border-radius: 5px; font-size: 13px; font-weight: 500; line-height: 1.5; margin-top: 20px; }
-.heroAction { background: #132636; color: #fff; }
-.heroAction:hover { background: #087957; }
+.heroAction { width: 100%; border: 0; box-sizing: border-box; background: #132636; color: #fff; font: inherit; font-size: 13px; font-weight: 500; line-height: 1.5; text-align: left; cursor: pointer; }
+.heroAction:hover { background: var(--button-hover-bg); color: var(--button-hover-text); }
 .secondaryAction { border: 1px solid #d5e3db; color: #35594e; margin-top: 10px; }
 .secondaryAction:hover { background: #f1f8f3; }
 .heroAction svg, .secondaryAction svg { flex-shrink: 0; }
+.centeredAction { position: relative; justify-content: center; text-align: center; }
+.centeredAction svg { position: absolute; right: 17px; }
 .actionNote { text-align: center; color: #74847c; font-size: 10px; line-height: 1.7; margin-top: 10px; }
 .includesTitle { margin-top: 24px; margin-bottom: 14px; padding-top: 20px; border-top: 1px solid #e2e9e5; font-size: 13px; font-weight: 500; }
 .included { display: flex; flex-direction: column; gap: 13px; color: #516c70; font-size: 12px; line-height: 1.6; }
@@ -90,7 +99,7 @@
 .form input.selectedCourse { background: #eef4ef; color: #526860; }
 .formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .form button { display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 17px; min-height: 48px; font-size: 14px; color: #fff; border-radius: 5px; background: #132636; }
-.form button:hover { background: #087957; }
+.form button:hover:not(:disabled) { background: var(--button-hover-bg); color: var(--button-hover-text); }
 .form button:disabled { opacity: .65; cursor: wait; }
 .formNote { font-size: 11px; line-height: 1.8; color: #718078; }
 .error { font-size: 13px; line-height: 1.7; color: #a03323; }
@@ -98,21 +107,23 @@
 .success svg { flex-shrink: 0; }
 .success h3 { font-size: 18px; font-weight: 500; }
 .success p { margin-top: 8px; color: #526a5c; font-size: 14px; line-height: 1.8; }
-.brochure { display: flex; align-items: center; gap: 28px; padding: clamp(24px,4vw,38px); margin-bottom: 36px; border: 1px solid #d5e7df; border-radius: 12px; background: radial-gradient(ellipse at top left,#dff6ed,transparent 65%),#f6faf8; scroll-margin-top: calc(var(--nav-h) + 24px); }
-.brochureIcon { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; flex-shrink: 0; width: 88px; height: 112px; border: 1px solid #c7e1d5; border-radius: 6px 20px 6px 6px; background: #fff; color: #087957; box-shadow: 6px 7px 0 #dceee5; }
-.brochureIcon span { font-size: 11px; letter-spacing: .12em; font-weight: 600; }
+.brochure { display: grid; grid-template-columns: minmax(180px,.75fr) minmax(0,1.5fr); align-items: center; gap: 24px; padding: 20px; margin-bottom: 30px; border: 1px solid #d5e7df; border-radius: 12px; background: radial-gradient(ellipse at top left,#dff6ed,transparent 65%),#f6faf8; scroll-margin-top: calc(var(--nav-h) + 24px); }
+.brochurePreview { display: block; position: relative; overflow: hidden; aspect-ratio: 16 / 9; border-radius: 8px; background: #10252b; box-shadow: 0 8px 20px #10252b1a; }
+.brochurePreview img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.075); transform-origin: center; }
+.brochurePreview > span { position: absolute; right: 12px; bottom: 12px; padding: 7px 10px; border: 1px solid #ffffff6b; border-radius: 4px; background: #102a35df; color: #fff; font-size: 11px; }
 .brochureCopy { min-width: 0; }
-.brochureCopy .eyebrow { margin-bottom: 10px; }
-.brochureCopy h2 { font-size: clamp(23px,3vw,28px); line-height: 1.25; letter-spacing: -.025em; }
-.brochureCopy > p:not(.eyebrow) { margin-top: 12px; color: #61747e; font-size: 15px; line-height: 1.8; }
-.brochureDownload { display: inline-flex; align-items: center; justify-content: center; gap: 18px; margin-top: 20px; padding: 13px 18px; min-height: 48px; border-radius: 5px; background: #132636; color: #fff; font-size: 14px; font-weight: 500; }
-.brochureDownload:hover { background: #087957; }
+.brochureCopy .eyebrow { margin-bottom: 8px; }
+.brochureCopy h2 { font-size: 24px; line-height: 1.25; letter-spacing: -.025em; }
+.brochureCopy > p:not(.eyebrow) { margin-top: 8px; color: #61747e; font-size: 14px; line-height: 1.65; }
+.brochureActions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 16px; margin-top: 14px; }
+.brochureDownload { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 11px 16px; min-height: 44px; border-radius: 5px; background: #132636; color: #fff; font-size: 14px; font-weight: 500; }
+.brochureDownload svg { position: static; flex: 0 0 18px; }
+.brochureDownload:hover { background: var(--button-hover-bg); color: var(--button-hover-text); }
 .brochureDownload:focus-visible { outline: 2px solid #087957; outline-offset: 4px; }
-.brochureMeta { display: block; margin-top: 10px; font-size: 12px; color: #61747e; }
-@media (max-width: 600px) { .brochure { align-items: flex-start; flex-direction: column; gap: 24px; } .brochureIcon { width: 65px; height: 80px; gap: 6px; } .brochureDownload { width: 100%; font-size: 15px; } }
+.brochureMeta { font-size: 12px; color: #61747e; white-space: nowrap; }
+@media (max-width: 600px) { .brochure { grid-template-columns: minmax(0,1fr); gap: 24px; } .brochureDownload { width: 100%; font-size: 15px; } }
 .closing { color: #74827a; font-size: 12px; line-height: 1.85; margin-top: 24px; }
 @media (max-height: 800px) and (min-width: 901px) {
-  .cardVisual > div { aspect-ratio: 2.6; }
   .cardBody { padding: 20px; }
   .includesTitle { margin-top: 18px; padding-top: 16px; }
   .included { gap: 10px; }
@@ -161,6 +172,7 @@
   .moduleHeading small { font-size: 10px; }
   .moduleBody { padding: 0 18px 20px 44px; }
   .moduleBody p { font-size: 15px; }
+  .moduleTopics { font-size: 15px; gap: 12px; }
   .project { grid-template-columns: minmax(0,1fr); gap: 20px; padding: 24px; }
   .projectIcon { width: 48px; height: 48px; }
   .project .eyebrow { font-size: 10px; }

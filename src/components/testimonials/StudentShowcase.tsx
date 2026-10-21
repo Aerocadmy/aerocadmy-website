@@ -53,6 +53,7 @@ export const StudentShowcase: React.FC = () => {
                   alt={item.name}
                   width={48}
                   height={48}
+                  quality={95}
                   className="h-12 w-12 rounded-full object-cover border-2 border-[#18CB96]"
                 />
                 <div>

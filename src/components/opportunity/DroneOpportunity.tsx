@@ -18,6 +18,7 @@ function IndustryPhoto({ industry, quadrant, alt, lead = false }: {
         alt={`Illustrative scene: ${alt}`}
         width={1536}
         height={1024}
+        quality={95}
         sizes={lead ? "(max-width: 640px) 90vw, (max-width: 1000px) 36vw, 420px" : "(max-width: 640px) 90vw, (max-width: 1000px) 24vw, 290px"}
         className={styles.atlas}
         style={{ left: quadrant % 2 === 0 ? "0%" : "-100%", top: quadrant < 2 ? "0%" : "-100%" }}

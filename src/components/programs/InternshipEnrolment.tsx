@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
-import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { ArrowRight, CheckCircle2, ShieldCheck, X } from "lucide-react";
 import styles from "./InternshipEnrolment.module.css";
 type Session = { id: string; token: string };
 type Result = { error?: string; status?: string; paid?: boolean; reference?: string; orderId?: string; key?: string; amount?: number; currency?: string; prefill?: { name: string; email: string; contact: string } };
@@ -17,9 +17,15 @@ function loadCheckout() {
   });
 }
 export function InternshipEnrolment() {
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [paid, setPaid] = useState(false);
   useEffect(() => { try { const stored = sessionStorage.getItem(storageKey); if (stored) { const parsed = JSON.parse(stored); if (parsed.id && parsed.token) setSession(parsed); } } catch { /* A new registration can still be created. */ } }, []);
+  useEffect(() => {
+    const open = () => { const dialog = dialogRef.current; if (dialog && !dialog.open) dialog.showModal(); };
+    window.addEventListener("open-internship-enrolment", open);
+    return () => window.removeEventListener("open-internship-enrolment", open);
+  }, []);
   async function request(active: Session, values: Record<string, unknown>) {
     const response = await fetch("/api/enrolment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...active, ...values }) });
     const result = await response.json() as Result;
@@ -60,11 +66,12 @@ export function InternshipEnrolment() {
       checkout.open();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not start checkout."); setBusy(false); }
   }
-  return <section id="enrolment" className={styles.section} aria-labelledby="enrolment-title">
-    <p className={styles.eyebrow}>Your next step</p><h2 id="enrolment-title">Make room for your curiosity.</h2>
+  return <dialog ref={dialogRef} className={styles.dialog} aria-labelledby="enrolment-title" onClick={event => { if (event.target === event.currentTarget) dialogRef.current?.close(); }}>
+    <button type="button" className={styles.close} aria-label="Close enrollment form" onClick={() => dialogRef.current?.close()}><X size={20} aria-hidden="true" /></button>
+    <p className={styles.eyebrow}>Your next step</p><h2 id="enrolment-title">Enroll in the Drone Technology Internship</h2>
     {paid ? <div className={styles.success} role="status"><CheckCircle2 size={28} /><div><h3>You’re enrolled.</h3><p>Your ₹4,999 payment is confirmed for the Drone Technology Internship. Keep your enrolment reference for support.</p><p className={styles.reference}>{session?.id}</p><a href="/#counselling">Talk to a counsellor about your next steps →</a></div></div> : <>
       <p className={styles.intro}>Register for the six-week live online internship, including an ESP32 drone kit you keep.</p>
-      <div className={styles.total}><span>Training + ESP32 kit<strong>Next batch · 15 November 2026</strong></span><b>₹4,999</b></div>
+      <div className={styles.total}><span>Training + ESP32 kit<strong>Next batch · 15 November 2026</strong></span><span className={styles.totalPrice}><del>₹9,999</del><b>₹4,999</b></span></div>
       <form onSubmit={submit} className={styles.form}>
         <fieldset disabled={busy}><legend>Your contact details</legend><div className={styles.grid}>
           <label>Full name<input name="name" autoComplete="name" required minLength={2} maxLength={100} /></label>
@@ -85,5 +92,5 @@ export function InternshipEnrolment() {
       {session && <p className={styles.note}>Resuming checkout uses the details saved with your first registration. Contact the counsellor if those details need correcting.</p>}
       <p className={styles.message} role="status" aria-live="polite">{message}</p>
     </>}
-  </section>;
+  </dialog>;
 }

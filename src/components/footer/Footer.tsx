@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { ArrowRight, ArrowUp, Mail, Phone } from "lucide-react";
-import { ComponentImage } from "@/components/ui/ComponentImage";
-import { ASSETS } from "@/lib/assets";
 import styles from "./Footer.module.css";
 
 const learningLinks = [
@@ -35,7 +33,9 @@ export function Footer() {
         <div className={styles.grid}>
           <div className={styles.brand}>
             <Link href="/" aria-label="Aerocadmy home" className={styles.logo}>
-              <ComponentImage src={ASSETS.logo} alt="Aerocadmy" className={styles.logoImage} />
+              <svg role="img" aria-label="Aerocadmy" width={399} height={90} viewBox="60 18 399 90" className={styles.logoImage}>
+                <image href="/logo-cream-transparent.png" x={0} y={0} width={500} height={141} />
+              </svg>
             </Link>
             <p className={styles.statement}>Learn the systems.<br /><span>Build your skills.</span></p>
             <p className={styles.description}>Explore drone technology through electronics, programming and practical learning.</p>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import { ASSETS } from '@/lib/assets';
+import { WhatsAppFloat } from "@/components/ui/WhatsAppFloat";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -61,6 +62,7 @@ export default function RootLayout({
     <html lang="en" className={dmSans.variable}>
       <body className="min-h-screen bg-[#fbfdfd] text-[#081C2B] antialiased">
         {children}
+        <WhatsAppFloat />
       </body>
     </html>
   );

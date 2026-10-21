@@ -35,22 +35,22 @@ export function CourseDetailLayout({ title, category, eyebrow, summary, facts, s
   </main>;
 }
 
-export function CourseSummaryCard({ visual, caption = "Illustrative learning scene", children }: { visual: CourseVisual; caption?: string; children: ReactNode }) {
+export function CourseSummaryCard({ visual, caption = "Illustrative learning scene", featuredVisual = false, children }: { visual: CourseVisual; caption?: string; featuredVisual?: boolean; children: ReactNode }) {
   return <aside className={styles.rail} aria-label="Course summary">
-    <div className={styles.summaryCard}>
-      <figure className={styles.cardVisual}><CourseImage visual={visual} priority /><figcaption>{caption}</figcaption></figure>
+    <div className={`${styles.summaryCard} ${featuredVisual ? styles.featuredSummaryCard : ""}`}>
+      <figure className={`${styles.cardVisual} ${featuredVisual ? styles.featuredCardVisual : ""}`}><CourseImage visual={visual} priority /><figcaption>{caption}</figcaption></figure>
       <div className={styles.cardBody}>{children}</div>
     </div>
   </aside>;
 }
 
-export function CourseAction({ href, children, secondary = false }: { href: string; children: ReactNode; secondary?: boolean }) {
-  return <a href={href} className={secondary ? styles.secondaryAction : styles.heroAction}>{children}<ArrowUpRight size={18} aria-hidden="true" /></a>;
+export function CourseAction({ href, children, secondary = false, centered = false }: { href: string; children: ReactNode; secondary?: boolean; centered?: boolean }) {
+  return <a href={href} className={`${secondary ? styles.secondaryAction : styles.heroAction} ${centered ? styles.centeredAction : ""}`}>{children}<ArrowUpRight size={18} aria-hidden="true" /></a>;
 }
 
-export function CourseCurriculum({ modules, label = "Module" }: { modules: { title: string; description: string }[]; label?: string }) {
+export function CourseCurriculum({ modules, label = "Module" }: { modules: { title: string; description?: string; topics?: string[] }[]; label?: string }) {
   return <div className={styles.curriculum}>{modules.map((module, index) => <details className={styles.module} key={module.title} open={index === 0}>
     <summary><span className={styles.moduleNumber}>{String(index + 1).padStart(2, "0")}</span><span className={styles.moduleHeading}><small>{label} {index + 1}</small>{module.title}</span><ChevronDown size={19} className={styles.moduleChevron} aria-hidden="true" /></summary>
-    <div className={styles.moduleBody}><p>{module.description}</p></div>
+    <div className={styles.moduleBody}>{module.topics?.length ? <ul className={styles.moduleTopics}>{module.topics.map(topic => <li key={topic}>{topic}</li>)}</ul> : <p>{module.description}</p>}</div>
   </details>)}</div>;
 }

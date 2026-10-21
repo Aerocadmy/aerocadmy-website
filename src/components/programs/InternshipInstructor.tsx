@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { ArrowUpRight, Globe, Linkedin } from "lucide-react";
 import styles from "./InternshipInstructor.module.css";
 
 const experience = [
@@ -9,8 +8,8 @@ const experience = [
 ];
 
 const workshops = [
-  { title: "IIT Guwahati", topic: "Drone/UAV building workshop", image: "/images/instructors/yash-kansal/iit-guwahati-workshop.jpg", width: 1024, height: 768, alt: "Drone components being demonstrated to participants at an IIT Guwahati workshop", href: "https://www.yashkansal.in/workshops/drone-uav-building-iit-guwahati" },
-  { title: "CIMAGE, Patna", topic: "Programmable AI drone workshop", image: "/images/instructors/yash-kansal/cimage-patna-workshop.jpg", width: 1024, height: 575, alt: "A classroom session during the programmable AI drone workshop at CIMAGE, Patna", href: "https://www.yashkansal.in/workshops/cimage-ai-drone-workshop" },
+  { title: "IIT Guwahati", topic: "Drone/UAV building workshop", image: "/images/instructors/yash-kansal/iit-guwahati-workshop.jpg", width: 1024, height: 768, alt: "Drone components being demonstrated to participants at an IIT Guwahati workshop" },
+  { title: "CIMAGE, Patna", topic: "Programmable AI drone workshop", image: "/images/instructors/yash-kansal/cimage-patna-workshop.jpg", width: 1024, height: 575, alt: "A classroom session during the programmable AI drone workshop at CIMAGE, Patna" },
 ];
 
 export function InternshipInstructor() {
@@ -20,17 +19,13 @@ export function InternshipInstructor() {
 
     <div className={styles.profile}>
       <figure className={styles.portrait}>
-        <Image src="/images/instructors/yash-kansal/portrait.webp" alt="Yash Kansal with FPV goggles and a drone controller" width={1024} height={768} sizes="(max-width: 600px) 160px, 180px" />
+        <Image src="/images/instructors/yash-kansal/portrait.webp" alt="Yash Kansal with FPV goggles and a drone controller" width={1024} height={768} quality={95} sizes="(max-width: 600px) 160px, 180px" />
       </figure>
       <div className={styles.bio}>
         <h3>Yash Kansal</h3>
         <p className={styles.role}>Drone instructor · UAV & robotics engineer</p>
         <p>Yash brings together practical UAV engineering and experience teaching drone technology. His work spans drone assembly, flight testing, controller tuning and troubleshooting, alongside workshops for students and professionals.</p>
         <ul className={styles.focus} aria-label="Areas of experience"><li>UAV systems</li><li>Flight control</li><li>Embedded electronics</li></ul>
-        <div className={styles.links}>
-          <a href="https://www.yashkansal.in/" target="_blank" rel="noopener noreferrer" aria-label="Yash Kansal’s website (opens in a new tab)"><Globe size={16} aria-hidden="true" />Explore his work<ArrowUpRight size={15} aria-hidden="true" /></a>
-          <a href="https://www.linkedin.com/in/yash-kansal-robotics-enthusiast/" target="_blank" rel="noopener noreferrer" aria-label="Yash Kansal’s LinkedIn profile (opens in a new tab)"><Linkedin size={16} aria-hidden="true" />LinkedIn<ArrowUpRight size={15} aria-hidden="true" /></a>
-        </div>
       </div>
     </div>
 
@@ -43,12 +38,10 @@ export function InternshipInstructor() {
       <h3>Teaching in practice</h3>
       <p>A look at his previous in-person workshops. Your Aerocadmy internship is delivered online.</p>
       <div className={styles.gallery}>{workshops.map(workshop => <figure key={workshop.title}>
-        <a href={workshop.href} target="_blank" rel="noopener noreferrer" aria-label={`${workshop.topic} at ${workshop.title} — view the instructor’s portfolio (opens in a new tab)`}>
-          <div className={styles.workshopPhoto}><Image src={workshop.image} alt={workshop.alt} width={workshop.width} height={workshop.height} sizes="(max-width: 600px) 90vw, (max-width: 900px) 44vw, 360px" /></div>
-          <figcaption><span><strong>{workshop.title}</strong><span>{workshop.topic}</span></span><ArrowUpRight size={17} aria-hidden="true" /></figcaption>
-        </a>
+          <div className={styles.workshopPhoto}><Image src={workshop.image} alt={workshop.alt} width={workshop.width} height={workshop.height} quality={95} sizes="(max-width: 600px) 90vw, (max-width: 900px) 44vw, 360px" /></div>
+          <figcaption><span><strong>{workshop.title}</strong><span>{workshop.topic}</span></span></figcaption>
       </figure>)}</div>
-      <p className={styles.credit}>Photos and workshop details from Yash Kansal’s portfolio. Professional experience is summarised from his LinkedIn profile.</p>
+      <p className={styles.credit}>Examples of the instructor’s previous in-person workshops.</p>
     </div>
   </section>;
 }
