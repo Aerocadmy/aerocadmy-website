@@ -39,7 +39,7 @@ export function CourseCatalogue({ headingAs = "h2", initialGroup = "All recorded
           </ul>
           <p className={styles.batchDate}>Next batch starts 15 November 2026</p>
         </div>
-        <div className={styles.liveAction}><span className={styles.feeLabel}>Training + ESP32 kit</span><strong>₹4,999</strong><Link href="/programs/drone-technology-internship">Explore program <ArrowUpRight size={17} aria-hidden="true" /></Link></div>
+        <div className={styles.liveAction}><span className={styles.feeLabel}>Training + ESP32 kit</span><strong>₹6,999</strong><Link href="/programs/drone-technology-internship">Explore program <ArrowUpRight size={17} aria-hidden="true" /></Link></div>
       </aside>
       <p className={styles.catalogueNote}>Upcoming recorded courses. Explore the proposed outlines and join a course waitlist.</p>
       <p className={styles.resultCount} role="status">{visible.length} planned courses{group !== "All recorded courses" ? ` · ${group}` : " · Two learning paths"}</p>

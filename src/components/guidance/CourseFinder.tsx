@@ -25,7 +25,7 @@ const interests = [
   { title: "I prefer live guidance with a kit", hint: "Explore the live internship", icon: Users,
     heading: "Drone Technology Internship", label: "A live learning option", status: "Live online · Enrolment open",
     description: "Explore the six-week live online internship, with an ESP32 drone kit to keep, class recordings and community access.",
-    detail: "₹4,999 including training and the ESP32 kit", cta: "Explore program", href: "/programs/drone-technology-internship",
+    detail: "₹6,999 including training and the ESP32 kit", cta: "Explore program", href: "/programs/drone-technology-internship",
     image: { src: "/images/courses/foundations.png", quadrant: 3, alt: "Hands assembling an educational ESP32 micro-drone" }, links: [] },
 ];
 

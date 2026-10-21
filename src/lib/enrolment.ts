@@ -4,8 +4,8 @@ import { createRequire } from "node:module";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 
-export const FEE = 499900;
-export type Registration = { name: string; email: string; phone: string; address: string; city: string; state: string; pincode: string };
+export const FEE = 699900;
+export type Registration = { name: string; email: string; phone: string };
 type Row = { id: string; token: string; details: string; order_id: string | null; payment_id: string | null; status: string };
 interface Database { exec(sql: string): void; prepare(sql: string): { run(...values: (string | number | null)[]): unknown; get(...values: string[]): Row | undefined }; }
 let database: Database | undefined;
@@ -28,10 +28,10 @@ export function credentials() {
 export function validRegistration(value: unknown): Registration | null {
   if (!value || typeof value !== "object") return null;
   const v = value as Record<string, unknown>;
-  const keys = ["name", "email", "phone", "address", "city", "state", "pincode"] as const;
+  const keys = ["name", "email", "phone"] as const;
   if (keys.some(k => typeof v[k] !== "string")) return null;
   const r = Object.fromEntries(keys.map(k => [k, (v[k] as string).trim()])) as Registration;
-  if (keys.some(k => /[\u0000-\u001f]/.test(r[k])) || r.name.length < 2 || r.name.length > 100 || r.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.email) || !/^[+\d ()-]{7,25}$/.test(r.phone) || r.phone.replace(/\D/g, "").length < 10 || r.address.length < 8 || r.address.length > 300 || r.city.length < 2 || r.city.length > 80 || r.state.length < 2 || r.state.length > 80 || !/^[1-9]\d{5}$/.test(r.pincode)) return null;
+  if (keys.some(k => /[\u0000-\u001f]/.test(r[k])) || r.name.length < 2 || r.name.length > 100 || r.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.email) || !/^[+\d ()-]{7,25}$/.test(r.phone) || r.phone.replace(/\D/g, "").length < 10) return null;
   return r;
 }
 const hash = (token: string) => createHash("sha256").update(token).digest("hex");

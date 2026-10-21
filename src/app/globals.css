@@ -5,6 +5,11 @@
 :root {
   --button-hover-bg: #18cb96;
   --button-hover-text: #000;
+  --radius-control: 8px;
+  --radius-card: 14px;
+  --radius-modal: 24px;
+  --radius-pill: 999px;
+  --focus-ring: 0 0 0 4px rgba(17, 183, 134, .2);
   --blue: #11B786;
   --blue-hover: #0e9f75;
   --green: #11B786;
@@ -114,6 +119,59 @@ body {
 .mobile-hero-atmosphere { display: none; }
 section[id], footer[id] { scroll-margin-top: var(--nav-h); }
 button:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 0; border-color: var(--blue); box-shadow: var(--focus-ring); }
+input, select, textarea { border-radius: var(--radius-control); transition: border-color .2s ease, box-shadow .2s ease; }
+
+/* Shared action hover: a small lift and green sweep across primary actions. */
+button:not(:disabled):not([aria-expanded]):not([aria-pressed]):not([aria-label]):not([role="radio"]),
+a[class*="Action"]:not(.light-action),
+a[class*="Download"]:not(.light-action),
+a[class*="brandAction"]:not(.light-action),
+a[class*="backToTop"]:not(.light-action) {
+  transition: transform .22s ease, background .22s ease, box-shadow .22s ease, color .22s ease, border-color .22s ease;
+}
+
+button:not(:disabled):not([aria-expanded]):not([aria-pressed]):not([aria-label]):not([role="radio"]):hover,
+a[class*="Action"]:not(.light-action):hover,
+a[class*="Download"]:not(.light-action):hover,
+a[class*="brandAction"]:not(.light-action):hover,
+a[class*="backToTop"]:not(.light-action):hover {
+  transform: translateY(-2px);
+  background: linear-gradient(110deg, #132636 0%, #087957 100%) !important;
+  border-color: #087957 !important;
+  color: #fff !important;
+  box-shadow: 0 10px 24px rgba(8, 121, 87, .24);
+}
+
+button:not(:disabled):not([aria-expanded]):not([aria-pressed]):not([aria-label]):not([role="radio"]):active,
+a[class*="Action"]:not(.light-action):active,
+a[class*="Download"]:not(.light-action):active,
+a[class*="brandAction"]:not(.light-action):active,
+a[class*="backToTop"]:not(.light-action):active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(8, 121, 87, .18);
+}
+
+/* Light actions use a quieter surface response instead of the primary fill. */
+.light-action,
+.light-action:hover {
+  transition: transform .22s ease, background .22s ease, box-shadow .22s ease, color .22s ease, border-color .22s ease;
+}
+
+.light-action:hover {
+  transform: translateY(-2px);
+  background: #e8f8f0 !important;
+  border-color: #087957 !important;
+  color: #087957 !important;
+  box-shadow: 0 8px 20px rgba(8, 121, 87, .14);
+}
+
+.light-action:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(8, 121, 87, .1);
+}
+
+button, input, select, textarea { font: inherit; }
 
 @media (max-width: 900px) {
   .drone-hero { height: calc(100dvh - var(--nav-h)); min-height: 400px; }
@@ -180,4 +238,3 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition-duration: 0s !important; }
 }
-

@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     if (typeof v.id !== "string" || !/^[a-f0-9-]{36}$/.test(v.id) || typeof v.token !== "string" || !/^[a-f0-9]{64}$/.test(v.token)) return NextResponse.json({ error: "Please restart registration." }, { status: 400 });
     if (v.action === "register") {
       const input = validRegistration(v.details);
-      if (!input) return NextResponse.json({ error: "Please complete your contact and Indian delivery address correctly." }, { status: 400 });
+      if (!input) return NextResponse.json({ error: "Please complete your name, email, and phone number correctly." }, { status: 400 });
       return NextResponse.json(await createOrder(v.id, v.token, input), { headers: { "Cache-Control": "no-store" } });
     }
     const row = getRegistration(v.id, v.token);

@@ -9,7 +9,7 @@ import { InternshipEnrolment } from "@/components/programs/InternshipEnrolment";
 import { InternshipEnrollButton } from "@/components/programs/InternshipEnrollButton";
 import styles from "@/components/programs/CourseDetail.module.css";
 
-export const metadata: Metadata = { title: "Six-week Live Drone Technology Internship | Aerocadmy", description: "Explore Aerocadmy’s six-week live online drone technology internship. ₹4,999 including an ESP32 drone kit to keep. Next batch starts 15 November 2026." };
+export const metadata: Metadata = { title: "Six-week Live Drone Technology Internship | Aerocadmy", description: "Explore Aerocadmy’s six-week live online drone technology internship. ₹6,999 including an ESP32 drone kit to keep. Next batch starts 15 November 2026." };
 const weeks = [
   { title: "Drone foundations & airspace", topics: ["Drone types & components", "Lift, thrust & stability", "Introduction to DGCA rules & Digital Sky", "Mission planning & waypoints", "Live quiz & airspace exploration"] },
   { title: "Aerodynamics & virtual drone design", topics: ["Thrust-to-weight ratio", "Motor, propeller & battery selection", "Frame layouts, weight distribution & balance", "3D modelling in Tinkercad", "Virtual flight physics experiments"] },
@@ -28,7 +28,7 @@ export default function InternshipPage() {
       sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Six-week journey" }, { id: "brochure", label: "Brochure" }, { id: "project", label: "Practical learning" }, { id: "kit", label: "Your kit" }, { id: "instructor", label: "Instructor" }]}
       sidebar={<CourseSummaryCard featuredVisual visual={{ src: "/images/courses/foundations.png", quadrant: 3, alt: "Hands assembling a compact educational micro-drone" }} caption="Illustrative learning scene · Final kit may differ">
         <p className={styles.eyebrow}>Training + ESP32 drone kit</p>
-        <div className={styles.discountPrice}><del className={styles.oldPrice}>₹9,999</del><strong className={styles.price}>₹4,999</strong></div>
+        <div className={styles.discountPrice}><del className={styles.oldPrice}>₹11,999</del><strong className={styles.price}>₹6,999</strong></div>
         <p className={styles.batch}>Next batch · 15 November 2026</p>
         <InternshipEnrollButton className={`${styles.heroAction} ${styles.centeredAction}`}>Enroll now</InternshipEnrollButton>
         <CourseAction href="/#counselling" secondary centered>Talk to a counsellor</CourseAction>
@@ -78,7 +78,7 @@ export default function InternshipPage() {
       </section>
       <section id="kit" className={styles.section}>
         <h2>Your ESP32 kit & learning setup</h2>
-        <p>The ₹4,999 fee includes an ESP32 drone kit that you keep. The kit is under development and is expected to be ready in October 2026.</p>
+        <p>The ₹6,999 fee includes an ESP32 drone kit that you keep. The kit is under development and is expected to be ready in October 2026.</p>
         <p className={styles.note}>Before enrolling, speak with the team to confirm kit delivery, class timings and equipment requirements for the batch starting 15 November 2026.</p>
       </section>
       <InternshipInstructor />

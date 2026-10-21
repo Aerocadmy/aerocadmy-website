@@ -7,15 +7,15 @@
 .choiceHint { font-size: 12px; color: #61737c; margin-bottom: 25px; }
 .choices { position: relative; padding-left: 20px; }
 .choices::before { content: ''; position: absolute; left: 1px; top: 44px; bottom: 44px; width: 1px; background: #92cdb3; }
-.choice { position: relative; display: flex; align-items: center; width: 100%; gap: 17px; padding: 23px 17px; min-height: 106px; border-bottom: 1px solid #e0e7e2; text-align: left; }
+.choice { position: relative; display: flex; align-items: center; width: 100%; gap: 17px; padding: 23px 17px; min-height: 106px; border-bottom: 1px solid #e0e7e2; text-align: left; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .choice::before { content: ''; width: 9px; height: 9px; border: 1.5px solid #11b786; border-radius: 50%; background: #fbfdfb; position: absolute; left: -23px; top: calc(50% - 4.5px); }
 .choice > svg { flex: 0 0 auto; }
 .choice > span:not(.check) { min-width: 0; }
 .choice strong { display: block; font-size: 15px; line-height: 1.5; letter-spacing: -.015em; font-weight: 600; }
 .choice strong + span { display: block; font-size: 12px; line-height: 1.7; color: #667c85; margin-top: 4px; }
-.choice[aria-checked=true] { border-radius: 7px; border-bottom-color: transparent; background: #eaf6ef; }
+.choice[aria-checked=true] { border-radius: var(--radius-control); border: 1px solid #bfe4d0; background: #eaf6ef; box-shadow: 0 8px 20px rgba(8,121,87,.08); }
 .choice[aria-checked=true]::before { background: #11b786; box-shadow: 0 0 0 3px #fbfdfb; }
-.choice:hover { background: #eff7f1; }
+.choice:hover { background: #eff7f1; transform: translateX(3px); }
 .check { display: grid; place-items: center; flex: 0 0 21px; height: 21px; background: #11b786; border-radius: 50%; color: white; margin-left: auto; }
 .connection { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .recommendation { position: relative; min-width: 0; }
@@ -49,7 +49,7 @@
 .callNote p { font-size: 12px; line-height: 1.9; color: #4f6b5b; }
 .callNote p span { color: #758278; font-size: 11px; }
 .callNote svg { flex-shrink: 0; margin-top: 4px; }
-.counsellingForm { background: white; padding: 30px; border: 1px solid #dce7df; border-radius: 10px; min-width: 0; }
+.counsellingForm { background: white; padding: 30px; border: 1px solid #dce7df; border-radius: var(--radius-card); min-width: 0; box-shadow: 0 12px 32px rgba(19,38,54,.04); }
 .formSteps { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; padding-bottom: 25px; margin-bottom: 25px; border-bottom: 1px solid #e3ebe6; }
 .formSteps li { display: flex; flex-direction: column; gap: 7px; font-size: 10px; line-height: 1.5; color: #76857b; }
 .formSteps li > span { min-height: 17px; font-size: 10px; color: #6b8877; }
@@ -60,7 +60,7 @@
 .form fieldset { min-width: 0; display: flex; flex-direction: column; gap: 19px; }
 .form label { display: flex; flex-direction: column; gap: 8px; min-width: 0; font-size: 12px; line-height: 1.7; color: #324e50; font-weight: 500; }
 .form label > span { display: contents; color: #7b897f; font-size: 10px; font-weight: 400; }
-.form input, .form select, .form textarea { width: 100%; min-width: 0; padding: 12px 11px; border: 1px solid #d7e2da; border-radius: 5px; background: white; color: #132636; font-size: 13px; font-weight: 400; }
+.form input, .form select, .form textarea { width: 100%; min-width: 0; padding: 12px 11px; border: 1px solid #d7e2da; border-radius: var(--radius-control); background: white; color: #132636; font-size: 13px; font-weight: 400; }
 .form select { text-overflow: ellipsis; padding-right: 24px; }
 .form textarea { resize: vertical; }
 .form input:focus-visible, .form select:focus-visible, .form textarea:focus-visible { outline: 2px solid #087957; outline-offset: 2px; }

@@ -9,7 +9,7 @@
 
 ## Records and support
 
-The server fixes the fee at 499900 paise INR. Registration collects contact details and an Indian kit delivery address. Other delivery destinations need a separately defined policy.
+The server fixes the fee at 699900 paise INR. Registration collects the applicant’s name, email, and phone number. Any kit delivery details should be collected separately after payment.
 
 Enrolments are stored in `.data/enrolments/enrolments.sqlite`, or the private `ENROLMENT_STORAGE_DIR`. Protect the directory with OS permissions and encrypted backups. It contains personal information: never serve it publicly or commit it. There is no public listing endpoint. Staff currently need secure server/database access to view registrations; no admin dashboard, email, SMS or automatic course access is included.
 

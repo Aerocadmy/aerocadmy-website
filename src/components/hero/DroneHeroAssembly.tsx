@@ -458,6 +458,9 @@ export const DroneHeroAssembly: React.FC = () => {
       el.style.width = w + "px";
       el.style.backgroundColor = "transparent";
       el.style.zIndex = String(z);
+      if (src === ASSETS.frameBody) {
+        el.style.filter = "blur(0.55px) saturate(0.96)";
+      }
 
       const im = mountComponentImage(el, src, w);
       el.dataset.assemblyAsset = src;

@@ -45,7 +45,7 @@ export function CourseSummaryCard({ visual, caption = "Illustrative learning sce
 }
 
 export function CourseAction({ href, children, secondary = false, centered = false }: { href: string; children: ReactNode; secondary?: boolean; centered?: boolean }) {
-  return <a href={href} className={`${secondary ? styles.secondaryAction : styles.heroAction} ${centered ? styles.centeredAction : ""}`}>{children}<ArrowUpRight size={18} aria-hidden="true" /></a>;
+  return <a href={href} className={`${secondary ? `${styles.secondaryAction} light-action` : styles.heroAction} ${centered ? styles.centeredAction : ""}`}>{children}<ArrowUpRight size={18} aria-hidden="true" /></a>;
 }
 
 export function CourseCurriculum({ modules, label = "Module" }: { modules: { title: string; description?: string; topics?: string[] }[]; label?: string }) {

@@ -7,7 +7,7 @@
 .filters { display: flex; gap: 24px; flex-wrap: wrap; }
 .filters button { padding: 10px 0; color: #62717c; font-size: 12px; border-bottom: 2px solid transparent; }
 .filters button[aria-pressed=true] { color: #087957; border-bottom-color: #11b786; }
-.live { display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr) auto; align-items: center; gap: 28px; padding: 16px; background: #fff; border: 1px solid #dfe7e2; border-radius: 10px; margin: 0 0 26px; }
+.live { display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr) auto; align-items: center; gap: 28px; padding: 16px; background: #fff; border: 1px solid #dfe7e2; border-radius: var(--radius-card); margin: 0 0 26px; box-shadow: 0 8px 24px rgba(19,38,54,.04); }
 .liveVisual { margin: 0; min-width: 0; }
 .liveVisual > a { display: block; position: relative; }
 .liveVisual .image { aspect-ratio: 1.6; }
@@ -25,14 +25,14 @@
 .liveAction { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; padding: 10px 8px 10px 26px; border-left: 1px solid #e0e8e3; white-space: nowrap; }
 .feeLabel { font-size: 10px; color: #718078; }
 .liveAction strong { font-size: 29px; font-weight: 600; letter-spacing: -.035em; }
-.liveAction a { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; color: white; background: #132636; padding: 11px 14px; border-radius: 5px; margin-top: 4px; }
+.liveAction a { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; color: white; background: #132636; padding: 11px 14px; border-radius: var(--radius-control); margin-top: 4px; }
 .liveAction a:hover { background: var(--button-hover-bg); color: var(--button-hover-text); }
 .catalogueNote { font-size: 13px; line-height: 1.8; color: #62717c; }
 .resultCount { font-size: 10px; color: #63776c; margin: 8px 0 25px; }
 .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 44px 26px; }
 .card { min-width: 0; display: flex; flex-direction: column; }
 .imageLink { display: block; position: relative; }
-.image { position: relative; aspect-ratio: 3/2; background: #eaf0ec; border-radius: 6px; overflow: hidden; isolation: isolate; }
+.image { position: relative; aspect-ratio: 3/2; background: #eaf0ec; border-radius: var(--radius-control); overflow: hidden; isolation: isolate; }
 .atlas { position: absolute; width: 200%; height: 200%; max-width: none; object-fit: cover; }
 .badge { position: absolute; top: 12px; left: 12px; color: white; background: #132636e8; border-radius: 4px; padding: 5px 9px; font-size: 9px; letter-spacing: .06em; }
 .meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 10px; color: #637480; margin: 16px 0 10px; }

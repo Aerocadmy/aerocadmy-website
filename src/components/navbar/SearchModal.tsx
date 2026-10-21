@@ -174,7 +174,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                 </a>
               ))}
               {filteredPrograms.length === 0 && <p className="text-xs text-slate-500">No matching recorded courses.</p>}
-              {(!q || "live online drone technology internship esp32 kit".includes(q)) && <a href="/programs/drone-technology-internship" onClick={onClose} className="block rounded-xl border border-slate-100 p-3 text-sm font-medium text-[#087957]">Live Drone Technology Internship · 6 weeks · ₹4,999</a>}
+              {(!q || "live online drone technology internship esp32 kit".includes(q)) && <a href="/programs/drone-technology-internship" onClick={onClose} className="block rounded-xl border border-slate-100 p-3 text-sm font-medium text-[#087957]">Live Drone Technology Internship · 6 weeks · ₹6,999</a>}
             </div>
           </div>
 
@@ -227,4 +227,3 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     </div>
   );
 };
-

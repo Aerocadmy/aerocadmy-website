@@ -69,27 +69,21 @@ export function InternshipEnrolment() {
   return <dialog ref={dialogRef} className={styles.dialog} aria-labelledby="enrolment-title" onClick={event => { if (event.target === event.currentTarget) dialogRef.current?.close(); }}>
     <button type="button" className={styles.close} aria-label="Close enrollment form" onClick={() => dialogRef.current?.close()}><X size={20} aria-hidden="true" /></button>
     <p className={styles.eyebrow}>Your next step</p><h2 id="enrolment-title">Enroll in the Drone Technology Internship</h2>
-    {paid ? <div className={styles.success} role="status"><CheckCircle2 size={28} /><div><h3>You’re enrolled.</h3><p>Your ₹4,999 payment is confirmed for the Drone Technology Internship. Keep your enrolment reference for support.</p><p className={styles.reference}>{session?.id}</p><a href="/#counselling">Talk to a counsellor about your next steps →</a></div></div> : <>
+    {paid ? <div className={styles.success} role="status"><CheckCircle2 size={28} /><div><h3>You’re enrolled.</h3><p>Your ₹6,999 payment is confirmed for the Drone Technology Internship. Keep your enrolment reference for support.</p><p className={styles.reference}>{session?.id}</p></div></div> : <>
       <p className={styles.intro}>Register for the six-week live online internship, including an ESP32 drone kit you keep.</p>
-      <div className={styles.total}><span>Training + ESP32 kit<strong>Next batch · 15 November 2026</strong></span><span className={styles.totalPrice}><del>₹9,999</del><b>₹4,999</b></span></div>
+      <div className={styles.total}><span>Training + ESP32 kit<strong>Next batch · 15 November 2026</strong></span><span className={styles.totalPrice}><del>₹11,999</del><b>₹6,999</b></span></div>
       <form onSubmit={submit} className={styles.form}>
         <fieldset disabled={busy}><legend>Your contact details</legend><div className={styles.grid}>
           <label>Full name<input name="name" autoComplete="name" required minLength={2} maxLength={100} /></label>
           <label>Email address<input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
           <label>Phone number<input name="phone" type="tel" autoComplete="tel" required minLength={10} maxLength={25} /></label>
         </div></fieldset>
-        <fieldset disabled={busy}><legend>Kit delivery address · India</legend><div className={styles.grid}>
-          <label className={styles.full}>Street address<input name="address" autoComplete="street-address" required minLength={8} maxLength={300} /></label>
-          <label>City<input name="city" autoComplete="address-level2" required minLength={2} maxLength={80} /></label>
-          <label>State<input name="state" autoComplete="address-level1" required minLength={2} maxLength={80} /></label>
-          <label>PIN code<input name="pincode" autoComplete="postal-code" inputMode="numeric" pattern="[1-9][0-9]{5}" maxLength={6} required /></label>
-        </div></fieldset>
-        <p className={styles.note}>We’ll use these details to manage your enrolment and kit delivery. Payment details are handled by Razorpay.</p>
-        <div className={styles.actions}><button disabled={busy} type="submit">{busy ? "Please wait…" : "Continue to payment"}<ArrowRight size={18} /></button><a href="/#counselling">Talk to a counsellor <ArrowRight size={18} /></a></div>
-        <p className={styles.security}><ShieldCheck size={16} /> ₹4,999 · Secure checkout with Razorpay</p>
+        <p className={styles.note}>We’ll use these details to manage your enrolment. Payment details are handled securely by Razorpay.</p>
+        <div className={styles.actions}><button disabled={busy} type="submit">{busy ? "Please wait…" : "Continue to payment"}<ArrowRight size={18} /></button></div>
+        <p className={styles.security}><ShieldCheck size={16} /> ₹6,999 · Secure checkout with Razorpay</p>
       </form>
       {session && <button className={styles.status} type="button" onClick={checkStatus} disabled={busy}>Already attempted payment? Check payment status</button>}
-      {session && <p className={styles.note}>Resuming checkout uses the details saved with your first registration. Contact the counsellor if those details need correcting.</p>}
+      {session && <p className={styles.note}>Resuming checkout uses the details saved with your first registration.</p>}
       <p className={styles.message} role="status" aria-live="polite">{message}</p>
     </>}
   </dialog>;

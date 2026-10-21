@@ -41,7 +41,7 @@ export const FAQSection: React.FC = () => {
                     onClick={() => toggle(idx)}
                     aria-expanded={isOpen}
                     aria-controls={`faq-answer-${idx}`}
-                    className="w-full flex items-center justify-between p-6 text-left transition-colors hover:bg-white"
+                    className={`w-full flex items-center justify-between p-6 text-left transition-colors hover:bg-white ${isOpen ? "bg-[#eef8f3]" : ""}`}
                   >
                     <span className="text-base sm:text-lg font-bold text-[#081C2B] pr-4">
                       {faq.question}
@@ -79,7 +79,7 @@ export const FAQSection: React.FC = () => {
 
             <button
               onClick={() => setIsAdvisorOpen(true)}
-              className="flex-shrink-0 rounded-xl bg-[#0097B2] px-6 py-3 text-sm font-bold text-white shadow-cta hover:bg-[#007f96] transition-all"
+              className="flex-shrink-0 rounded-xl bg-[#0097B2] px-6 py-3 text-sm font-bold text-white shadow-cta transition-all"
             >
               Ask an Advisor
             </button>
@@ -91,4 +91,3 @@ export const FAQSection: React.FC = () => {
     </>
   );
 };
-
