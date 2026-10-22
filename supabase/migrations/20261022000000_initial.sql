@@ -12,7 +12,8 @@ create table if not exists public.enrolments (
   amount integer not null default 699900,
   currency text not null default 'INR',
   created_at timestamptz not null default now(),
-  paid_at timestamptz
+  paid_at timestamptz,
+  confirmation_email_sent_at timestamptz
 );
 
 create table if not exists public.payment_events (

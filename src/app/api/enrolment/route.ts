@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { confirmPayment, createOrder, credentials, getRegistration, validRegistration, validSignature } from "@/lib/enrolment";
+import { confirmPayment, createOrder, credentials, getRegistration, sendPendingEnrollmentConfirmation, validRegistration, validSignature } from "@/lib/enrolment";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
@@ -19,7 +19,10 @@ export async function POST(request: Request) {
     }
     const row = await getRegistration(v.id, v.token);
     if (v.action === "status") {
-      if (row.status === "paid") return NextResponse.json({ status: "paid", reference: row.id });
+      if (row.status === "paid") {
+        await sendPendingEnrollmentConfirmation(v.id, v.token);
+        return NextResponse.json({ status: "paid", reference: row.id });
+      }
       if (row.order_id) {
         const { gateway } = await import("@/lib/enrolment");
         const result = await gateway(`orders/${row.order_id}/payments`);
