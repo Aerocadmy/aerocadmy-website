@@ -12,7 +12,7 @@ export function RatingStars({ rating }: { rating: number }) {
 }
 
 export function ReviewRating({ href = "#reviews" }: { href?: string }) {
-  return <a href={href} className={styles.topRating} aria-label={`View ${participantReviews.length} webinar reviews, rated ${reviewAverage.toFixed(1)} out of 5`}>
-    <strong>{reviewAverage.toFixed(1)}</strong><RatingStars rating={reviewAverage} /><span>{participantReviews.length} webinar reviews</span>
+  return <a href={href} className={styles.topRating} aria-label={`View ${participantReviews.length} internship reviews, rated ${reviewAverage.toFixed(1)} out of 5`}>
+    <strong>{reviewAverage.toFixed(1)}</strong><RatingStars rating={reviewAverage} /><span>{participantReviews.length} internship reviews</span>
   </a>;
 }
