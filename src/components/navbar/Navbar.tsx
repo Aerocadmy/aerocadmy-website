@@ -13,7 +13,7 @@ import styles from "./Navbar.module.css";
 
 const sectionLinks = [
   { label: "Programs", href: "/courses" },
-  { label: "Events", href: "/#events" },
+  { label: "Events", href: "/events" },
   { label: "Career", href: "/#why-drone-technology" },
   { label: "Store", href: "/#store" },
 ];
@@ -74,8 +74,7 @@ export const Navbar: React.FC = () => {
       <header ref={headerRef} className={`${styles.header} ${isScrolled ? styles.scrolled : ""}`}>
         <div className={styles.announcement}>
           <span className={styles.offerDot} aria-hidden="true" />
-          <span>Get 50% off on your first course</span>
-          <span className={styles.offerCode}>FIRST50</span>
+          <span>Our live internship program is live now</span>
         </div>
         <div className={styles.row}>
           <Link href="/" aria-label="Aerocadmy home" onClick={closeMenus} className={styles.logo}>

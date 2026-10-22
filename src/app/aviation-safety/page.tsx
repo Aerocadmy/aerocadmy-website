@@ -1,9 +1,7 @@
 import { LegalPage } from "@/components/legal/LegalPage";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata = {
-  title: "Aviation Safety | Aerocadmy",
-  description: "Safety guidance for learning and working with drone systems.",
-};
+export const metadata = pageMetadata({ title: "Aviation Safety | Aerocadmy", description: "Safety guidance for learning and working with drone systems.", path: "/aviation-safety" });
 
 export default function AviationSafetyPage() {
   return <LegalPage title="Aviation safety" intro="Drone technology is practical engineering, but it must always be used responsibly. This guidance is educational and does not replace current aviation rules or qualified supervision.">

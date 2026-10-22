@@ -1,14 +1,19 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { preload } from "react-dom";
 import { ArrowDown, ArrowRight, RotateCcw } from "lucide-react";
 import journeyStyles from "./JourneyPanel.module.css";
 import { ASSETS, imageBounds, mountComponentImage } from "@/lib/assets";
 import { LESSONS } from "@/lib/drone-data";
 
 const assemblyScrollDistance = () => window.innerWidth <= 900 ? 2400 : Math.max(2400, window.innerHeight * 3.5);
+const openingAssets = [ASSETS.motor, ASSETS.propeller, ASSETS.controller, ASSETS.battery, ASSETS.camera, ASSETS.arm, ASSETS.sensor, ASSETS.screw];
 
 export const DroneHeroAssembly: React.FC = () => {
+  // Fetch the first-scene parts before hydration creates their animated elements.
+  openingAssets.forEach((src) => preload(src, { as: "image", fetchPriority: "high" }));
+
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -401,7 +406,7 @@ export const DroneHeroAssembly: React.FC = () => {
         rot: d.rot || 0,
         from: d.from,
         ph: Math.random() * 6.28,
-        delay: 180 + i * 80,
+        delay: 120 + i * 48,
         ox: 0,
         oy: 0,
         vx: 0,
@@ -561,6 +566,8 @@ export const DroneHeroAssembly: React.FC = () => {
       el.style.position = "absolute";
       el.style.left = "0";
       el.style.top = "0";
+      // Prevent parts from flashing stacked at the stage origin before positioning.
+      el.style.opacity = "0";
       el.style.willChange = "transform";
       el.style.pointerEvents = "none";
       el.style.width = (p.W || p.w) + "px";
@@ -637,8 +644,8 @@ export const DroneHeroAssembly: React.FC = () => {
         sc: 1,
         phase: Math.random() * 6.28,
         sp: 0.7 + Math.random() * 0.6,
-        delay: 180 + i * 95,
-        dur: 1250,
+        delay: 120 + i * 58,
+        dur: 1120,
         f: 0,
         vx: 0,
         vy: 0,
@@ -658,6 +665,15 @@ export const DroneHeroAssembly: React.FC = () => {
 
     const mobilePortrait = () => window.innerWidth <= 900 && window.innerHeight > 520;
 
+    function positionCopy(fade = 0) {
+      const mobileCopy = window.innerWidth <= 900;
+      const copyScale = mobileCopy ? 1 : .82;
+      const phoneCopyTop = Math.max(128, Math.min(200, (viewportH - copyTextHeight) * .36));
+      copyEl.style.top = (mobilePortrait() ? phoneCopyTop : mobileCopy ? 24 : Math.max(0, (viewportH - copyTextHeight * copyScale) / 2)) + "px";
+      copyEl.style.transformOrigin = "top center";
+      copyEl.style.transform = `translateX(-50%) translateY(${-70 * fade}px) scale(${copyScale})`;
+    }
+
     function fit() {
       mobileCopyHeight = (journeyPanelRef.current?.offsetHeight || 300) + 36;
       copyTextHeight = copyEl.offsetHeight;
@@ -666,6 +682,7 @@ export const DroneHeroAssembly: React.FC = () => {
       viewportH = hero.clientHeight;
       scrollDistance = assemblyScrollDistance();
       if (track) track.style.height = viewportH + scrollDistance + "px";
+      positionCopy();
       positionStage(journeyBlend);
     }
 
@@ -912,17 +929,13 @@ export const DroneHeroAssembly: React.FC = () => {
         c5y = FIN5.cy + gy;
 
       copyEl.style.opacity = (1 - q1).toFixed(3);
-      const mobileCopy = window.innerWidth <= 900;
-      const copyScale = mobileCopy ? 1 : Math.min(window.innerWidth / W, viewportH / H);
-      const phoneCopyTop = Math.max(128, Math.min(200, (viewportH - copyTextHeight) * .36));
-      copyEl.style.top = (mobilePortrait() ? phoneCopyTop : mobileCopy ? 24 : Math.max(0, (viewportH - H * copyScale) / 2)) + 'px';
-      copyEl.style.transformOrigin = 'top center';
-      copyEl.style.transform = `translateX(-50%) translateY(${-70 * q1}px) scale(${copyScale})`;
+      positionCopy(q1);
       copyEl.inert = q1 > .5;
       copyEl.style.pointerEvents = q1 > 0.5 ? "none" : "";
       copyEl.setAttribute("aria-hidden", String(q1 > 0.5));
       const compactParts = mobilePortrait();
       orbitClone.style.opacity = compactParts ? "0" : (1 - ph(p, 0, 0.15)).toFixed(3);
+      const phoneCopyTop = Math.max(128, Math.min(200, (viewportH - copyTextHeight) * .36));
 
       nodes.forEach((n) => {
         const p0 = n.p,
@@ -1470,7 +1483,7 @@ export const DroneHeroAssembly: React.FC = () => {
 
       // Decos movement
       decos.forEach((d) => {
-        const e = reduce ? 1 : clamp01((t - d.delay) / 1300),
+        const e = reduce ? 1 : clamp01((t - d.delay) / 1050),
           eb = easeOutBack(e);
         const dx = mouse.x - d.x,
           dy = mouse.y - d.y,
@@ -1500,11 +1513,23 @@ export const DroneHeroAssembly: React.FC = () => {
 
     // Start only after image dimensions are available. Strict Mode cleanup cancels stale loads.
     const images = Array.from(stage.querySelectorAll<HTMLImageElement>('img[data-initial-asset]'));
-    const ready = images.map(image => image.complete ? Promise.resolve() : new Promise<void>(resolve => {
-      const done = () => { image.removeEventListener('load', done); image.removeEventListener('error', done); resolve(); };
-      image.addEventListener('load', done); image.addEventListener('error', done);
-      imageCleanups.push(done);
-    }));
+    const ready = images.map(async (image) => {
+      if (!image.complete) {
+        await new Promise<void>((resolve) => {
+          const done = () => {
+            image.removeEventListener("load", done);
+            image.removeEventListener("error", done);
+            resolve();
+          };
+          image.addEventListener("load", done);
+          image.addEventListener("error", done);
+          imageCleanups.push(done);
+        });
+      }
+      if (image.naturalWidth > 0 && typeof image.decode === "function") {
+        try { await image.decode(); } catch { /* A failed image must not block the rest of the hero. */ }
+      }
+    });
     Promise.all(ready).then(() => {
       if (disposed) return;
       nodes.forEach(n => { n.h = n.el.offsetHeight || n.h; });
@@ -1670,7 +1695,7 @@ export const DroneHeroAssembly: React.FC = () => {
         {/* Center Initial Copy (fades out as user scrolls into the assembly) */}
         <div
           ref={copyRef}
-          className="hero-copy absolute left-1/2 top-0 z-20 w-[700px] -translate-x-1/2 text-center pointer-events-auto"
+          className="hero-copy absolute left-1/2 z-20 w-[700px] -translate-x-1/2 text-center pointer-events-auto"
         >
           {/* Eyebrow */}
           <div className="pt-24 sm:pt-28 flex items-center justify-center gap-3 text-xs sm:text-sm font-semibold tracking-[0.22em] text-[#5a6b77] uppercase">

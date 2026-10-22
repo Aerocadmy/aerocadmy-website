@@ -3,11 +3,15 @@ import Link from "next/link";
 import { ArrowRight, Check, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/navbar/Navbar";
 import { Footer } from "@/components/footer/Footer";
+import { pageMetadata } from "@/lib/page-metadata";
 
 export const metadata: Metadata = {
-  title: "What Are the Main Components of a Drone? | Aerocadmy",
-  description:
-    "Learn about the main drone components, including the frame, motors, propellers, ESCs, flight controller, battery, sensors and GPS.",
+  ...pageMetadata({
+    title: "What Are the Main Components of a Drone? | Aerocadmy",
+    description: "A beginner-friendly guide to the hardware and systems that help a drone fly, stay stable and respond to the pilot.",
+    path: "/articles/drone-components-for-beginners",
+    type: "article",
+  }),
   keywords: [
     "drone components",
     "parts of a drone",
@@ -15,12 +19,13 @@ export const metadata: Metadata = {
     "quadcopter parts",
     "drone flight controller",
   ],
-  alternates: { canonical: "/articles/drone-components-for-beginners" },
   openGraph: {
-    title: "What Are the Main Components of a Drone?",
-    description:
-      "A beginner-friendly guide to the hardware and systems that help a drone fly, stay stable and respond to the pilot.",
     type: "article",
+    title: "What Are the Main Components of a Drone? | Aerocadmy",
+    description: "A beginner-friendly guide to the hardware and systems that help a drone fly, stay stable and respond to the pilot.",
+    url: "/articles/drone-components-for-beginners",
+    siteName: "Aerocadmy",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Aerocadmy — Engineered to Inspire" }],
     publishedTime: "2026-10-21T00:00:00.000Z",
     authors: ["Aerocadmy Team"],
   },

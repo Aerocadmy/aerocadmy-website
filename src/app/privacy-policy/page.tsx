@@ -1,9 +1,7 @@
 import { LegalPage } from "@/components/legal/LegalPage";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata = {
-  title: "Privacy Policy | Aerocadmy",
-  description: "How Aerocadmy collects and uses information.",
-};
+export const metadata = pageMetadata({ title: "Privacy Policy | Aerocadmy", description: "How Aerocadmy collects and uses information.", path: "/privacy-policy" });
 
 export default function PrivacyPolicyPage() {
   return <LegalPage title="Privacy policy" intro="Aerocadmy Education respects your privacy. This policy explains what we collect, why we use it and the choices available to you.">
