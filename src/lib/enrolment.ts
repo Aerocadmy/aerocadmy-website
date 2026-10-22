@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 export const FEE = 699900;
 export type Registration = { name: string; email: string; phone: string };
-type Row = { id: string; token: string; details: string; order_id: string | null; payment_id: string | null; status: string; confirmation_email_sent_at: string | null };
+type Row = { id: string; token: string; details: string; order_id: string | null; payment_id: string | null; status: string; confirmation_email_sent_at: string | null; confirmation_email_claimed_at: string | null };
 export function credentials() {
   const key = process.env.RAZORPAY_KEY_ID, secret = process.env.RAZORPAY_KEY_SECRET;
   if (!key || !secret) throw new Error("Payments are not configured yet. Please talk to a counsellor.");
@@ -22,17 +22,34 @@ export function validRegistration(value: unknown): Registration | null {
 }
 const hash = (token: string) => createHash("sha256").update(token).digest("hex");
 export function getRegistration(id: string, token: string) {
-  return supabaseAdmin().from("enrolments").select("id,token_hash,name,email,phone,order_id,payment_id,status,amount,currency,created_at,paid_at,confirmation_email_sent_at").eq("id", id).maybeSingle().then(({ data, error }) => {
+  return supabaseAdmin().from("enrolments").select("id,token_hash,name,email,phone,order_id,payment_id,status,amount,currency,created_at,paid_at,confirmation_email_sent_at,confirmation_email_claimed_at").eq("id", id).maybeSingle().then(({ data, error }) => {
     if (error || !data || data.token_hash !== hash(token)) throw new Error("Registration could not be accessed. Please start again.");
-    return { id: data.id, token: data.token_hash, details: JSON.stringify({ name: data.name, email: data.email, phone: data.phone }), order_id: data.order_id, payment_id: data.payment_id, status: data.status, confirmation_email_sent_at: data.confirmation_email_sent_at } satisfies Row;
+    return { id: data.id, token: data.token_hash, details: JSON.stringify({ name: data.name, email: data.email, phone: data.phone }), order_id: data.order_id, payment_id: data.payment_id, status: data.status, confirmation_email_sent_at: data.confirmation_email_sent_at, confirmation_email_claimed_at: data.confirmation_email_claimed_at } satisfies Row;
   });
 }
 async function sendConfirmationIfNeeded(row: Row) {
   if (row.confirmation_email_sent_at) return;
+  const admin = supabaseAdmin();
+  const claimedAt = new Date().toISOString();
+  const staleBefore = new Date(Date.now() - 5 * 60_000).toISOString();
+  const { data: claim, error: claimError } = await admin.from("enrolments")
+    .update({ confirmation_email_claimed_at: claimedAt })
+    .eq("id", row.id)
+    .is("confirmation_email_sent_at", null)
+    .or(`confirmation_email_claimed_at.is.null,confirmation_email_claimed_at.lt.${staleBefore}`)
+    .select("id")
+    .maybeSingle();
+  if (claimError) throw new Error("Enrollment confirmation could not be prepared.");
+  if (!claim) return;
   const details = JSON.parse(row.details) as Registration;
-  await sendEnrollmentConfirmation({ id: row.id, name: details.name, email: details.email });
-  const { error } = await supabaseAdmin().from("enrolments").update({ confirmation_email_sent_at: new Date().toISOString() }).eq("id", row.id).is("confirmation_email_sent_at", null);
-  if (error) throw new Error("Enrollment confirmation status could not be saved.");
+  try {
+    await sendEnrollmentConfirmation({ id: row.id, name: details.name, email: details.email });
+    const { data: saved, error } = await admin.from("enrolments").update({ confirmation_email_sent_at: new Date().toISOString(), confirmation_email_claimed_at: null }).eq("id", row.id).eq("confirmation_email_claimed_at", claimedAt).is("confirmation_email_sent_at", null).select("id").maybeSingle();
+    if (error || !saved) throw new Error("Enrollment confirmation status could not be saved.");
+  } catch (error) {
+    await admin.from("enrolments").update({ confirmation_email_claimed_at: null }).eq("id", row.id).eq("confirmation_email_claimed_at", claimedAt).is("confirmation_email_sent_at", null);
+    throw error;
+  }
 }
 export async function sendPendingEnrollmentConfirmation(id: string, token: string) {
   const row = await getRegistration(id, token);
@@ -74,14 +91,31 @@ export async function confirmPayment(orderId: string, paymentId: string) {
   if (!/^order_[a-zA-Z0-9]+$/.test(orderId) || !/^pay_[a-zA-Z0-9]+$/.test(paymentId)) throw new Error("Invalid payment reference.");
   const { data: record, error: recordError } = await supabaseAdmin().from("enrolments").select("id,token_hash,name,email,phone,order_id,payment_id,status,confirmation_email_sent_at").eq("order_id", orderId).maybeSingle();
   if (recordError || !record) throw new Error("Registration was not found.");
-  const row: Row = { id: record.id, token: record.token_hash, details: JSON.stringify({ name: record.name, email: record.email, phone: record.phone }), order_id: record.order_id, payment_id: record.payment_id, status: record.status, confirmation_email_sent_at: record.confirmation_email_sent_at };
+  const row: Row = { id: record.id, token: record.token_hash, details: JSON.stringify({ name: record.name, email: record.email, phone: record.phone }), order_id: record.order_id, payment_id: record.payment_id, status: record.status, confirmation_email_sent_at: record.confirmation_email_sent_at, confirmation_email_claimed_at: null };
   const payment = await gateway(`payments/${paymentId}`);
   if (payment.order_id !== row.order_id || payment.amount !== FEE || payment.currency !== "INR") throw new Error("Payment details did not match the registration.");
   if (payment.status === "captured" && payment.captured === true) {
-    const { error } = await supabaseAdmin().from("enrolments").update({ status: "paid", payment_id: paymentId, paid_at: new Date().toISOString() }).eq("id", row.id).or(`payment_id.is.null,payment_id.eq.${paymentId}`);
+    const admin = supabaseAdmin();
+    const { data: updated, error } = await admin.from("enrolments").update({ status: "paid", payment_id: paymentId, paid_at: new Date().toISOString() }).eq("id", row.id).neq("status", "paid").or(`payment_id.is.null,payment_id.eq.${paymentId}`).select("id").maybeSingle();
     if (error) throw new Error("Payment status could not be saved.");
+    if (!updated) {
+      const { data: current, error: currentError } = await admin.from("enrolments").select("payment_id,status").eq("id", row.id).maybeSingle();
+      if (currentError || !current) throw new Error("Payment status could not be confirmed.");
+      if (current.status !== "paid" || current.payment_id !== paymentId) {
+        console.error("A second captured payment needs manual reconciliation", { enrolmentId: row.id, paymentId, recordedPaymentId: current.payment_id });
+        return { status: "review_required", reference: row.id };
+      }
+    }
     await sendConfirmationIfNeeded(row);
     return { status: "paid", reference: row.id };
   }
   return { status: row.status === "paid" ? "paid" : "pending", reference: row.id };
+}
+
+export async function reconcileOrderPayment(orderId: string) {
+  const result = await gateway(`orders/${encodeURIComponent(orderId)}/payments`);
+  const payments = Array.isArray(result.items) ? result.items as Record<string, unknown>[] : [];
+  const captured = payments.find(payment => payment.status === "captured" && typeof payment.id === "string");
+  if (!captured || typeof captured.id !== "string") return null;
+  return confirmPayment(orderId, captured.id);
 }

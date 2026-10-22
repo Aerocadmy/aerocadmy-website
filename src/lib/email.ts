@@ -34,6 +34,6 @@ export async function sendEnrollmentConfirmation(input: { id: string; name: stri
       <strong>Program fee paid:</strong> INR 6,999</p>
       <p>Our team will contact you with the next steps and batch details.</p>
       <p>Regards,<br>Aerocadmy</p>`,
-  });
+  }, { idempotencyKey: `enrollment-confirmation/${input.id}` });
   if (error) throw new Error("Enrollment confirmation email could not be sent.");
 }
