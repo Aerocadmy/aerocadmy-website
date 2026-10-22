@@ -306,33 +306,6 @@ export const STATS = [
   { label: "Commercial Flight Certifications", value: "100%" },
 ];
 
-export const TESTIMONIALS = [
-  {
-    name: "Aarav Sharma",
-    role: "Aerospace Engineering Undergrad, IIT Kanpur",
-    quote:
-      "The interactive step-by-step visual assembly completely changed how I look at multirotors. Building the hardware, tuning PID loops, and testing telemetry hands-on gave me an unfair advantage in our university robotics club.",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-    badge: "Certified Drone Builder",
-  },
-  {
-    name: "Elena Rostova",
-    role: "Robotics Researcher & Drone Lead",
-    quote:
-      "Aerocadmy balances hardcore aerospace physics with modern software. The bridge between microcontroller programming and autonomous OpenCV navigation is unmatched.",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
-    badge: "Autonomous Specialist",
-  },
-  {
-    name: "Dr. Rajesh Kulkarni",
-    role: "HOD Mechatronics, Tech Institute",
-    quote:
-      "We integrated Aerocadmy's curriculum across our 3rd-year engineering cohort. The depth of the curriculum, from carbon fiber dynamics to Betaflight telemetry, is exceptional.",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-    badge: "Institutional Partner",
-  },
-];
-
 export const FAQS = [
   {
     question: "Do I need prior electronics or coding experience to start?",

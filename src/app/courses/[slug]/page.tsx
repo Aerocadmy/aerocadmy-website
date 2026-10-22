@@ -5,16 +5,18 @@ import { findRecordedCourse, recordedCourses } from "@/data/courses";
 import { Navbar } from "@/components/navbar/Navbar";
 import { Footer } from "@/components/footer/Footer";
 import { CourseWaitlist } from "@/components/programs/CourseWaitlist";
+import { StudentShowcase } from "@/components/testimonials/StudentShowcase";
 import { CourseAction, CourseCurriculum, CourseDetailLayout, CourseSummaryCard } from "@/components/programs/CourseDetailLayout";
 import styles from "@/components/programs/CourseDetail.module.css";
+import { pageMetadata } from "@/lib/page-metadata";
 
 export const dynamicParams = false;
 export function generateStaticParams() { return recordedCourses.map(course => ({ slug: course.slug })); }
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const course = findRecordedCourse(slug);
-  if (!course) return { title: "Course not found | Aerocadmy" };
-  return { title: `${course.title} — Course Preview | Aerocadmy`, description: `Explore the proposed outline for ${course.title}. ${course.summary} Join the waitlist for updates.`, alternates: { canonical: `/courses/${course.slug}` } };
+  if (!course) return { title: "Course not found | Aerocadmy", robots: { index: false, follow: false } };
+  return pageMetadata({ title: `${course.title} — Course Preview | Aerocadmy`, description: `Explore the proposed outline for ${course.title}. ${course.summary} Join the waitlist for updates.`, path: `/courses/${course.slug}` });
 }
 
 export default async function RecordedCoursePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -25,7 +27,7 @@ export default async function RecordedCoursePage({ params }: { params: Promise<{
     <Navbar />
     <CourseDetailLayout title={course.title} category={course.group} eyebrow="Upcoming recorded course · In development" summary={course.summary}
       facts={[{ icon: "video", label: "Recorded · Online" }, { icon: "modules", label: `${course.modules.length} planned modules` }, { icon: "online", label: "No drone required" }]}
-      sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Curriculum" }, { id: "project", label: "Your project" }, { id: "requirements", label: "Requirements" }]}
+      sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Curriculum" }, { id: "project", label: "Your project" }, { id: "requirements", label: "Requirements" }, { id: "reviews", label: "Reviews" }]}
       sidebar={<CourseSummaryCard visual={course.visual}>
         <p className={styles.eyebrow}>Planned recorded course</p>
         <h2 className={styles.cardTitle}>Start with curiosity.</h2>
@@ -64,6 +66,7 @@ export default async function RecordedCoursePage({ params }: { params: Promise<{
         {course.note && <p className={styles.note}>{course.note}</p>}
         <p className={styles.note}>Final software, computer requirements and learning resources will be confirmed before enrolment opens. Fees, duration, release dates, certificates and hardware bundles have not been announced.</p>
       </section>
+      <StudentShowcase />
       <CourseWaitlist key={course.slug} slug={course.slug} title={course.title} />
       <p className={styles.closing}>This is a planned course preview. Industry connections describe learning directions; completion does not guarantee employment or a professional qualification. The live internship’s kit and benefits apply to that program.</p>
     </CourseDetailLayout>

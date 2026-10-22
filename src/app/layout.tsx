@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
-import { ASSETS } from '@/lib/assets';
 import { WhatsAppFloat } from "@/components/ui/WhatsAppFloat";
 
 const dmSans = DM_Sans({
@@ -34,19 +33,14 @@ export const metadata: Metadata = {
       "Learn drone technology — from components and electronics to programming and real-world applications.",
     type: "website",
     locale: "en_US",
-    images: [
-      {
-        url: ASSETS.logo,
-        width: 800,
-        height: 250,
-        alt: "Aerocadmy Logo",
-      },
-    ],
+    siteName: "Aerocadmy",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Aerocadmy — Engineered to Inspire" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Aerocadmy — Engineered to Inspire",
     description: "Learn drone technology with interactive 3D assembly and hands-on projects.",
+    images: ["/opengraph-image"],
   },
   icons: {
     icon: "/favicon.png",

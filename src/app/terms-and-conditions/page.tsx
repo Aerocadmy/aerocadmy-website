@@ -1,9 +1,7 @@
 import { LegalPage } from "@/components/legal/LegalPage";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata = {
-  title: "Terms & Conditions | Aerocadmy",
-  description: "Terms governing use of the Aerocadmy website and learning services.",
-};
+export const metadata = pageMetadata({ title: "Terms & Conditions | Aerocadmy", description: "Terms governing use of the Aerocadmy website and learning services.", path: "/terms-and-conditions" });
 
 export default function TermsAndConditionsPage() {
   return <LegalPage title="Terms & conditions" intro="These terms explain the rules for using the Aerocadmy website, learning content and services. By using the site, you agree to them.">

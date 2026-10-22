@@ -7,10 +7,12 @@ import { CourseAction, CourseCurriculum, CourseDetailLayout, CourseSummaryCard }
 import { InternshipInstructor } from "@/components/programs/InternshipInstructor";
 import { InternshipEnrolment } from "@/components/programs/InternshipEnrolment";
 import { InternshipEnrollButton } from "@/components/programs/InternshipEnrollButton";
+import { StudentShowcase } from "@/components/testimonials/StudentShowcase";
 import styles from "@/components/programs/CourseDetail.module.css";
 import { publicStorageUrl } from "@/lib/supabase";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = { title: "Six-week Live Drone Technology Internship | Aerocadmy", description: "Explore Aerocadmy’s six-week live online drone technology internship. ₹6,999 including an ESP32 drone kit to keep. Next batch starts 15 November 2026." };
+export const metadata: Metadata = pageMetadata({ title: "Six-week Live Drone Technology Internship | Aerocadmy", description: "Explore Aerocadmy’s six-week live online drone technology internship. ₹6,999 including an ESP32 drone kit to keep. Next batch starts 15 November 2026.", path: "/programs/drone-technology-internship" });
 const brochureUrl = publicStorageUrl("internships/drone-technology/Aerocadmy_Internship_Details.pdf");
 const brochurePreviewUrl = publicStorageUrl("internships/drone-technology/brochure-preview.jpg");
 const weeks = [
@@ -28,7 +30,7 @@ export default function InternshipPage() {
     <CourseDetailLayout title="Drone Technology Internship" category="Live online program" eyebrow="Live online · Enrolment open"
       summary="Build your understanding through live classes, practical activities, and an ESP32 drone kit you keep."
       facts={[{ icon: "calendar", label: "6 weeks" }, { icon: "video", label: "Live classes + recordings" }, { icon: "kit", label: "ESP32 kit included" }]}
-      sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Six-week journey" }, { id: "brochure", label: "Brochure" }, { id: "project", label: "Practical learning" }, { id: "kit", label: "Your kit" }, { id: "instructor", label: "Instructor" }]}
+      sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Six-week journey" }, { id: "brochure", label: "Brochure" }, { id: "project", label: "Practical learning" }, { id: "kit", label: "Your kit" }, { id: "instructor", label: "Instructor" }, { id: "reviews", label: "Reviews" }]}
       sidebar={<CourseSummaryCard featuredVisual visual={{ src: "/images/courses/foundations.png", quadrant: 3, alt: "Hands assembling a compact educational micro-drone" }} caption="Illustrative learning scene · Final kit may differ">
         <p className={styles.eyebrow}>Training + ESP32 drone kit</p>
         <div className={styles.discountPrice}><del className={styles.oldPrice}>₹11,999</del><strong className={styles.price}>₹6,999</strong></div>
@@ -85,6 +87,7 @@ export default function InternshipPage() {
         <p className={styles.note}>Before enrolling, speak with the team to confirm kit delivery, class timings and equipment requirements for the batch starting 15 November 2026.</p>
       </section>
       <InternshipInstructor />
+      <StudentShowcase />
       <p className={styles.closing}>The included kit, fee and benefits on this page apply to the live internship. Upcoming recorded courses are separate offerings. Career guidance does not guarantee employment.</p>
     </CourseDetailLayout>
     <InternshipEnrolment />

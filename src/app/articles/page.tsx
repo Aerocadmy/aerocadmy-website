@@ -3,13 +3,9 @@ import Link from "next/link";
 import { ArrowRight, Clock3 } from "lucide-react";
 import { Navbar } from "@/components/navbar/Navbar";
 import { Footer } from "@/components/footer/Footer";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = {
-  title: "Drone Technology Articles & Guides | Aerocadmy",
-  description:
-    "Explore beginner-friendly articles and practical guides about drone components, electronics, flight control and learning drone technology.",
-  alternates: { canonical: "/articles" },
-};
+export const metadata: Metadata = pageMetadata({ title: "Drone Technology Articles & Guides | Aerocadmy", description: "Explore beginner-friendly articles and practical guides about drone components, electronics, flight control and learning drone technology.", path: "/articles" });
 
 const articles = [
   {
