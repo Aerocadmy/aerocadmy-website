@@ -8,13 +8,15 @@ type Result = { error?: string; status?: string; paid?: boolean; reference?: str
 type Checkout = { open(): void; on(event: string, callback: () => void): void };
 declare global { interface Window { Razorpay?: new (options: Record<string, unknown>) => Checkout } }
 const storageKey = "aerocadmy-internship-registration";
+let checkoutScriptPromise: Promise<void> | null = null;
 function loadCheckout() {
   if (window.Razorpay) return Promise.resolve();
-  return new Promise<void>((resolve, reject) => {
+  if (!checkoutScriptPromise) checkoutScriptPromise = new Promise<void>((resolve, reject) => {
     const script = document.createElement("script"); script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(); script.onerror = () => { script.remove(); reject(new Error("Checkout could not load. Please try again.")); };
+    script.onload = () => resolve(); script.onerror = () => { script.remove(); checkoutScriptPromise = null; reject(new Error("Checkout could not load. Please try again.")); };
     document.head.appendChild(script);
   });
+  return checkoutScriptPromise;
 }
 export function InternshipEnrolment() {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -26,6 +28,12 @@ export function InternshipEnrolment() {
     window.addEventListener("open-internship-enrolment", open);
     return () => window.removeEventListener("open-internship-enrolment", open);
   }, []);
+  function reopenEnrollment() {
+    requestAnimationFrame(() => {
+      const dialog = dialogRef.current;
+      if (dialog && !dialog.open) dialog.showModal();
+    });
+  }
   async function request(active: Session, values: Record<string, unknown>) {
     const response = await fetch("/api/enrolment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...active, ...values }) });
     const result = await response.json() as Result;
@@ -35,13 +43,14 @@ export function InternshipEnrolment() {
   async function checkStatus() {
     if (!session) return;
     setBusy(true); setMessage("");
-    try { const result = await request(session, { action: "status" }); if (result.status === "paid") setPaid(true); else setMessage("Payment is not confirmed yet. If you’ve paid, please wait and check again before making another payment."); }
+    try { const result = await request(session, { action: "status" }); if (result.status === "paid") setPaid(true); else if (result.status === "review_required") setMessage("Your payment was received, but this registration needs manual review. Please contact a counsellor before making another payment."); else setMessage("Payment is not confirmed yet. If you’ve paid, please wait and check again before making another payment."); }
     catch (error) { setMessage(error instanceof Error ? error.message : "Could not check payment."); }
     finally { setBusy(false); }
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage("");
     const details = Object.fromEntries(new FormData(event.currentTarget).entries());
+    dialogRef.current?.close();
     let active = session;
     try {
       if (!active) {
@@ -50,21 +59,23 @@ export function InternshipEnrolment() {
       }
       await loadCheckout();
       const result = await request(active, { action: "register", details });
-      if (result.paid) { setPaid(true); setBusy(false); return; }
+      if (result.paid) { setPaid(true); setBusy(false); reopenEnrollment(); return; }
       if (!window.Razorpay || !result.orderId || !result.key) throw new Error("Checkout is unavailable. Please contact a counsellor.");
       const current = active;
       const checkout = new window.Razorpay({ key: result.key, order_id: result.orderId, amount: result.amount, currency: result.currency, name: "Aerocadmy", description: "Six-week Drone Technology Internship · ESP32 kit included", prefill: result.prefill, theme: { color: "#087957" },
-        modal: { ondismiss: () => { setBusy(false); setMessage("Checkout closed. You can resume with the same registration, or check payment status if you’ve already paid."); } },
+        modal: { ondismiss: () => { setBusy(false); setMessage(current => current.startsWith("Payment was not completed") ? current : "Checkout closed. You can resume with the same registration, or check payment status if you’ve already paid."); reopenEnrollment(); } },
         handler: async (payment: { razorpay_payment_id: string; razorpay_signature: string }) => {
           setBusy(true);
-          try { const verified = await request(current, { action: "verify", paymentId: payment.razorpay_payment_id, signature: payment.razorpay_signature }); if (verified.status === "paid") setPaid(true); else setMessage("Your payment is awaiting confirmation. Use Check payment status in a moment; please do not pay again."); }
+          try { const verified = await request(current, { action: "verify", paymentId: payment.razorpay_payment_id, signature: payment.razorpay_signature }); if (verified.status === "paid") setPaid(true); else if (verified.status === "review_required") setMessage("Your payment was received, but this registration needs manual review. Please contact a counsellor before making another payment."); else setMessage("Your payment is awaiting confirmation. Use Check payment status in a moment; please do not pay again."); }
           catch (error) { setMessage(error instanceof Error ? error.message : "Payment confirmation is pending. Please check status before paying again."); }
-          finally { setBusy(false); }
+          finally { setBusy(false); reopenEnrollment(); }
         }
       });
+      // Razorpay can keep its checkout open after a failed attempt so the user can retry.
+      // Reopening this native <dialog> here would put it in the browser's top layer above Razorpay.
       checkout.on("payment.failed", () => { setMessage("Payment was not completed. You can retry checkout. If money was deducted, check payment status first."); setBusy(false); });
       checkout.open();
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not start checkout."); setBusy(false); }
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not start checkout."); setBusy(false); reopenEnrollment(); }
   }
   return <dialog ref={dialogRef} className={styles.dialog} aria-labelledby="enrolment-title" onClick={event => { if (event.target === event.currentTarget) dialogRef.current?.close(); }}>
     <button type="button" className={styles.close} aria-label="Close enrollment form" onClick={() => dialogRef.current?.close()}><X size={20} aria-hidden="true" /></button>
