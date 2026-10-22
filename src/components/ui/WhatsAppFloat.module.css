@@ -1,0 +1,40 @@
+.button {
+  position: fixed;
+  z-index: 50;
+  right: max(22px, env(safe-area-inset-right));
+  bottom: max(22px, env(safe-area-inset-bottom));
+  display: inline-flex;
+  align-items: center;
+  width: 58px;
+  height: 58px;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 999px;
+  background: #168b55;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(8, 47, 31, .24);
+  text-decoration: none;
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.button:hover {
+  background: #107747;
+  box-shadow: 0 10px 28px rgba(8, 47, 31, .3);
+  transform: translateY(-2px);
+}
+
+.button:focus-visible {
+  outline: 3px solid #122d25;
+  outline-offset: 3px;
+}
+
+.icon { width: 31px; height: 31px; flex: 0 0 auto; }
+
+@media (max-width: 520px) {
+  .button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); width: 54px; height: 54px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button { transition: none; }
+  .button:hover { transform: none; }
+}
