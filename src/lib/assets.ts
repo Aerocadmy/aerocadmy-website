@@ -3,27 +3,27 @@ import bounds from './image-bounds.json';
 // All raster assets live in the single Next.js public component directory.
 const component = (name: string) => `/component%20images/${encodeURIComponent(name)}`;
 export const ASSETS = {
-  logo: component('aerocadmy-logo.png'),
-  motor: component('motor.png'),
-  propeller: component('properllers.png'),
-  controller: component('flight controller.png'),
-  battery: component('battery-theme-no-logo-v2.png'),
-  camera: component('camera.png'),
-  arm: component('frame arms.png'),
-  frameMotorsAttached: component('frame-motors-attached.png'),
-  sensor: component('sensor-sensor-wire-fixed.png'),
-  screw: component('screw.png'),
-  plate: component('frame attachement.png'),
-  frameBattery: component('drone-battery-theme-no-logo-v2.png'),
-  frameController: component('drone-battery-controller-no-logo-v1.png'),
-  frameSensor: component('drone-battery-controller-sensor-no-logo-v1.png'),
-  frameBody: component('drone-battery-controller-sensor-body-frame-no-logo-v2.png'),
-  finalDrone: component('final-drone.png'),
-  body: component('body-frame-bare-hd-v1.png'),
+  logo: component('aerocadmy-logo.webp'),
+  motor: component('motor.webp'),
+  propeller: component('properllers.webp'),
+  controller: component('flight controller.webp'),
+  battery: component('battery-theme-no-logo-v2.webp'),
+  camera: component('camera.webp'),
+  arm: component('frame arms.webp'),
+  frameMotorsAttached: component('frame-motors-attached.webp'),
+  sensor: component('sensor-sensor-wire-fixed.webp'),
+  screw: component('screw.webp'),
+  plate: component('frame attachement.webp'),
+  frameBattery: component('drone-battery-theme-no-logo-v2.webp'),
+  frameController: component('drone-battery-controller-no-logo-v1.webp'),
+  frameSensor: component('drone-battery-controller-sensor-no-logo-v1.webp'),
+  frameBody: component('drone-battery-controller-sensor-body-frame-no-logo-v2.webp'),
+  finalDrone: component('final-drone.webp'),
+  body: component('body-frame-bare-hd-v1.webp'),
 } as const;
 
 export function imageBounds(src: string) {
-  const name = decodeURIComponent(src.split('/').pop() || '');
+  const name = decodeURIComponent(src.split('/').pop() || '').replace(/\.webp$/i, '.png');
   return bounds[name as keyof typeof bounds];
 }
 
