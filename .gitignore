@@ -35,3 +35,5 @@ next-env.d.ts
 # private waitlist submissions (never serve or commit)
 /.data/
 
+# Codex remote attachments
+/.codex-remote-attachments/

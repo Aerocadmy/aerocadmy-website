@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const course = findRecordedCourse(slug);
   if (!course) return { title: "Course not found | Aerocadmy", robots: { index: false, follow: false } };
-  return pageMetadata({ title: `${course.title} — Course Preview | Aerocadmy`, description: `Explore the proposed outline for ${course.title}. ${course.summary} Join the waitlist for updates.`, path: `/courses/${course.slug}` });
+  return pageMetadata({ title: `${course.title} — Course Preview | Aerocadmy`, description: `Explore the proposed outline for ${course.title}. ${course.summary} Join the waitlist for updates.`, path: `/courses/${course.slug}`, image: { url: `/courses/${course.slug}/opengraph-image`, alt: `${course.title} course preview` } });
 }
 
 export default async function RecordedCoursePage({ params }: { params: Promise<{ slug: string }> }) {

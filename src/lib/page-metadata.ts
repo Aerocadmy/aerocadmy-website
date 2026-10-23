@@ -5,9 +5,11 @@ type ShareMetadataInput = {
   description: string;
   path: string;
   type?: "website" | "article";
+  image?: { url: string; alt: string };
 };
 
-export function pageMetadata({ title, description, path, type = "website" }: ShareMetadataInput): Metadata {
+export function pageMetadata({ title, description, path, type = "website", image }: ShareMetadataInput): Metadata {
+  const shareImage = image ?? { url: "/opengraph-image", alt: "Aerocadmy — Engineered to Inspire" };
   return {
     title,
     description,
@@ -18,13 +20,13 @@ export function pageMetadata({ title, description, path, type = "website" }: Sha
       url: path,
       siteName: "Aerocadmy",
       type,
-      images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Aerocadmy — Engineered to Inspire" }],
+      images: [{ url: shareImage.url, width: 1200, height: 630, alt: shareImage.alt }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: ["/opengraph-image"],
+      images: [shareImage.url],
     },
   };
 }
