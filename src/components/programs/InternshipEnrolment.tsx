@@ -6,12 +6,14 @@ import styles from "./InternshipEnrolment.module.css";
 
 type Session = { id: string; token: string; reference?: string };
 type PaymentPhase = "idle" | "preparing" | "waiting" | "verifying" | "pending" | "failed" | "review" | "paid";
-type Result = { error?: string; status?: string; paid?: boolean; reference?: string; orderId?: string; key?: string; amount?: number; currency?: string; prefill?: { name: string; email: string; contact: string } };
+type Result = { error?: string; status?: string; paid?: boolean; reference?: string; orderId?: string; key?: string; amount?: number; discountAmount?: number; couponCode?: string | null; currency?: string; prefill?: { name: string; email: string; contact: string } };
 type Checkout = { open(): void; on(event: string, callback: (response?: unknown) => void): void };
 declare global { interface Window { Razorpay?: new (options: Record<string, unknown>) => Checkout } }
 
 const storageKey = "aerocadmy-internship-registration";
+const programFee = 699900;
 let checkoutScriptPromise: Promise<void> | null = null;
+const formatINR = (paise: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(paise / 100);
 
 function loadCheckout() {
   if (window.Razorpay) return Promise.resolve();
@@ -45,6 +47,11 @@ export function InternshipEnrolment() {
   const [message, setMessage] = useState("");
   const [phase, setPhaseState] = useState<PaymentPhase>("idle");
   const [formValues, setFormValues] = useState({ name: "", email: "", phone: "" });
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number } | null>(null);
+  const [payableAmount, setPayableAmount] = useState(programFee);
+  const [couponBusy, setCouponBusy] = useState(false);
+  const [couponMessage, setCouponMessage] = useState("");
 
   function setPhase(next: PaymentPhase) {
     phaseRef.current = next;
@@ -125,6 +132,40 @@ export function InternshipEnrolment() {
     return result;
   }
 
+  function updateOffer(result: Result) {
+    if (typeof result.amount === "number") setPayableAmount(result.amount);
+    if (typeof result.discountAmount === "number" && result.discountAmount > 0 && result.couponCode) {
+      setAppliedCoupon({ code: result.couponCode, discountAmount: result.discountAmount });
+      setCouponInput(result.couponCode);
+      setCouponMessage(`${result.couponCode} applied — you save ${formatINR(result.discountAmount)}.`);
+    } else if (typeof result.amount === "number") {
+      setAppliedCoupon(null);
+    }
+  }
+
+  async function applyCoupon() {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) { setCouponMessage("Enter a coupon code first."); return; }
+    setCouponBusy(true);
+    setCouponMessage("");
+    try {
+      const quoteSession = session ?? { id: crypto.randomUUID(), token: Array.from(crypto.getRandomValues(new Uint8Array(32)), n => n.toString(16).padStart(2, "0")).join("") };
+      const result = await request(quoteSession, { action: "coupon", couponCode: code });
+      updateOffer(result);
+    } catch (error) {
+      setAppliedCoupon(null);
+      setPayableAmount(programFee);
+      setCouponMessage(error instanceof Error ? error.message : "Could not apply this code. Please try again.");
+    } finally { setCouponBusy(false); }
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setPayableAmount(programFee);
+    setCouponMessage("Coupon removed.");
+  }
+
   async function checkStatus() {
     if (!session) return;
     setBusy(true);
@@ -132,6 +173,7 @@ export function InternshipEnrolment() {
     try {
       const result = await request(session, { action: "status" });
       saveReference(result.reference);
+      updateOffer(result);
       if (result.status === "paid") setPhase("paid");
       else if (result.status === "review_required") setPhase("review");
       else setPhase("pending");
@@ -145,7 +187,8 @@ export function InternshipEnrolment() {
     setBusy(true);
     setMessage("");
     setPhase("preparing");
-    const details = Object.fromEntries(new FormData(event.currentTarget).entries()) as typeof formValues;
+    const formData = new FormData(event.currentTarget);
+    const details = { name: String(formData.get("name") || ""), email: String(formData.get("email") || ""), phone: String(formData.get("phone") || "") };
     setFormValues(details);
     let active = session;
     try {
@@ -155,8 +198,9 @@ export function InternshipEnrolment() {
         setSession(active);
       }
       await loadCheckout();
-      const result = await request(active, { action: "register", details });
+      const result = await request(active, { action: "register", details, ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}) });
       saveReference(result.reference);
+      updateOffer(result);
       if (result.paid) { setPhase("paid"); setBusy(false); return; }
       if (!window.Razorpay || !result.orderId || !result.key) throw new Error("Checkout is unavailable. Please contact a counsellor.");
 
@@ -184,6 +228,7 @@ export function InternshipEnrolment() {
           try {
             const verified = await request(current, { action: "verify", paymentId: payment.razorpay_payment_id, signature: payment.razorpay_signature });
             saveReference(verified.reference);
+            updateOffer(verified);
             if (verified.status === "paid") setPhase("paid");
             else if (verified.status === "review_required") setPhase("review");
             else setPhase("pending");
@@ -219,7 +264,7 @@ export function InternshipEnrolment() {
       <button type="button" className={styles.close} aria-label="Close enrollment form" onClick={closeDialog} disabled={checkoutActive || phase === "preparing" || phase === "verifying"}><X size={20} aria-hidden="true" /></button>
       {paid ? <>
         <p className={styles.eyebrow}>Payment confirmed</p><h2 id="enrolment-title">You’re enrolled.</h2>
-        <div className={styles.success} role="status"><CheckCircle2 size={28} /><div><p>Your ₹6,999 payment is confirmed for the Drone Technology Internship. Keep your enrollment reference for support.</p><p className={styles.reference}>{session?.reference || "Reference is being prepared"}</p></div></div>
+        <div className={styles.success} role="status"><CheckCircle2 size={28} /><div><p>Your {formatINR(payableAmount)} payment is confirmed for the Drone Technology Internship. Keep your enrollment reference for support.</p><p className={styles.reference}>{session?.reference || "Reference is being prepared"}</p></div></div>
       </> : processing ? <div className={styles.paymentScreen} role="status" aria-live="polite">
         <span className={`${styles.spinner} ${styles.spinnerLarge}`} aria-hidden="true" />
         <p className={styles.eyebrow}>Secure payment</p>
@@ -239,16 +284,26 @@ export function InternshipEnrolment() {
       </div> : <>
         <p className={styles.eyebrow}>Your next step</p><h2 id="enrolment-title">Enroll in the Drone Technology Internship</h2>
         <p className={styles.intro}>Register for the six-week live online internship, including an ESP32 drone kit you keep.</p>
-        <div className={styles.total}><span>Training + ESP32 kit<strong>Next batch · 15 November 2026</strong></span><span className={styles.totalPrice}><del>₹11,999</del><b>₹6,999</b></span></div>
+        <div className={styles.total}><span>Training + ESP32 kit<strong>Next batch · 15 November 2026</strong></span><span className={styles.totalPrice}><del>{formatINR(appliedCoupon ? programFee : 1199900)}</del><b>{formatINR(payableAmount)}</b></span></div>
         <form onSubmit={submit} className={styles.form}>
+          <div className={styles.couponField}>
+            <label htmlFor="internship-coupon">Coupon code</label>
+            <div className={styles.couponRow}>
+              <input id="internship-coupon" name="couponCode" autoComplete="off" autoCapitalize="characters" maxLength={32} value={couponInput} onChange={event => { setCouponInput(event.target.value.toUpperCase()); setCouponMessage(""); if (appliedCoupon) { setAppliedCoupon(null); setPayableAmount(programFee); } }} placeholder="Enter code" disabled={busy || couponBusy || checkoutActive} />
+              <button type="button" onClick={applyCoupon} disabled={busy || couponBusy || checkoutActive}>{couponBusy ? "Checking…" : "Apply"}</button>
+              {appliedCoupon && <button type="button" className={styles.removeCoupon} onClick={removeCoupon} disabled={busy || couponBusy || checkoutActive}>Remove</button>}
+            </div>
+            {couponMessage && <p className={`${styles.couponMessage} ${appliedCoupon ? styles.couponSuccess : ""}`} role="status">{couponMessage}</p>}
+            {appliedCoupon && <p className={styles.discountLine}><span>{appliedCoupon.code} discount</span><strong>−{formatINR(appliedCoupon.discountAmount)}</strong></p>}
+          </div>
           <fieldset disabled={busy}><legend>Your contact details</legend><div className={styles.grid}>
             <label>Full name<input name="name" autoComplete="name" required minLength={2} maxLength={100} value={formValues.name} onChange={event => setFormValues(current => ({ ...current, name: event.target.value }))} /></label>
             <label>Email address<input name="email" type="email" autoComplete="email" required maxLength={254} value={formValues.email} onChange={event => setFormValues(current => ({ ...current, email: event.target.value }))} /></label>
             <label>Phone number<input name="phone" type="tel" autoComplete="tel" required minLength={10} maxLength={25} value={formValues.phone} onChange={event => setFormValues(current => ({ ...current, phone: event.target.value }))} /></label>
           </div></fieldset>
           <p className={styles.note}>We’ll use these details to manage your enrollment. Payment details are handled securely by Razorpay.</p>
-          <div className={styles.actions}><button className="dark-action" disabled={busy || checkoutActive} type="submit">{busy ? "Please wait…" : "Continue to payment"}<ArrowRight size={18} /></button></div>
-          <p className={styles.security}><ShieldCheck size={16} /> ₹6,999 · Secure checkout with Razorpay</p>
+          <div className={styles.actions}><button className="dark-action" disabled={busy || couponBusy || checkoutActive} type="submit">{busy ? "Please wait…" : "Continue to payment"}<ArrowRight size={18} /></button></div>
+          <p className={styles.security}><ShieldCheck size={16} /> {formatINR(payableAmount)} · Secure checkout with Razorpay</p>
         </form>
         {session && <button className={styles.status} type="button" onClick={checkStatus} disabled={busy || checkoutActive}>Already attempted payment? Check payment status</button>}
         {session && <p className={styles.note}>Resuming checkout uses the details saved with your first registration.</p>}

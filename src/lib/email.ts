@@ -17,17 +17,27 @@ function escapeHtml(value: string) {
   })[character] as string);
 }
 
-export async function sendEnrollmentConfirmation(input: { id: string; reference: string; name: string; email: string }) {
+export async function sendEnrollmentConfirmation(input: { id: string; reference: string; name: string; email: string; amount: number; couponCode: string | null; discountAmount: number }) {
   const resend = new Resend(requiredEnvironment("RESEND_API_KEY"));
   const from = process.env.RESEND_FROM_EMAIL || "enrollment@aerocadmy.com";
   const name = escapeHtml(input.name);
   const reference = escapeHtml(input.reference);
+  const formatINR = (paise: number) => `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+  const paidAmount = formatINR(input.amount);
+  const discountLine = input.couponCode && input.discountAmount > 0
+    ? `
+DISCOUNT
+${input.couponCode}: −${formatINR(input.discountAmount)}`
+    : "";
+  const discountRow = input.couponCode && input.discountAmount > 0
+    ? `<tr><td style="padding:12px 0;border-bottom:1px solid #e8efea;color:#71837b;font-size:13px;">Coupon · ${escapeHtml(input.couponCode)}</td><td align="right" style="padding:12px 0;border-bottom:1px solid #e8efea;color:#087957;font-size:13px;font-weight:700;">−${formatINR(input.discountAmount)}</td></tr>`
+    : "";
 
   const { error } = await resend.emails.send({
     from,
     to: input.email,
     subject: "You’re enrolled — Drone Technology Internship | Aerocadmy",
-    text: `Hi ${input.name},\n\nYour payment is confirmed and your place in the six-week Drone Technology Internship is reserved.\n\nENROLLMENT REFERENCE\n${input.reference}\n\nProgram fee paid: INR 6,999\nNext batch: 15 November 2026\nIncludes: ESP32 drone kit to keep\n\nOur admissions team will contact you with the next steps and batch details. Keep this email and your enrollment reference for support.\n\nWelcome aboard,\nAerocadmy`,
+    text: `Hi ${input.name},\n\nYour payment is confirmed and your place in the six-week Drone Technology Internship is reserved.\n\nENROLLMENT REFERENCE\n${input.reference}\n\nProgram fee paid: ${paidAmount}${discountLine}\nNext batch: 15 November 2026\nIncludes: ESP32 drone kit to keep\n\nOur admissions team will contact you with the next steps and batch details. Keep this email and your enrollment reference for support.\n\nWelcome aboard,\nAerocadmy`,
     html: `<!doctype html>
 <html lang="en">
   <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Enrollment confirmed</title></head>
@@ -56,7 +66,8 @@ export async function sendEnrollmentConfirmation(input: { id: string; reference:
               <tr><td style="padding:12px 0;border-bottom:1px solid #e8efea;color:#71837b;font-size:13px;">Program</td><td align="right" style="padding:12px 0;border-bottom:1px solid #e8efea;color:#132636;font-size:13px;font-weight:700;">Drone Technology Internship</td></tr>
               <tr><td style="padding:12px 0;border-bottom:1px solid #e8efea;color:#71837b;font-size:13px;">Duration</td><td align="right" style="padding:12px 0;border-bottom:1px solid #e8efea;color:#132636;font-size:13px;font-weight:700;">6 weeks · Live online</td></tr>
               <tr><td style="padding:12px 0;border-bottom:1px solid #e8efea;color:#71837b;font-size:13px;">Next batch</td><td align="right" style="padding:12px 0;border-bottom:1px solid #e8efea;color:#132636;font-size:13px;font-weight:700;">15 November 2026</td></tr>
-              <tr><td style="padding:12px 0;color:#71837b;font-size:13px;">Payment received</td><td align="right" style="padding:12px 0;color:#132636;font-size:13px;font-weight:700;">₹6,999 · ESP32 kit included</td></tr>
+              ${discountRow}
+              <tr><td style="padding:12px 0;color:#71837b;font-size:13px;">Payment received</td><td align="right" style="padding:12px 0;color:#132636;font-size:13px;font-weight:700;">${paidAmount} · ESP32 kit included</td></tr>
             </table>
           </td></tr>
           <tr><td style="padding:20px 32px 30px;">
