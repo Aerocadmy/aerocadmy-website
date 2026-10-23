@@ -1719,7 +1719,7 @@ export const DroneHeroAssembly: React.FC = () => {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <a
               href="#programs"
-              className="inline-flex items-center gap-3 rounded-xl bg-[#081C2B] px-8 py-4 text-base sm:text-lg font-semibold text-white shadow-primary hover:bg-[#0b3347] hover:-translate-y-1 transition-all group"
+              className="dark-action inline-flex items-center gap-3 rounded-xl bg-[#081C2B] px-8 py-4 text-base sm:text-lg font-semibold text-white shadow-primary hover:bg-[#0b3347] hover:-translate-y-1 transition-all group"
             >
               <span>Explore Programs</span>
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />

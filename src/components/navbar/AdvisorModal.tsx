@@ -119,7 +119,7 @@ export const AdvisorModal: React.FC<AdvisorModalProps> = ({
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#081C2B] px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-[#0b3347] transition-all"
+                  className="dark-action inline-flex items-center gap-2 rounded-xl bg-[#081C2B] px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-[#0b3347] transition-all"
                 >
                   Back to Website
                 </button>

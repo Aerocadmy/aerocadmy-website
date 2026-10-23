@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { confirmPayment, createOrder, credentials, getRegistration, reconcileOrderPayment, sendPendingEnrollmentConfirmation, validRegistration, validSignature } from "@/lib/enrolment";
+import { confirmPayment, couponQuote, CouponValidationError, createOrder, credentials, getRegistration, reconcileOrderPayment, sendPendingEnrollmentConfirmation, validRegistration, validSignature } from "@/lib/enrolment";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
@@ -18,23 +18,25 @@ export async function POST(request: Request) {
     } catch {
       return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
+    if (v.action === "coupon") return NextResponse.json(couponQuote(v.couponCode), { headers: { "Cache-Control": "no-store" } });
     if (typeof v.id !== "string" || !/^[a-f0-9-]{36}$/.test(v.id) || typeof v.token !== "string" || !/^[a-f0-9]{64}$/.test(v.token)) return NextResponse.json({ error: "Please restart registration." }, { status: 400 });
     if (v.action === "register") {
       const input = validRegistration(v.details);
       if (!input) return NextResponse.json({ error: "Please complete your name, email, and phone number correctly." }, { status: 400 });
-      return NextResponse.json(await createOrder(v.id, v.token, input), { headers: { "Cache-Control": "no-store" } });
+      if (v.couponCode !== undefined && typeof v.couponCode !== "string") return NextResponse.json({ error: "Invalid coupon code." }, { status: 400 });
+      return NextResponse.json(await createOrder(v.id, v.token, input, v.couponCode as string | undefined), { headers: { "Cache-Control": "no-store" } });
     }
     const row = await getRegistration(v.id, v.token);
     if (v.action === "status") {
       if (row.status === "paid") {
         await sendPendingEnrollmentConfirmation(v.id, v.token);
-        return NextResponse.json({ status: "paid", reference: row.id });
+        return NextResponse.json({ status: "paid", reference: row.reference_code, amount: row.amount, couponCode: row.coupon_code, discountAmount: row.discount_amount });
       }
       if (row.order_id) {
         const reconciled = await reconcileOrderPayment(row.order_id);
         if (reconciled) return NextResponse.json(reconciled);
       }
-      return NextResponse.json({ status: "pending" });
+      return NextResponse.json({ status: "pending", amount: row.amount, couponCode: row.coupon_code, discountAmount: row.discount_amount });
     }
     if (v.action !== "verify" || typeof v.paymentId !== "string" || typeof v.signature !== "string" || !row.order_id) return NextResponse.json({ error: "Payment verification failed. Please contact the counsellor if money was deducted." }, { status: 400 });
     const orderId = row.order_id;
@@ -44,6 +46,7 @@ export async function POST(request: Request) {
     return NextResponse.json(await confirmPayment(orderId, v.paymentId));
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
+    if (error instanceof CouponValidationError) return NextResponse.json({ error: message }, { status: 400, headers: { "Cache-Control": "no-store" } });
     return NextResponse.json({ error: message.startsWith("Payments are not") || message.startsWith("Your payment order") ? message : "We couldn’t complete this step. If money was deducted, check payment status or contact the counsellor before paying again." }, { status: 503 });
   }
 }

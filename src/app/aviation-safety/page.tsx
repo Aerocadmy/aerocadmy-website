@@ -14,6 +14,6 @@ export default function AviationSafetyPage() {
     <h2>Responsible learning</h2>
     <p>Aerocadmy learning materials are for education. You are responsible for your equipment, flight decisions, permissions and compliance with the laws that apply where you operate.</p>
     <h2>Questions</h2>
-    <p>For course or workshop safety questions, contact <a href="mailto:supportflight@aerocadmy.com">supportflight@aerocadmy.com</a>.</p>
+    <p>For course or workshop safety questions, contact <a href="mailto:contact@aerocadmy.com">contact@aerocadmy.com</a>.</p>
   </LegalPage>;
 }

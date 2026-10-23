@@ -113,7 +113,7 @@ export const ProgramsSection: React.FC = () => {
                 <div className="pt-2">
                   <button
                     onClick={() => handleEnrollClick(prog.title)}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#081C2B] py-3.5 text-sm font-semibold text-white shadow-primary hover:bg-[#0097B2] hover:shadow-cta transition-all group/btn"
+                    className="dark-action w-full flex items-center justify-center gap-2 rounded-xl bg-[#081C2B] py-3.5 text-sm font-semibold text-white shadow-primary hover:bg-[#0097B2] hover:shadow-cta transition-all group/btn"
                   >
                     <span>Apply for Track</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />

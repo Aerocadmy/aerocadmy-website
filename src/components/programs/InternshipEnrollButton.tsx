@@ -6,7 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 export function InternshipEnrollButton({ className, children }: { className: string; children: ReactNode }) {
   return <button
     type="button"
-    className={className}
+    className={`${className} dark-action`}
     aria-haspopup="dialog"
     onClick={() => window.dispatchEvent(new Event("open-internship-enrolment"))}
   >

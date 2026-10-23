@@ -3,15 +3,14 @@ import Link from "next/link";
 import { ArrowUpRight, BookOpen, Box, CalendarDays, ChevronDown, ChevronRight, Home, Laptop, Video } from "lucide-react";
 import type { CourseVisual } from "@/data/courses";
 import { CourseImage } from "./CourseImage";
-import { ReviewRating } from "@/components/testimonials/ReviewRating";
 import styles from "./CourseDetail.module.css";
 
 const factIcons = { video: Video, modules: BookOpen, kit: Box, calendar: CalendarDays, online: Laptop };
 type Fact = { icon: keyof typeof factIcons; label: string };
 
-export function CourseDetailLayout({ title, category, eyebrow, summary, facts, sections, sidebar, children }: {
+export function CourseDetailLayout({ title, category, eyebrow, summary, facts, sections, sidebar, children, reviewSummary }: {
   title: string; category: string; eyebrow: string; summary: string; facts: Fact[];
-  sections: { id: string; label: string }[]; sidebar: ReactNode; children: ReactNode;
+  sections: { id: string; label: string }[]; sidebar: ReactNode; children: ReactNode; reviewSummary?: ReactNode;
 }) {
   return <main className={styles.container}>
     <nav className={styles.breadcrumb} aria-label="Breadcrumb">
@@ -23,7 +22,7 @@ export function CourseDetailLayout({ title, category, eyebrow, summary, facts, s
       <header className={styles.hero}>
         <p className={styles.eyebrow}><span className={styles.statusDot} aria-hidden="true" />{eyebrow}</p>
         <h1>{title}</h1>
-        <ReviewRating />
+        {reviewSummary}
         <p className={styles.summary}>{summary}</p>
         <ul className={styles.facts} aria-label="Course at a glance">{facts.map(fact => {
           const Icon = factIcons[fact.icon];
@@ -47,7 +46,7 @@ export function CourseSummaryCard({ visual, caption = "Illustrative learning sce
 }
 
 export function CourseAction({ href, children, secondary = false, centered = false }: { href: string; children: ReactNode; secondary?: boolean; centered?: boolean }) {
-  return <a href={href} className={`${secondary ? `${styles.secondaryAction} light-action` : styles.heroAction} ${centered ? styles.centeredAction : ""}`}>{children}<ArrowUpRight size={18} aria-hidden="true" /></a>;
+  return <a href={href} className={`${secondary ? `${styles.secondaryAction} light-action` : `${styles.heroAction} dark-action`} ${centered ? styles.centeredAction : ""}`}>{children}<ArrowUpRight size={18} aria-hidden="true" /></a>;
 }
 
 export function CourseCurriculum({ modules, label = "Module" }: { modules: { title: string; description?: string; topics?: string[] }[]; label?: string }) {

@@ -12,8 +12,8 @@ export default function PrivacyPolicyPage() {
     <h2>Security and sharing</h2>
     <p>We use reasonable technical and organisational safeguards. Information is shared only with service providers needed to operate the service, such as our database and payment providers, or where required by law. We do not provide public access to counselling, waitlist or payment records.</p>
     <h2>Your choices</h2>
-    <p>You may ask us to access, correct or delete your personal information, or opt out of promotional communication. Email <a href="mailto:supportflight@aerocadmy.com">supportflight@aerocadmy.com</a> with your request.</p>
+    <p>You may ask us to access, correct or delete your personal information, or opt out of promotional communication. Email <a href="mailto:contact@aerocadmy.com">contact@aerocadmy.com</a> with your request.</p>
     <h2>Contact</h2>
-    <p>For privacy questions, contact us at <a href="mailto:supportflight@aerocadmy.com">supportflight@aerocadmy.com</a>.</p>
+    <p>For privacy questions, contact us at <a href="mailto:contact@aerocadmy.com">contact@aerocadmy.com</a>.</p>
   </LegalPage>;
 }

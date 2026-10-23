@@ -4,8 +4,20 @@ import { sendEnrollmentConfirmation } from "@/lib/email";
 import { supabaseAdmin } from "@/lib/supabase";
 
 export const FEE = 699900;
+export const INTERNSHIP_COUPON = { code: "SPECIAL1000", discountAmount: 100000 } as const;
+export class CouponValidationError extends Error {}
 export type Registration = { name: string; email: string; phone: string };
-type Row = { id: string; token: string; details: string; order_id: string | null; payment_id: string | null; status: string; confirmation_email_sent_at: string | null; confirmation_email_claimed_at: string | null };
+type Row = { id: string; reference_code: string; token: string; details: string; order_id: string | null; payment_id: string | null; status: string; amount: number; coupon_code: string | null; discount_amount: number; confirmation_email_sent_at: string | null; confirmation_email_claimed_at: string | null };
+export function validateInternshipCoupon(value: unknown) {
+  if (typeof value !== "string" || value.trim().toUpperCase() !== INTERNSHIP_COUPON.code) {
+    throw new CouponValidationError("That coupon code isn’t valid. Check the code and try again.");
+  }
+  return INTERNSHIP_COUPON;
+}
+export function couponQuote(value: unknown) {
+  const coupon = validateInternshipCoupon(value);
+  return { couponCode: coupon.code, discountAmount: coupon.discountAmount, amount: FEE - coupon.discountAmount, currency: "INR" };
+}
 export function credentials() {
   const key = process.env.RAZORPAY_KEY_ID, secret = process.env.RAZORPAY_KEY_SECRET;
   if (!key || !secret) throw new Error("Payments are not configured yet. Please talk to a counsellor.");
@@ -22,9 +34,9 @@ export function validRegistration(value: unknown): Registration | null {
 }
 const hash = (token: string) => createHash("sha256").update(token).digest("hex");
 export function getRegistration(id: string, token: string) {
-  return supabaseAdmin().from("enrolments").select("id,token_hash,name,email,phone,order_id,payment_id,status,amount,currency,created_at,paid_at,confirmation_email_sent_at,confirmation_email_claimed_at").eq("id", id).maybeSingle().then(({ data, error }) => {
+  return supabaseAdmin().from("enrolments").select("id,reference_code,token_hash,name,email,phone,order_id,payment_id,status,amount,coupon_code,discount_amount,currency,created_at,paid_at,confirmation_email_sent_at,confirmation_email_claimed_at").eq("id", id).maybeSingle().then(({ data, error }) => {
     if (error || !data || data.token_hash !== hash(token)) throw new Error("Registration could not be accessed. Please start again.");
-    return { id: data.id, token: data.token_hash, details: JSON.stringify({ name: data.name, email: data.email, phone: data.phone }), order_id: data.order_id, payment_id: data.payment_id, status: data.status, confirmation_email_sent_at: data.confirmation_email_sent_at, confirmation_email_claimed_at: data.confirmation_email_claimed_at } satisfies Row;
+    return { id: data.id, reference_code: data.reference_code, token: data.token_hash, details: JSON.stringify({ name: data.name, email: data.email, phone: data.phone }), order_id: data.order_id, payment_id: data.payment_id, status: data.status, amount: data.amount, coupon_code: data.coupon_code, discount_amount: data.discount_amount, confirmation_email_sent_at: data.confirmation_email_sent_at, confirmation_email_claimed_at: data.confirmation_email_claimed_at } satisfies Row;
   });
 }
 async function sendConfirmationIfNeeded(row: Row) {
@@ -43,7 +55,7 @@ async function sendConfirmationIfNeeded(row: Row) {
   if (!claim) return;
   const details = JSON.parse(row.details) as Registration;
   try {
-    await sendEnrollmentConfirmation({ id: row.id, name: details.name, email: details.email });
+    await sendEnrollmentConfirmation({ id: row.id, reference: row.reference_code, name: details.name, email: details.email, amount: row.amount, couponCode: row.coupon_code, discountAmount: row.discount_amount });
     const { data: saved, error } = await admin.from("enrolments").update({ confirmation_email_sent_at: new Date().toISOString(), confirmation_email_claimed_at: null }).eq("id", row.id).eq("confirmation_email_claimed_at", claimedAt).is("confirmation_email_sent_at", null).select("id").maybeSingle();
     if (error || !saved) throw new Error("Enrollment confirmation status could not be saved.");
   } catch (error) {
@@ -61,27 +73,33 @@ export async function gateway(endpoint: string, body?: unknown) {
   if (!response.ok) throw new Error("Payment service could not complete the request. Please try again later.");
   return await response.json() as Record<string, unknown>;
 }
-export async function createOrder(id: string, token: string, input: Registration) {
+export async function createOrder(id: string, token: string, input: Registration, requestedCouponCode?: string) {
   const { key } = credentials();
   const admin = supabaseAdmin();
+  const coupon = requestedCouponCode ? validateInternshipCoupon(requestedCouponCode) : null;
   const { error: insertError } = await admin.from("enrolments").upsert({ id, token_hash: hash(token), ...input }, { onConflict: "id", ignoreDuplicates: true });
   if (insertError) throw new Error("Registration could not be saved.");
   const row = await getRegistration(id, token);
   if (row.status === "paid") {
     await sendConfirmationIfNeeded(row);
-    return { paid: true, id };
+    return { paid: true, reference: row.reference_code, amount: row.amount, couponCode: row.coupon_code, discountAmount: row.discount_amount };
   }
   const saved = JSON.parse(row.details) as Registration;
   const prefill = { name: saved.name, email: saved.email, contact: saved.phone };
-  if (row.order_id) return { id, orderId: row.order_id, key, amount: FEE, currency: "INR", prefill };
+  if (row.order_id) {
+    if (coupon && row.coupon_code !== coupon.code) throw new CouponValidationError("A payment order already exists for this registration without that coupon. Check payment status or contact a counsellor before trying again.");
+    return { reference: row.reference_code, orderId: row.order_id, key, amount: row.amount, currency: "INR", couponCode: row.coupon_code, discountAmount: row.discount_amount, prefill };
+  }
   // An unresolved remote request must not be retried automatically: it may have created an order.
-  const { data: claim, error: claimError } = await admin.from("enrolments").update({ status: "creating" }).eq("id", id).eq("status", "created").select("id").maybeSingle();
+  const discountAmount = coupon?.discountAmount ?? 0;
+  const amount = FEE - discountAmount;
+  const { data: claim, error: claimError } = await admin.from("enrolments").update({ status: "creating", amount, coupon_code: coupon?.code ?? null, discount_amount: discountAmount }).eq("id", id).eq("status", "created").select("id").maybeSingle();
   if (claimError || !claim) throw new Error("Your payment order is being prepared or needs review. Please contact the counsellor before starting another payment.");
-  const order = await gateway("orders", { amount: FEE, currency: "INR", receipt: id, notes: { enrolment_id: id, program: "Drone Technology Internship" } });
-  if (typeof order.id !== "string" || !/^order_[a-zA-Z0-9]+$/.test(order.id) || order.amount !== FEE || order.currency !== "INR") throw new Error("Payment order could not be confirmed.");
+  const order = await gateway("orders", { amount, currency: "INR", receipt: row.reference_code, notes: { enrollment_reference: row.reference_code, program: "Drone Technology Internship", ...(coupon ? { coupon_code: coupon.code, discount_amount: String(discountAmount) } : {}) } });
+  if (typeof order.id !== "string" || !/^order_[a-zA-Z0-9]+$/.test(order.id) || order.amount !== amount || order.currency !== "INR") throw new Error("Payment order could not be confirmed.");
   const { error: orderError } = await admin.from("enrolments").update({ order_id: order.id, status: "pending" }).eq("id", id);
   if (orderError) throw new Error("Payment order could not be saved.");
-  return { id, orderId: order.id, key, amount: FEE, currency: "INR", prefill };
+  return { reference: row.reference_code, orderId: order.id, key, amount, currency: "INR", couponCode: coupon?.code ?? null, discountAmount, prefill };
 }
 export function validSignature(body: string, signature: string, secret: string) {
   if (!/^[a-f0-9]{64}$/i.test(signature)) return false;
@@ -89,11 +107,11 @@ export function validSignature(body: string, signature: string, secret: string) 
 }
 export async function confirmPayment(orderId: string, paymentId: string) {
   if (!/^order_[a-zA-Z0-9]+$/.test(orderId) || !/^pay_[a-zA-Z0-9]+$/.test(paymentId)) throw new Error("Invalid payment reference.");
-  const { data: record, error: recordError } = await supabaseAdmin().from("enrolments").select("id,token_hash,name,email,phone,order_id,payment_id,status,confirmation_email_sent_at").eq("order_id", orderId).maybeSingle();
+  const { data: record, error: recordError } = await supabaseAdmin().from("enrolments").select("id,reference_code,token_hash,name,email,phone,order_id,payment_id,status,amount,coupon_code,discount_amount,confirmation_email_sent_at").eq("order_id", orderId).maybeSingle();
   if (recordError || !record) throw new Error("Registration was not found.");
-  const row: Row = { id: record.id, token: record.token_hash, details: JSON.stringify({ name: record.name, email: record.email, phone: record.phone }), order_id: record.order_id, payment_id: record.payment_id, status: record.status, confirmation_email_sent_at: record.confirmation_email_sent_at, confirmation_email_claimed_at: null };
+  const row: Row = { id: record.id, reference_code: record.reference_code, token: record.token_hash, details: JSON.stringify({ name: record.name, email: record.email, phone: record.phone }), order_id: record.order_id, payment_id: record.payment_id, status: record.status, amount: record.amount, coupon_code: record.coupon_code, discount_amount: record.discount_amount, confirmation_email_sent_at: record.confirmation_email_sent_at, confirmation_email_claimed_at: null };
   const payment = await gateway(`payments/${paymentId}`);
-  if (payment.order_id !== row.order_id || payment.amount !== FEE || payment.currency !== "INR") throw new Error("Payment details did not match the registration.");
+  if (payment.order_id !== row.order_id || payment.amount !== row.amount || payment.currency !== "INR") throw new Error("Payment details did not match the registration.");
   if (payment.status === "captured" && payment.captured === true) {
     const admin = supabaseAdmin();
     const { data: updated, error } = await admin.from("enrolments").update({ status: "paid", payment_id: paymentId, paid_at: new Date().toISOString() }).eq("id", row.id).neq("status", "paid").or(`payment_id.is.null,payment_id.eq.${paymentId}`).select("id").maybeSingle();
@@ -103,13 +121,13 @@ export async function confirmPayment(orderId: string, paymentId: string) {
       if (currentError || !current) throw new Error("Payment status could not be confirmed.");
       if (current.status !== "paid" || current.payment_id !== paymentId) {
         console.error("A second captured payment needs manual reconciliation", { enrolmentId: row.id, paymentId, recordedPaymentId: current.payment_id });
-        return { status: "review_required", reference: row.id };
+        return { status: "review_required", reference: row.reference_code };
       }
     }
     await sendConfirmationIfNeeded(row);
-    return { status: "paid", reference: row.id };
+    return { status: "paid", reference: row.reference_code, amount: row.amount, couponCode: row.coupon_code, discountAmount: row.discount_amount };
   }
-  return { status: row.status === "paid" ? "paid" : "pending", reference: row.id };
+  return { status: row.status === "paid" ? "paid" : "pending", reference: row.reference_code, amount: row.amount, couponCode: row.coupon_code, discountAmount: row.discount_amount };
 }
 
 export async function reconcileOrderPayment(orderId: string) {

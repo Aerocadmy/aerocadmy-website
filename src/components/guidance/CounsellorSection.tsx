@@ -66,7 +66,7 @@ export function CounsellorSection() {
                 <p className={styles.contactNotice}>By requesting a call, you ask Aerocadmy to contact you about your learning enquiry using these details. The team will confirm availability.</p>
               </>}
               {status === "error" && <p role="alert" className={styles.error}>{error}</p>}
-              <div className={styles.formActions}>{step > 0 && <button type="button" className={styles.backButton} onClick={() => moveStep(step - 1)}><ArrowLeft size={15} aria-hidden="true" />Back</button>}<button type="submit" className={styles.submitButton}>{status === "saving" ? "Saving your request…" : step === 2 ? "Request a counsellor call" : "Continue"}{step === 2 ? <Phone size={15} aria-hidden="true" /> : <ArrowRight size={16} aria-hidden="true" />}</button></div>
+              <div className={styles.formActions}>{step > 0 && <button type="button" className={styles.backButton} onClick={() => moveStep(step - 1)}><ArrowLeft size={15} aria-hidden="true" />Back</button>}<button type="submit" className={`${styles.submitButton} dark-action`}>{status === "saving" ? "Saving your request…" : step === 2 ? "Request a counsellor call" : "Continue"}{step === 2 ? <Phone size={15} aria-hidden="true" /> : <ArrowRight size={16} aria-hidden="true" />}</button></div>
             </fieldset>
           </form>
         </>}

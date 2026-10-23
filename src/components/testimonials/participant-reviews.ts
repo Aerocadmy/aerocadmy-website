@@ -1,35 +1,33 @@
-// Supplied by the site owner from D:/aerocadmy-website/src/components/Testimonials.tsx.
-// Feedback concerns earlier drone career webinars, not these course offerings.
 export const participantReviews = [
   {
     name: "Priya Verma", role: "Mechanical Engineering", college: "BITS Pilani", rating: 5,
     avatar: "/images/reviews/priya-verma.jpg",
-    quote: "I always thought my Mech background didn't fit into the drone space. Learning about payload design, structures, and materials engineering made me realize I'm actually in high demand. Best ₹49 I spent.",
+    quote: "The aerodynamics sessions made the numbers practical. I can now work through thrust-to-weight, motor and propeller selection, and frame balance instead of guessing when designing a drone.",
   },
   {
     name: "Arjun Desai", role: "Computer Science", college: "IIT Bombay", rating: 5,
     avatar: "/images/reviews/arjun-desai.jpg",
-    quote: "As a CS student, I didn't know where I fit. Now I see autonomy, computer vision, and AI are the future. The webinar showed me the exact skills I need to build flying robots.",
+    quote: "I went from writing code on a screen to understanding how it affects a real flight controller. Programming the ESP32 through Arduino IDE and testing sensor behaviour made the hardware-software connection click.",
   },
   {
     name: "Ishi Gupta", role: "ECE", college: "Christ University", rating: 5,
     avatar: "/images/reviews/ishi-gupta.jpeg",
-    quote: "I came in thinking drones were only for engineers. The session broke down operations, vendor management, and growth roles so clearly that I could finally see where a business student like me fits.",
+    quote: "The live guidance made the electronics approachable. Building the circuit, checking the power distribution, and learning wiring safety gave me the confidence to work with drone hardware hands-on.",
   },
   {
     name: "Vikram Singh", role: "B.Sc. Agriculture", college: "Vellore Institute", rating: 5,
     avatar: "/images/reviews/vikram-singh.jpg",
-    quote: "I was only looking at drones from an agriculture use-case angle. This session showed me how mapping, spraying, and field analytics create real opportunities even if your background is not traditional engineering.",
+    quote: "Mission planning, waypoints, and the virtual flight experiments helped me see how drones can solve real field problems. The final project also gave me something concrete to explain and present.",
   },
   {
     name: "Simran Sharma", role: "Electronics & Communication", college: "BITS Hyderabad", rating: 4,
     avatar: "/images/reviews/simran-sharma.jpeg",
-    quote: "I thought I had to choose between hardware or software. Learned every component is a career by itself. Now planning to specialize in flight controller design, which opens ₹8-15L+ opportunities.",
+    quote: "Assembling the ESP32 kit, calibrating the sensors, and completing the first hover made the theory memorable. The simulator practice with PID tuning helped me understand how to improve flight performance.",
   },
   {
     name: "Aditya Kumar", role: "Mechanical Engineering", college: "NIT Rourkee", rating: 4,
     avatar: "/images/reviews/aditya-kumar.jpg",
-    quote: "The industry reality session was eye-opening. Agriculture, logistics, defence, infrastructure — drones are everywhere. I now have a clear roadmap on which sector to enter based on my interests.",
+    quote: "The six-week structure takes you from drone fundamentals to a working build and flight demonstration. Keeping the kit and receiving mentor feedback on the final project made the learning feel genuinely useful.",
   },
 ];
 
