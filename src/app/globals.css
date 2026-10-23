@@ -123,32 +123,20 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 0; border-color: var(--blue); box-shadow: var(--focus-ring); }
 input, select, textarea { border-radius: var(--radius-control); transition: border-color .2s ease, box-shadow .2s ease; }
 
-/* Shared action hover: a small lift and green sweep across primary actions. */
-button:not(:disabled):not([aria-expanded]):not([aria-pressed]):not([aria-label]):not([role="radio"]),
-a[class*="Action"]:not(.light-action),
-a[class*="Download"]:not(.light-action),
-a[class*="brandAction"]:not(.light-action),
-a[class*="backToTop"]:not(.light-action) {
+/* Dark primary actions share the navy-to-teal hover used on the internship CTA. */
+.dark-action {
   transition: transform .22s ease, background .22s ease, box-shadow .22s ease, color .22s ease, border-color .22s ease;
 }
 
-button:not(:disabled):not([aria-expanded]):not([aria-pressed]):not([aria-label]):not([role="radio"]):hover,
-a[class*="Action"]:not(.light-action):hover,
-a[class*="Download"]:not(.light-action):hover,
-a[class*="brandAction"]:not(.light-action):hover,
-a[class*="backToTop"]:not(.light-action):hover {
+.dark-action:hover:not(:disabled) {
   transform: translateY(-2px);
-  background: linear-gradient(110deg, #132636 0%, #087957 100%) !important;
+  background: linear-gradient(110deg, #132636 0%, #0d594b 54%, #087957 100%) !important;
   border-color: #087957 !important;
   color: #fff !important;
   box-shadow: 0 10px 24px rgba(8, 121, 87, .24);
 }
 
-button:not(:disabled):not([aria-expanded]):not([aria-pressed]):not([aria-label]):not([role="radio"]):active,
-a[class*="Action"]:not(.light-action):active,
-a[class*="Download"]:not(.light-action):active,
-a[class*="brandAction"]:not(.light-action):active,
-a[class*="backToTop"]:not(.light-action):active {
+.dark-action:active:not(:disabled) {
   transform: translateY(0);
   box-shadow: 0 4px 10px rgba(8, 121, 87, .18);
 }

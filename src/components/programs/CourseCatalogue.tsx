@@ -41,7 +41,7 @@ export function CourseCatalogue({ headingAs = "h2", initialGroup = "All recorded
           </ul>
           <p className={styles.batchDate}>Next batch starts 15 November 2026</p>
         </div>
-        <div className={styles.liveAction}><span className={styles.feeLabel}>Training + ESP32 kit</span><strong>₹6,999</strong><Link href="/programs/drone-technology-internship">Explore program <ArrowUpRight size={17} aria-hidden="true" /></Link></div>
+        <div className={styles.liveAction}><span className={styles.feeLabel}>Training + ESP32 kit</span><strong>₹6,999</strong><Link className="dark-action" href="/programs/drone-technology-internship">Explore program <ArrowUpRight size={17} aria-hidden="true" /></Link></div>
       </aside>
       <p className={styles.catalogueNote}>Upcoming recorded courses. Explore the proposed outlines and join a course waitlist.</p>
       <p className={styles.resultCount} role="status">{visible.length} planned courses{group !== "All recorded courses" ? ` · ${group}` : " · Two learning paths"}</p>
@@ -50,7 +50,6 @@ export function CourseCatalogue({ headingAs = "h2", initialGroup = "All recorded
           <Link href={`/courses/${course.slug}`} className={styles.imageLink} tabIndex={-1} aria-hidden="true"><CourseImage visual={course.visual} /><span className={styles.badge}>Planned</span></Link>
           <p className={styles.meta}><BookOpen size={13} aria-hidden="true" />Recorded course<span aria-hidden="true">|</span>{course.group === "Engineering Foundations" ? "Foundations" : "Applications"}</p>
           <h3><Link href={`/courses/${course.slug}`}>{course.title}</Link></h3>
-          <ReviewRating href={`/courses/${course.slug}#reviews`} />
           <p className={styles.summary}>{course.summary}</p>
           <div className={styles.cardFooter}><span>Upcoming</span><Link href={`/courses/${course.slug}`}>Preview course <ArrowUpRight size={16} aria-hidden="true" /><span className={styles.srOnly}>: {course.title}</span></Link></div>
         </article>)}

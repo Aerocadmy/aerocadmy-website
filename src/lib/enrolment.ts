@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 export const FEE = 699900;
 export type Registration = { name: string; email: string; phone: string };
-type Row = { id: string; token: string; details: string; order_id: string | null; payment_id: string | null; status: string; confirmation_email_sent_at: string | null; confirmation_email_claimed_at: string | null };
+type Row = { id: string; reference_code: string; token: string; details: string; order_id: string | null; payment_id: string | null; status: string; confirmation_email_sent_at: string | null; confirmation_email_claimed_at: string | null };
 export function credentials() {
   const key = process.env.RAZORPAY_KEY_ID, secret = process.env.RAZORPAY_KEY_SECRET;
   if (!key || !secret) throw new Error("Payments are not configured yet. Please talk to a counsellor.");
@@ -22,9 +22,9 @@ export function validRegistration(value: unknown): Registration | null {
 }
 const hash = (token: string) => createHash("sha256").update(token).digest("hex");
 export function getRegistration(id: string, token: string) {
-  return supabaseAdmin().from("enrolments").select("id,token_hash,name,email,phone,order_id,payment_id,status,amount,currency,created_at,paid_at,confirmation_email_sent_at,confirmation_email_claimed_at").eq("id", id).maybeSingle().then(({ data, error }) => {
+  return supabaseAdmin().from("enrolments").select("id,reference_code,token_hash,name,email,phone,order_id,payment_id,status,amount,currency,created_at,paid_at,confirmation_email_sent_at,confirmation_email_claimed_at").eq("id", id).maybeSingle().then(({ data, error }) => {
     if (error || !data || data.token_hash !== hash(token)) throw new Error("Registration could not be accessed. Please start again.");
-    return { id: data.id, token: data.token_hash, details: JSON.stringify({ name: data.name, email: data.email, phone: data.phone }), order_id: data.order_id, payment_id: data.payment_id, status: data.status, confirmation_email_sent_at: data.confirmation_email_sent_at, confirmation_email_claimed_at: data.confirmation_email_claimed_at } satisfies Row;
+    return { id: data.id, reference_code: data.reference_code, token: data.token_hash, details: JSON.stringify({ name: data.name, email: data.email, phone: data.phone }), order_id: data.order_id, payment_id: data.payment_id, status: data.status, confirmation_email_sent_at: data.confirmation_email_sent_at, confirmation_email_claimed_at: data.confirmation_email_claimed_at } satisfies Row;
   });
 }
 async function sendConfirmationIfNeeded(row: Row) {
@@ -43,7 +43,7 @@ async function sendConfirmationIfNeeded(row: Row) {
   if (!claim) return;
   const details = JSON.parse(row.details) as Registration;
   try {
-    await sendEnrollmentConfirmation({ id: row.id, name: details.name, email: details.email });
+    await sendEnrollmentConfirmation({ id: row.id, reference: row.reference_code, name: details.name, email: details.email });
     const { data: saved, error } = await admin.from("enrolments").update({ confirmation_email_sent_at: new Date().toISOString(), confirmation_email_claimed_at: null }).eq("id", row.id).eq("confirmation_email_claimed_at", claimedAt).is("confirmation_email_sent_at", null).select("id").maybeSingle();
     if (error || !saved) throw new Error("Enrollment confirmation status could not be saved.");
   } catch (error) {
@@ -69,19 +69,19 @@ export async function createOrder(id: string, token: string, input: Registration
   const row = await getRegistration(id, token);
   if (row.status === "paid") {
     await sendConfirmationIfNeeded(row);
-    return { paid: true, id };
+    return { paid: true, reference: row.reference_code };
   }
   const saved = JSON.parse(row.details) as Registration;
   const prefill = { name: saved.name, email: saved.email, contact: saved.phone };
-  if (row.order_id) return { id, orderId: row.order_id, key, amount: FEE, currency: "INR", prefill };
+  if (row.order_id) return { reference: row.reference_code, orderId: row.order_id, key, amount: FEE, currency: "INR", prefill };
   // An unresolved remote request must not be retried automatically: it may have created an order.
   const { data: claim, error: claimError } = await admin.from("enrolments").update({ status: "creating" }).eq("id", id).eq("status", "created").select("id").maybeSingle();
   if (claimError || !claim) throw new Error("Your payment order is being prepared or needs review. Please contact the counsellor before starting another payment.");
-  const order = await gateway("orders", { amount: FEE, currency: "INR", receipt: id, notes: { enrolment_id: id, program: "Drone Technology Internship" } });
+  const order = await gateway("orders", { amount: FEE, currency: "INR", receipt: row.reference_code, notes: { enrollment_reference: row.reference_code, program: "Drone Technology Internship" } });
   if (typeof order.id !== "string" || !/^order_[a-zA-Z0-9]+$/.test(order.id) || order.amount !== FEE || order.currency !== "INR") throw new Error("Payment order could not be confirmed.");
   const { error: orderError } = await admin.from("enrolments").update({ order_id: order.id, status: "pending" }).eq("id", id);
   if (orderError) throw new Error("Payment order could not be saved.");
-  return { id, orderId: order.id, key, amount: FEE, currency: "INR", prefill };
+  return { reference: row.reference_code, orderId: order.id, key, amount: FEE, currency: "INR", prefill };
 }
 export function validSignature(body: string, signature: string, secret: string) {
   if (!/^[a-f0-9]{64}$/i.test(signature)) return false;
@@ -89,9 +89,9 @@ export function validSignature(body: string, signature: string, secret: string) 
 }
 export async function confirmPayment(orderId: string, paymentId: string) {
   if (!/^order_[a-zA-Z0-9]+$/.test(orderId) || !/^pay_[a-zA-Z0-9]+$/.test(paymentId)) throw new Error("Invalid payment reference.");
-  const { data: record, error: recordError } = await supabaseAdmin().from("enrolments").select("id,token_hash,name,email,phone,order_id,payment_id,status,confirmation_email_sent_at").eq("order_id", orderId).maybeSingle();
+  const { data: record, error: recordError } = await supabaseAdmin().from("enrolments").select("id,reference_code,token_hash,name,email,phone,order_id,payment_id,status,confirmation_email_sent_at").eq("order_id", orderId).maybeSingle();
   if (recordError || !record) throw new Error("Registration was not found.");
-  const row: Row = { id: record.id, token: record.token_hash, details: JSON.stringify({ name: record.name, email: record.email, phone: record.phone }), order_id: record.order_id, payment_id: record.payment_id, status: record.status, confirmation_email_sent_at: record.confirmation_email_sent_at, confirmation_email_claimed_at: null };
+  const row: Row = { id: record.id, reference_code: record.reference_code, token: record.token_hash, details: JSON.stringify({ name: record.name, email: record.email, phone: record.phone }), order_id: record.order_id, payment_id: record.payment_id, status: record.status, confirmation_email_sent_at: record.confirmation_email_sent_at, confirmation_email_claimed_at: null };
   const payment = await gateway(`payments/${paymentId}`);
   if (payment.order_id !== row.order_id || payment.amount !== FEE || payment.currency !== "INR") throw new Error("Payment details did not match the registration.");
   if (payment.status === "captured" && payment.captured === true) {
@@ -103,13 +103,13 @@ export async function confirmPayment(orderId: string, paymentId: string) {
       if (currentError || !current) throw new Error("Payment status could not be confirmed.");
       if (current.status !== "paid" || current.payment_id !== paymentId) {
         console.error("A second captured payment needs manual reconciliation", { enrolmentId: row.id, paymentId, recordedPaymentId: current.payment_id });
-        return { status: "review_required", reference: row.id };
+        return { status: "review_required", reference: row.reference_code };
       }
     }
     await sendConfirmationIfNeeded(row);
-    return { status: "paid", reference: row.id };
+    return { status: "paid", reference: row.reference_code };
   }
-  return { status: row.status === "paid" ? "paid" : "pending", reference: row.id };
+  return { status: row.status === "paid" ? "paid" : "pending", reference: row.reference_code };
 }
 
 export async function reconcileOrderPayment(orderId: string) {

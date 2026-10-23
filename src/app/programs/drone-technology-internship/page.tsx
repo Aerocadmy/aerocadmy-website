@@ -8,6 +8,7 @@ import { InternshipInstructor } from "@/components/programs/InternshipInstructor
 import { InternshipEnrolment } from "@/components/programs/InternshipEnrolment";
 import { InternshipEnrollButton } from "@/components/programs/InternshipEnrollButton";
 import { StudentShowcase } from "@/components/testimonials/StudentShowcase";
+import { ReviewRating } from "@/components/testimonials/ReviewRating";
 import styles from "@/components/programs/CourseDetail.module.css";
 import { publicStorageUrl } from "@/lib/supabase";
 import { pageMetadata } from "@/lib/page-metadata";
@@ -28,6 +29,7 @@ const learningPoints = ["Drone systems and flight principles", "Electronics and 
 export default function InternshipPage() {
   return <div className={styles.page}><Navbar />
     <CourseDetailLayout title="Drone Technology Internship" category="Live online program" eyebrow="Live online · Enrolment open"
+      reviewSummary={<ReviewRating />}
       summary="Build your understanding through live classes, practical activities, and an ESP32 drone kit you keep."
       facts={[{ icon: "calendar", label: "6 weeks" }, { icon: "video", label: "Live classes + recordings" }, { icon: "kit", label: "ESP32 kit included" }]}
       sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Six-week journey" }, { id: "brochure", label: "Brochure" }, { id: "project", label: "Practical learning" }, { id: "kit", label: "Your kit" }, { id: "instructor", label: "Instructor" }, { id: "reviews", label: "Reviews" }]}
@@ -64,7 +66,7 @@ export default function InternshipPage() {
           <h2 id="brochure-title">Your internship, at a glance.</h2>
           <p>See the six-week plan, learning activities and program highlights in the brochure.</p>
           <div className={styles.brochureActions}>
-            <a className={styles.brochureDownload} href={brochureUrl} download="Aerocadmy_Internship_Brochure.pdf"><span>Download brochure</span><Download size={18} aria-hidden="true" /></a>
+            <a className={`${styles.brochureDownload} dark-action`} href={brochureUrl} download="Aerocadmy_Internship_Brochure.pdf"><span>Download brochure</span><Download size={18} aria-hidden="true" /></a>
             <span className={styles.brochureMeta}>PDF · 7.3 MB</span>
           </div>
         </div>

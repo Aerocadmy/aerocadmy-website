@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     if (v.action === "status") {
       if (row.status === "paid") {
         await sendPendingEnrollmentConfirmation(v.id, v.token);
-        return NextResponse.json({ status: "paid", reference: row.id });
+        return NextResponse.json({ status: "paid", reference: row.reference_code });
       }
       if (row.order_id) {
         const reconciled = await reconcileOrderPayment(row.order_id);

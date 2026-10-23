@@ -37,7 +37,7 @@ export function CourseWaitlist({ slug, title }: { slug: string; title: string })
           <label htmlFor={`${id}-email`}>Email address<input id={`${id}-email`} name="email" type="email" autoComplete="email" required maxLength={254} placeholder="you@example.com" /></label>
         </div>
         {status === "error" && <p className={styles.error} role="alert">{error}</p>}
-        <button type="submit" disabled={status === "saving"}>{status === "saving" ? "Saving your interest…" : "Join the waitlist"}<ArrowUpRight size={17} aria-hidden="true" /></button>
+        <button className="dark-action" type="submit" disabled={status === "saving"}>{status === "saving" ? "Saving your interest…" : "Join the waitlist"}<ArrowUpRight size={17} aria-hidden="true" /></button>
         <p className={styles.formNote}>This course is being planned. Pricing, duration, software, and release dates will be shared once confirmed.</p>
       </form>}
   </section>;
