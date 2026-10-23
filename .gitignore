@@ -3,6 +3,7 @@
 /.pnp
 .pnp.js
 .aerocadmylms/
+/.codex-remote-attachments/
 
 # testing
 /coverage
@@ -34,6 +35,3 @@ next-env.d.ts
 
 # private waitlist submissions (never serve or commit)
 /.data/
-
-# Codex remote attachments
-/.codex-remote-attachments/
