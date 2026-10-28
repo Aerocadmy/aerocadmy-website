@@ -76,7 +76,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={dmSans.variable} data-scroll-behavior="smooth">
+    <html lang="en" className={dmSans.variable}>
       <body className="min-h-screen bg-[#fbfdfd] text-[#081C2B] antialiased">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }} />
         {children}
