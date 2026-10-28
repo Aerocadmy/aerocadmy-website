@@ -8,11 +8,12 @@ import { InternshipInstructor } from "@/components/programs/InternshipInstructor
 import { InternshipEnrolment } from "@/components/programs/InternshipEnrolment";
 import { InternshipEnrollButton } from "@/components/programs/InternshipEnrollButton";
 import { StudentShowcase } from "@/components/testimonials/StudentShowcase";
+import { ReviewRating } from "@/components/testimonials/ReviewRating";
 import styles from "@/components/programs/CourseDetail.module.css";
 import { publicStorageUrl } from "@/lib/supabase";
 import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = pageMetadata({ title: "Six-week Live Drone Technology Internship | Aerocadmy", description: "Explore Aerocadmy’s six-week live online drone technology internship. ₹6,999 including an ESP32 drone kit to keep. Next batch starts 15 November 2026.", path: "/programs/drone-technology-internship" });
+export const metadata: Metadata = pageMetadata({ title: "Six-week Live Drone Technology Internship | Aerocadmy", description: "Explore Aerocadmy’s six-week live online drone technology internship. ₹6,999 including an ESP32 drone kit to keep. Next batch starts 15 November 2026.", path: "/programs/drone-technology-internship", image: { url: "/programs/drone-technology-internship/opengraph-image", alt: "Six-week live Drone Technology Internship with Aerocadmy" } });
 const brochureUrl = publicStorageUrl("internships/drone-technology/Aerocadmy_Internship_Details.pdf");
 const brochurePreviewUrl = publicStorageUrl("internships/drone-technology/brochure-preview.jpg");
 const weeks = [
@@ -23,11 +24,27 @@ const weeks = [
   { title: "Physical kit assembly & first flight", topics: ["Kit unboxing, assembly & safety inspection", "Mobile app connection & controls", "Sensor calibration", "Motor testing & rotation checks", "First hover, throttle control & landing"] },
   { title: "Flight improvement & final project", topics: ["Trim & drift correction", "Basic tuning & performance improvement", "Mini drone project", "Flight demonstration video", "Final presentation, mentor feedback & career roadmap"] },
 ];
+const courseSchema = {
+  "@context": "https://schema.org",
+  "@type": "Course",
+  name: "Drone Technology Internship",
+  description: "Six-week live online drone technology internship covering drone systems, electronics, flight control and programming, with an ESP32 drone kit to keep.",
+  url: "https://www.aerocadmy.com/programs/drone-technology-internship",
+  provider: { "@id": "https://www.aerocadmy.com/#organization" },
+  offers: { "@type": "Offer", category: "Paid", price: 6999, priceCurrency: "INR", url: "https://www.aerocadmy.com/programs/drone-technology-internship" },
+  hasCourseInstance: {
+    "@type": "CourseInstance",
+    courseMode: "Online",
+    startDate: "2026-11-15",
+    instructor: { "@type": "Person", name: "Yash Kansal" },
+  },
+};
 const learningPoints = ["Drone systems and flight principles", "Electronics and drone hardware", "Flight control and programming", "Kit assembly, testing and a final project"];
 
 export default function InternshipPage() {
-  return <div className={styles.page}><Navbar />
+  return <div className={styles.page}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} /><Navbar />
     <CourseDetailLayout title="Drone Technology Internship" category="Live online program" eyebrow="Live online · Enrolment open"
+      reviewSummary={<ReviewRating />}
       summary="Build your understanding through live classes, practical activities, and an ESP32 drone kit you keep."
       facts={[{ icon: "calendar", label: "6 weeks" }, { icon: "video", label: "Live classes + recordings" }, { icon: "kit", label: "ESP32 kit included" }]}
       sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Six-week journey" }, { id: "brochure", label: "Brochure" }, { id: "project", label: "Practical learning" }, { id: "kit", label: "Your kit" }, { id: "instructor", label: "Instructor" }, { id: "reviews", label: "Reviews" }]}
@@ -64,7 +81,7 @@ export default function InternshipPage() {
           <h2 id="brochure-title">Your internship, at a glance.</h2>
           <p>See the six-week plan, learning activities and program highlights in the brochure.</p>
           <div className={styles.brochureActions}>
-            <a className={styles.brochureDownload} href={brochureUrl} download="Aerocadmy_Internship_Brochure.pdf"><span>Download brochure</span><Download size={18} aria-hidden="true" /></a>
+            <a className={`${styles.brochureDownload} dark-action`} href={brochureUrl} download="Aerocadmy_Internship_Brochure.pdf"><span>Download brochure</span><Download size={18} aria-hidden="true" /></a>
             <span className={styles.brochureMeta}>PDF · 7.3 MB</span>
           </div>
         </div>
@@ -83,8 +100,8 @@ export default function InternshipPage() {
       </section>
       <section id="kit" className={styles.section}>
         <h2>Your ESP32 kit & learning setup</h2>
-        <p>The ₹6,999 fee includes an ESP32 drone kit that you keep. The kit is under development and is expected to be ready in October 2026.</p>
-        <p className={styles.note}>Before enrolling, speak with the team to confirm kit delivery, class timings and equipment requirements for the batch starting 15 November 2026.</p>
+        <p>The ₹6,999 fee includes an ESP32 drone kit that you keep.</p>
+        <p className={styles.note}>Questions about class timings or equipment for the batch starting 15 November 2026? Speak with the team before enrolling.</p>
       </section>
       <InternshipInstructor />
       <StudentShowcase />

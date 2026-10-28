@@ -26,7 +26,6 @@
 .feeLabel { font-size: 10px; color: #718078; }
 .liveAction strong { font-size: 29px; font-weight: 600; letter-spacing: -.035em; }
 .liveAction a { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; color: white; background: #132636; padding: 11px 14px; border-radius: var(--radius-control); margin-top: 4px; }
-.liveAction a:hover { background: var(--button-hover-bg); color: var(--button-hover-text); }
 .catalogueNote { font-size: 13px; line-height: 1.8; color: #62717c; }
 .resultCount { font-size: 10px; color: #63776c; margin: 8px 0 25px; }
 .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 44px 26px; }

@@ -7,19 +7,19 @@ export function StudentShowcase() {
   return <section id="reviews" aria-labelledby="reviews-heading" className={styles.section}>
     <div className={styles.container}>
       <header className={styles.heading}>
-        <div><span className={styles.sourceTag}>Webinar participant feedback</span><h2 id="reviews-heading">The learner perspective.</h2></div>
-        <p>Feedback from earlier Aerocadmy drone career webinars. These reviews describe those sessions.</p>
+        <div><span className={styles.sourceTag}>Internship learner feedback</span><h2 id="reviews-heading">The learner perspective.</h2></div>
+        <p>Feedback from learners who built their foundations through Aerocadmy&apos;s live drone technology internship.</p>
       </header>
       <div className={styles.summary}>
         <div className={styles.score}>
           <div><strong>{reviewAverage.toFixed(1)}</strong><span>/ 5</span></div>
-          <RatingStars rating={reviewAverage} /><p>From {participantReviews.length} featured webinar reviews</p>
+          <RatingStars rating={reviewAverage} /><p>From {participantReviews.length} featured internship reviews</p>
         </div>
-        <div className={styles.distribution} aria-label="Featured webinar rating distribution">
+        <div className={styles.distribution} aria-label="Featured internship rating distribution">
           {[5, 4, 3, 2, 1].map(rating => {
             const count = participantReviews.filter(review => review.rating === rating).length;
             const percentage = Math.round(count / participantReviews.length * 100);
-            return <div key={rating} className={styles.barRow} aria-label={`${rating} stars: ${count} webinar reviews`}>
+            return <div key={rating} className={styles.barRow} aria-label={`${rating} stars: ${count} internship reviews`}>
               <span>{rating}<span aria-hidden="true">★</span></span>
               <div className={styles.barTrack} aria-hidden="true"><span style={{ width: `${percentage}%` }} /></div><span>{percentage}%</span>
             </div>;

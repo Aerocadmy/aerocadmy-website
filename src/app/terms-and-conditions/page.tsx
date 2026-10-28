@@ -14,6 +14,6 @@ export default function TermsAndConditionsPage() {
     <h2>Changes and governing law</h2>
     <p>We may update these terms when our services change. These terms are governed by the laws of India, and disputes are subject to the jurisdiction of the applicable courts in India.</p>
     <h2>Contact</h2>
-    <p>Questions about these terms can be sent to <a href="mailto:supportflight@aerocadmy.com">supportflight@aerocadmy.com</a>.</p>
+    <p>Questions about these terms can be sent to <a href="mailto:contact@aerocadmy.com">contact@aerocadmy.com</a>.</p>
   </LegalPage>;
 }

@@ -11,7 +11,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://aerocadmy.com"),
+  metadataBase: new URL("https://www.aerocadmy.com"),
   title: "Aerocadmy — Engineered to Inspire | Drone Technology Academy",
   description:
     "Master multirotor drone engineering, avionics, embedded programming, and autonomous flight through hands-on project builds and interactive curriculum.",
@@ -47,6 +47,29 @@ export const metadata: Metadata = {
   },
 };
 
+const siteSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "EducationalOrganization",
+      "@id": "https://www.aerocadmy.com/#organization",
+      name: "Aerocadmy",
+      url: "https://www.aerocadmy.com/",
+      logo: "https://www.aerocadmy.com/component%20images/aerocadmy-logo.webp",
+      email: "contact@aerocadmy.com",
+      description: "Online drone technology education: live internships and courses covering drone components, electronics, programming and real-world applications.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.aerocadmy.com/#website",
+      url: "https://www.aerocadmy.com/",
+      name: "Aerocadmy",
+      publisher: { "@id": "https://www.aerocadmy.com/#organization" },
+      inLanguage: "en",
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -55,6 +78,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={dmSans.variable} data-scroll-behavior="smooth">
       <body className="min-h-screen bg-[#fbfdfd] text-[#081C2B] antialiased">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }} />
         {children}
         <WhatsAppFloat />
       </body>
