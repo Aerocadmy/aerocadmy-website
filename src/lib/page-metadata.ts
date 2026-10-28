@@ -12,7 +12,7 @@ export function pageMetadata({ title, description, path, type = "website", image
   const shareImage = image ?? { url: "/opengraph-image", alt: "Aerocadmy — Engineered to Inspire" };
   // Vercel preview deployments must fetch their share image from that deployment.
   // metadataBase remains the production domain for canonical URLs and page links.
-  const deploymentBase = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined;
+  const deploymentBase = process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined;
   const shareImageUrl = deploymentBase && shareImage.url.startsWith("/")
     ? new URL(shareImage.url, deploymentBase).toString()
     : shareImage.url;

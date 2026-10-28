@@ -1706,7 +1706,7 @@ export const DroneHeroAssembly: React.FC = () => {
 
           {/* Heading */}
           <h1 className="mt-4 text-[clamp(40px,4vw,64px)] font-black tracking-tight text-[#081C2B] leading-[1.12]">
-            <span className="block">Curious about drones?</span>
+            <span className="block">Curious about drones?</span>{" "}
             <span className="block text-[.82em] text-[#18CB96]">Your Journey starts here!</span>
           </h1>
 

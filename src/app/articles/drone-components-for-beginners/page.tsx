@@ -67,10 +67,19 @@ export default function DroneComponentsArticle() {
     headline: "What Are the Main Components of a Drone? A Beginner's Guide",
     description: metadata.description,
     author: { "@type": "Organization", name: "Aerocadmy" },
-    publisher: { "@type": "Organization", name: "Aerocadmy" },
+    publisher: { "@id": "https://www.aerocadmy.com/#organization" },
     datePublished: "2026-10-21",
     dateModified: "2026-10-21",
-    mainEntityOfPage: "https://aerocadmy.com/articles/drone-components-for-beginners",
+    mainEntityOfPage: { "@type": "WebPage", "@id": "https://www.aerocadmy.com/articles/drone-components-for-beginners" },
+  };
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.aerocadmy.com/" },
+      { "@type": "ListItem", position: 2, name: "Articles", item: "https://www.aerocadmy.com/articles" },
+      { "@type": "ListItem", position: 3, name: "Drone components" },
+    ],
   };
   const faqSchema = {
     "@context": "https://schema.org",
@@ -86,6 +95,7 @@ export default function DroneComponentsArticle() {
     <div className="min-h-screen bg-[#fbfdfd]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <Navbar />
       <main>
         <header className="relative overflow-hidden border-b border-[#dce9e7] bg-[#eefaf7]">
@@ -98,7 +108,7 @@ export default function DroneComponentsArticle() {
               <ChevronRight size={15} aria-hidden="true" />
               <span aria-current="page">Drone components</span>
             </nav>
-            <p className="mb-5 text-xs font-bold uppercase tracking-[0.22em] text-[#087957]">Drone technology fundamentals · 8 min read</p>
+            <p className="mb-5 text-xs font-bold uppercase tracking-[0.22em] text-[#087957]">Drone technology fundamentals · 3 min read</p>
             <h1 className="max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-[-0.04em] text-[#081c2b] sm:text-5xl lg:text-6xl">
               What Are the Main Components of a Drone?
             </h1>

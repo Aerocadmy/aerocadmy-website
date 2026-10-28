@@ -1,0 +1,18 @@
+# Aerocadmy
+
+> Aerocadmy is an online drone technology academy. It teaches how drones work, from components and electronics to programming and flight control, through live classes and hands-on projects.
+
+## Programs
+
+- [Drone Technology Internship](https://www.aerocadmy.com/programs/drone-technology-internship): six-week live online internship with an ESP32 drone kit to keep
+- [Courses](https://www.aerocadmy.com/courses): recorded drone technology courses (in development)
+
+## Articles
+
+- [What are the main components of a drone?](https://www.aerocadmy.com/articles/drone-components-for-beginners): beginner's guide to drone hardware and systems
+
+## Other
+
+- [Aviation safety](https://www.aerocadmy.com/aviation-safety)
+- [Privacy policy](https://www.aerocadmy.com/privacy-policy)
+- [Terms and conditions](https://www.aerocadmy.com/terms-and-conditions)

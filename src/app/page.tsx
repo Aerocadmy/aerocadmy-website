@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Navbar } from "@/components/navbar/Navbar";
 import { DroneHeroAssembly } from "@/components/hero/DroneHeroAssembly";
 import { Footer } from "@/components/footer/Footer";
@@ -5,6 +6,8 @@ import { DroneOpportunity } from "@/components/opportunity/DroneOpportunity";
 import { CourseCatalogue } from "@/components/programs/CourseCatalogue";
 import { CourseFinder } from "@/components/guidance/CourseFinder";
 import { CounsellorSection } from "@/components/guidance/CounsellorSection";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function Home() {
   return (

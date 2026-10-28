@@ -14,7 +14,7 @@ const articles = [
     title: "What Are the Main Components of a Drone?",
     description:
       "Understand the frame, motors, propellers, ESCs, flight controller, battery, sensors and radio system in a typical multirotor.",
-    readTime: "8 min read",
+    readTime: "3 min read",
   },
 ];
 

@@ -38,7 +38,7 @@ export default function OpenGraphImage() {
           </div>
         </div>
         <div style={{ position: "absolute", right: 26, top: 130, width: 540, height: 370, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <img src="https://aerocadmy.com/component%20images/final-drone.webp" width="540" height="370" style={{ objectFit: "contain", filter: "drop-shadow(0 28px 28px rgba(8,28,43,.17))" }} />
+          <img src="https://www.aerocadmy.com/component%20images/final-drone.webp" width="540" height="370" style={{ objectFit: "contain", filter: "drop-shadow(0 28px 28px rgba(8,28,43,.17))" }} />
         </div>
         <div style={{ position: "absolute", right: 96, bottom: 42, padding: "12px 18px", borderRadius: 999, background: "rgba(255,255,255,.78)", color: "#087957", fontSize: 15, fontWeight: 700, letterSpacing: "1px", display: "flex" }}>BUILD · CODE · FLY</div>
       </div>
