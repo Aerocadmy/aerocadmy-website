@@ -1,3 +1,6 @@
+"use client";
+
+import { track } from "@/lib/analytics";
 import styles from "./WhatsAppFloat.module.css";
 
 const whatsappUrl = "https://wa.me/919429694423";
@@ -9,6 +12,7 @@ export function WhatsAppFloat() {
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => track("whatsapp_click")}
       aria-label="Chat with an Aerocadmy counsellor on WhatsApp"
     >
       <svg className={styles.icon} viewBox="0 0 32 32" aria-hidden="true">

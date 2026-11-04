@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import { WhatsAppFloat } from "@/components/ui/WhatsAppFloat";
+import { Analytics } from "@/components/analytics/Analytics";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -81,6 +82,7 @@ export default function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }} />
         {children}
         <WhatsAppFloat />
+        <Analytics />
       </body>
     </html>
   );

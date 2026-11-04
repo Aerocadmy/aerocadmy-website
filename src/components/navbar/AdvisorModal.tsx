@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useId } from "react";
 import { useDialog } from '@/components/ui/useDialog';
+import { track } from "@/lib/analytics";
 import { X, CheckCircle2, Send, PhoneCall, Calendar, Sparkles } from "lucide-react";
 
 interface AdvisorModalProps {
@@ -54,6 +55,7 @@ export const AdvisorModal: React.FC<AdvisorModalProps> = ({
       if (!response.ok) throw new Error(result.error || "We couldn't save your request. Please try again.");
       setLoading(false);
       setSubmitted(true);
+      track("lead_submitted", { form: "advisor", program: formData.program, experience: formData.experience });
     } catch (submissionError) {
       setLoading(false);
       setError(submissionError instanceof Error ? submissionError.message : "We couldn't save your request. Please try again.");

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { AlertCircle, ArrowRight, CheckCircle2, ShieldCheck, X } from "lucide-react";
+import { track } from "@/lib/analytics";
 import styles from "./InternshipEnrolment.module.css";
 
 type Session = { id: string; token: string; reference?: string };
@@ -125,6 +126,13 @@ export function InternshipEnrolment() {
     if (!isOpen && previousFocusRef.current?.isConnected) previousFocusRef.current.focus({ preventScroll: true });
   }, [isOpen]);
 
+  useEffect(() => {
+    if (phase !== "paid" || !session?.reference) return;
+    const key = `aerocadmy-purchase-${session.reference}`;
+    try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch { /* Worst case the purchase is reported twice. */ }
+    track("payment_completed", { program: "drone-technology-internship", value: payableAmount / 100, currency: "INR", reference: session.reference, coupon: appliedCoupon?.code });
+  }, [phase, session?.reference, payableAmount, appliedCoupon?.code]);
+
   async function request(active: Session, values: Record<string, unknown>) {
     const response = await fetch("/api/enrolment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: active.id, token: active.token, ...values }) });
     const result = await response.json() as Result;
@@ -205,6 +213,7 @@ export function InternshipEnrolment() {
       if (!window.Razorpay || !result.orderId || !result.key) throw new Error("Checkout is unavailable. Please contact a counsellor.");
 
       const current = active;
+      track("checkout_started", { program: "drone-technology-internship", value: (result.amount ?? payableAmount) / 100, currency: "INR", coupon: appliedCoupon?.code });
       const checkout = new window.Razorpay({
         key: result.key,
         order_id: result.orderId,
@@ -242,6 +251,7 @@ export function InternshipEnrolment() {
         },
       });
       checkout.on("payment.failed", () => {
+        track("payment_failed", { program: "drone-technology-internship" });
         setPhase("failed");
       });
       setCheckoutActive(true);

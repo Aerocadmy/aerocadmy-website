@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, ArrowUp, Mail, Phone } from "lucide-react";
+import { openCookieSettings } from "@/lib/analytics";
 import styles from "./Footer.module.css";
 
 const learningLinks = [
@@ -52,7 +53,7 @@ export function Footer() {
             <h2>Start learning<span>01</span></h2>
             <ul>{learningLinks.map(link => <li key={link.href}><Link href={link.href}>{link.label}{link.live && <span className={styles.liveTag}>LIVE</span>}</Link></li>)}</ul>
             <p className={styles.courseNote}>Recorded courses are upcoming.</p>
-            <ul className={styles.legalLinks}>{legalLinks.map(link => <li key={link.href}><Link href={link.href}>{link.label}</Link></li>)}</ul>
+            <ul className={styles.legalLinks}>{legalLinks.map(link => <li key={link.href}><Link href={link.href}>{link.label}</Link></li>)}<li><button type="button" onClick={openCookieSettings}>Cookie settings</button></li></ul>
           </nav>
 
           <nav aria-label="Resources" className={styles.linkGroup}>

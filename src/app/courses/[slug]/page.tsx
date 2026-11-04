@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { BookOpen, Check, FileText, Laptop, Layers, Video } from "lucide-react";
 import { findRecordedCourse, recordedCourses } from "@/data/courses";
 import { Navbar } from "@/components/navbar/Navbar";
+import { TrackEvent } from "@/components/analytics/TrackEvent";
 import { Footer } from "@/components/footer/Footer";
 import { CourseWaitlist } from "@/components/programs/CourseWaitlist";
 import { CourseAction, CourseCurriculum, CourseDetailLayout, CourseSummaryCard } from "@/components/programs/CourseDetailLayout";
@@ -23,6 +24,7 @@ export default async function RecordedCoursePage({ params }: { params: Promise<{
   const course = findRecordedCourse(slug);
   if (!course) notFound();
   return <div className={styles.page}>
+    <TrackEvent event="course_viewed" props={{ course: course.slug, title: course.title }} />
     <Navbar />
     <CourseDetailLayout title={course.title} category={course.group} eyebrow="Upcoming recorded course · In development" summary={course.summary}
       facts={[{ icon: "video", label: "Recorded · Online" }, { icon: "modules", label: `${course.modules.length} planned modules` }, { icon: "online", label: "No drone required" }]}
