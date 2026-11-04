@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import { WhatsAppFloat } from "@/components/ui/WhatsAppFloat";
+import { Analytics } from "@/components/analytics/Analytics";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -76,11 +77,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={dmSans.variable} data-scroll-behavior="smooth">
+    <html lang="en" className={dmSans.variable}>
       <body className="min-h-screen bg-[#fbfdfd] text-[#081C2B] antialiased">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }} />
         {children}
         <WhatsAppFloat />
+        <Analytics />
       </body>
     </html>
   );

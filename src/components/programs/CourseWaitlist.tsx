@@ -2,6 +2,7 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { track } from "@/lib/analytics";
 import styles from "./CourseDetail.module.css";
 
 export function CourseWaitlist({ slug, title }: { slug: string; title: string }) {
@@ -20,6 +21,7 @@ export function CourseWaitlist({ slug, title }: { slug: string; title: string })
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "We couldn't save your request. Please try again.");
       setStatus("success"); form.reset();
+      track("waitlist_joined", { form: "waitlist", course: slug });
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : "We couldn't connect. Please try again."); setStatus("error");
     }

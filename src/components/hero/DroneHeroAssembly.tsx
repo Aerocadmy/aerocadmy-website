@@ -71,7 +71,11 @@ export const DroneHeroAssembly: React.FC = () => {
     let heroInViewport = false;
     let imagesReady = false;
     const imageCleanups: Array<() => void> = [];
-    const navHeight = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue("--nav-h")) || 96;
+    const readNavHeight = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue("--nav-h")) || 96;
+    // Layout reads are cached and refreshed in fit(); reading them per frame forces style/layout work.
+    let cachedNavHeight = readNavHeight();
+    let cachedTrackTop = track.offsetTop;
+    const navHeight = () => cachedNavHeight;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
@@ -378,6 +382,7 @@ export const DroneHeroAssembly: React.FC = () => {
       el.style.willChange = "transform";
       el.style.opacity = "0";
       el.style.opacity = "0";
+      el.style.willChange = "transform, opacity";
       const w = d.w || 19;
       el.style.width = w + "px";
       el.style.height = w + "px";
@@ -480,6 +485,7 @@ export const DroneHeroAssembly: React.FC = () => {
       el.style.top = "0";
       el.style.borderRadius = "50%";
       el.style.opacity = "0";
+      el.style.willChange = "transform, opacity";
       el.style.pointerEvents = "none";
       el.style.width = size + "px";
       el.style.height = size + "px";
@@ -665,16 +671,25 @@ export const DroneHeroAssembly: React.FC = () => {
 
     const mobilePortrait = () => window.innerWidth <= 900 && window.innerHeight > 520;
 
+    let lastCopyTop = "", lastCopyTransform = "", lastStageTransform = "", lastCopyHidden: boolean | null = null;
+    // The stage is positioned with transform only so scrolling never triggers layout.
+    stage.style.left = "0px";
+    stage.style.top = "0px";
+
     function positionCopy(fade = 0) {
       const mobileCopy = window.innerWidth <= 900;
       const copyScale = mobileCopy ? 1 : .82;
       const phoneCopyTop = Math.max(128, Math.min(200, (viewportH - copyTextHeight) * .36));
-      copyEl.style.top = (mobilePortrait() ? phoneCopyTop : mobileCopy ? 24 : Math.max(0, (viewportH - copyTextHeight * copyScale) / 2)) + "px";
+      const top = (mobilePortrait() ? phoneCopyTop : mobileCopy ? 24 : Math.max(0, (viewportH - copyTextHeight * copyScale) / 2)) + "px";
+      if (top !== lastCopyTop) { lastCopyTop = top; copyEl.style.top = top; }
       copyEl.style.transformOrigin = "top center";
-      copyEl.style.transform = `translateX(-50%) translateY(${-70 * fade}px) scale(${copyScale})`;
+      const transform = `translateX(-50%) translateY(${-70 * fade}px) scale(${copyScale})`;
+      if (transform !== lastCopyTransform) { lastCopyTransform = transform; copyEl.style.transform = transform; }
     }
 
     function fit() {
+      cachedNavHeight = readNavHeight();
+      cachedTrackTop = track.offsetTop;
       mobileCopyHeight = (journeyPanelRef.current?.offsetHeight || 300) + 36;
       copyTextHeight = copyEl.offsetHeight;
       // Let CSS follow the visible mobile viewport as the browser toolbar hides.
@@ -701,19 +716,18 @@ export const DroneHeroAssembly: React.FC = () => {
           )
         : Math.min((window.innerWidth * 0.58) / W, (viewportH * 0.9) / H);
       s = lerp(initialScale, buildScale, blend);
-      stage.style.left =
-        lerp(window.innerWidth * (landscape ? .74 : .5), window.innerWidth * (mobile ? .5 : .72), blend) +
-        "px";
-      stage.style.top =
-        lerp(
-          viewportH * 0.5,
-          mobile ? mobileCopyHeight + mobileSceneHeight * .54 : viewportH * 0.5,
-          blend
-        ) + "px";
-      stage.style.transform = `translate(-50%,-50%) scale(${s})`;
+      const stageX = lerp(window.innerWidth * (landscape ? .74 : .5), window.innerWidth * (mobile ? .5 : .72), blend);
+      const stageY = lerp(
+        viewportH * 0.5,
+        mobile ? mobileCopyHeight + mobileSceneHeight * .54 : viewportH * 0.5,
+        blend
+      );
+      const stageTransform = `translate3d(${stageX.toFixed(2)}px,${stageY.toFixed(2)}px,0) translate(-50%,-50%) scale(${s})`;
+      if (stageTransform !== lastStageTransform) { lastStageTransform = stageTransform; stage.style.transform = stageTransform; }
     }
 
     window.addEventListener("resize", fit);
+    window.addEventListener("load", fit);
     const panelObserver = new ResizeObserver(fit);
     panelObserver.observe(hero);
     if (journeyPanelRef.current) panelObserver.observe(journeyPanelRef.current);
@@ -753,14 +767,13 @@ export const DroneHeroAssembly: React.FC = () => {
       if (target && !track.contains(target)) target.scrollIntoView({ behavior: "instant" });
     });
 
-    const mouse = { x: -9999, y: -9999, nx: 0, ny: 0, on: false };
+    const mouse = { x: -9999, y: -9999, cx: 0, cy: 0, nx: 0, ny: 0, on: false };
     const handlePointerMove = (e: PointerEvent) => {
-      const r = stage.getBoundingClientRect();
-      mouse.x = (e.clientX - r.left) / s;
-      mouse.y = (e.clientY - r.top) / s;
+      // Stage-space conversion happens once per frame, before any style writes.
+      mouse.cx = e.clientX;
+      mouse.cy = e.clientY;
       mouse.nx = (e.clientX / window.innerWidth - 0.5) * 2;
-      mouse.ny =
-        ((e.clientY - navHeight()) / Math.max(hero.clientHeight, 1) - 0.5) * 2;
+      mouse.ny = ((e.clientY - navHeight()) / Math.max(viewportH, 1) - 0.5) * 2;
       mouse.on = true;
     };
     const handlePointerLeave = () => {
@@ -788,6 +801,8 @@ export const DroneHeroAssembly: React.FC = () => {
       }
     }
 
+    const placed = new WeakMap<HTMLElement, string>();
+
     function place(
       el: HTMLElement,
       w: number,
@@ -800,13 +815,17 @@ export const DroneHeroAssembly: React.FC = () => {
       fx: number,
       fy: number
     ) {
-      el.style.transformOrigin = `${a.x * 100}% ${a.y * 100}%`;
-      el.style.transform = `translate3d(${(ax - a.x * w).toFixed(2)}px,${(
+      const origin = `${a.x * 100}% ${a.y * 100}%`;
+      const transform = `translate3d(${(ax - a.x * w).toFixed(2)}px,${(
         ay -
         a.y * h
       ).toFixed(2)}px,0) rotate(${rot.toFixed(2)}deg) scale(${(sc * fx).toFixed(
         4
       )},${(sc * fy).toFixed(4)})`;
+      if (placed.get(el) === origin + transform) return;
+      placed.set(el, origin + transform);
+      el.style.transformOrigin = origin;
+      el.style.transform = transform;
     }
 
     const hOf = (a: AsmItem, asp: number) =>
@@ -852,7 +871,12 @@ export const DroneHeroAssembly: React.FC = () => {
       if (disposed) return;
       const t = now - t0,
         sec = now / 1000;
-      const scrollStart = track.offsetTop - navHeight();
+      if (mouse.on) {
+        const r = stage.getBoundingClientRect();
+        mouse.x = (mouse.cx - r.left) / s;
+        mouse.y = (mouse.cy - r.top) / s;
+      }
+      const scrollStart = cachedTrackTop - cachedNavHeight;
       const p = clamp01((window.scrollY - scrollStart) / scrollDistance) * 6;
 
       const visible = p > .08;
@@ -930,9 +954,13 @@ export const DroneHeroAssembly: React.FC = () => {
 
       copyEl.style.opacity = (1 - q1).toFixed(3);
       positionCopy(q1);
-      copyEl.inert = q1 > .5;
-      copyEl.style.pointerEvents = q1 > 0.5 ? "none" : "";
-      copyEl.setAttribute("aria-hidden", String(q1 > 0.5));
+      const copyHidden = q1 > .5;
+      if (copyHidden !== lastCopyHidden) {
+        lastCopyHidden = copyHidden;
+        copyEl.inert = copyHidden;
+        copyEl.style.pointerEvents = copyHidden ? "none" : "";
+        copyEl.setAttribute("aria-hidden", String(copyHidden));
+      }
       const compactParts = mobilePortrait();
       orbitClone.style.opacity = compactParts ? "0" : (1 - ph(p, 0, 0.15)).toFixed(3);
       const phoneCopyTop = Math.max(128, Math.min(200, (viewportH - copyTextHeight) * .36));
@@ -1545,6 +1573,7 @@ export const DroneHeroAssembly: React.FC = () => {
       cancelAnimationFrame(animFrameId);
       cancelAnimationFrame(anchorFrameId);
       window.removeEventListener("resize", fit);
+      window.removeEventListener("load", fit);
       document.removeEventListener("visibilitychange", handleDocumentVisibility);
       visibilityObserver.disconnect();
       panelObserver.disconnect();

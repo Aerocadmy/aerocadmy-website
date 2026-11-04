@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Box, Check, Download, FileCheck2, HeartHandshake, Layers, Users, Video } from "lucide-react";
 import Image from "next/image";
 import { Navbar } from "@/components/navbar/Navbar";
+import { TrackEvent } from "@/components/analytics/TrackEvent";
 import { Footer } from "@/components/footer/Footer";
 import { CourseAction, CourseCurriculum, CourseDetailLayout, CourseSummaryCard } from "@/components/programs/CourseDetailLayout";
 import { InternshipInstructor } from "@/components/programs/InternshipInstructor";
@@ -42,7 +43,7 @@ const courseSchema = {
 const learningPoints = ["Drone systems and flight principles", "Electronics and drone hardware", "Flight control and programming", "Kit assembly, testing and a final project"];
 
 export default function InternshipPage() {
-  return <div className={styles.page}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} /><Navbar />
+  return <div className={styles.page}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} /><TrackEvent event="course_viewed" props={{ course: "drone-technology-internship", title: "Drone Technology Internship", value: 6999, currency: "INR" }} /><Navbar />
     <CourseDetailLayout title="Drone Technology Internship" category="Live online program" eyebrow="Live online · Enrolment open"
       reviewSummary={<ReviewRating />}
       summary="Build your understanding through live classes, practical activities, and an ESP32 drone kit you keep."

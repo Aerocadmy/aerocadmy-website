@@ -3,6 +3,7 @@
 import { useId, useRef, useState, type FormEvent } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, CheckCircle2, MessageCircle, Phone } from "lucide-react";
 import { callbackWindows, droneExperience, learningFormats, learningGoals, learningInterests, professions, type CounsellingInput } from "@/data/guidance";
+import { track } from "@/lib/analytics";
 import styles from "./LearningGuidance.module.css";
 
 const emptyForm: CounsellingInput = { profession: "", fieldOfWork: "", experience: "", interest: "", goal: "", format: "", name: "", phone: "", email: "", callbackWindow: "No preference", questions: "" };
@@ -30,6 +31,7 @@ export function CounsellorSection() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "We couldn't save your request. Please try again.");
       setStatus("success");
+      track("lead_submitted", { form: "counselling", interest: fields.interest, goal: fields.goal });
     } catch (failure) { setStatus("error"); setError(failure instanceof Error ? failure.message : "We couldn't connect. Please try again."); }
   }
 
