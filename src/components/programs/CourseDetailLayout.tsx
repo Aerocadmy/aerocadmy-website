@@ -36,10 +36,13 @@ export function CourseDetailLayout({ title, category, eyebrow, summary, facts, s
   </main>;
 }
 
-export function CourseSummaryCard({ visual, caption = "Illustrative learning scene", featuredVisual = false, children }: { visual: CourseVisual; caption?: string; featuredVisual?: boolean; children: ReactNode }) {
+/** `media` (e.g. a video player) replaces the course image when given. */
+export function CourseSummaryCard({ visual, media, caption = "Illustrative learning scene", featuredVisual = false, children }: { visual?: CourseVisual; media?: ReactNode; caption?: string; featuredVisual?: boolean; children: ReactNode }) {
   return <aside className={styles.rail} aria-label="Course summary">
     <div className={`${styles.summaryCard} ${featuredVisual ? styles.featuredSummaryCard : ""}`}>
-      <figure className={`${styles.cardVisual} ${featuredVisual ? styles.featuredCardVisual : ""}`}><CourseImage visual={visual} priority /><figcaption>{caption}</figcaption></figure>
+      {media
+        ? <div className={styles.cardVisual}>{media}</div>
+        : visual && <figure className={`${styles.cardVisual} ${featuredVisual ? styles.featuredCardVisual : ""}`}><CourseImage visual={visual} priority /><figcaption>{caption}</figcaption></figure>}
       <div className={styles.cardBody}>{children}</div>
     </div>
   </aside>;

@@ -8,6 +8,7 @@ import { CourseAction, CourseCurriculum, CourseDetailLayout, CourseSummaryCard }
 import { InternshipInstructor } from "@/components/programs/InternshipInstructor";
 import { InternshipEnrolment } from "@/components/programs/InternshipEnrolment";
 import { InternshipEnrollButton } from "@/components/programs/InternshipEnrollButton";
+import { InternshipTrailer } from "@/components/programs/InternshipTrailer";
 import { StudentShowcase } from "@/components/testimonials/StudentShowcase";
 import { ReviewRating } from "@/components/testimonials/ReviewRating";
 import styles from "@/components/programs/CourseDetail.module.css";
@@ -17,6 +18,7 @@ import { pageMetadata } from "@/lib/page-metadata";
 export const metadata: Metadata = pageMetadata({ title: "Six-week Live Drone Technology Internship | Aerocadmy", description: "Explore Aerocadmy’s six-week live online drone technology internship. ₹6,999 including an ESP32 drone kit to keep. Next batch starts 15 November 2026.", path: "/programs/drone-technology-internship", image: { url: "/programs/drone-technology-internship/opengraph-image", alt: "Six-week live Drone Technology Internship with Aerocadmy" } });
 const brochureUrl = publicStorageUrl("internships/drone-technology/Aerocadmy_Internship_Details.pdf");
 const brochurePreviewUrl = publicStorageUrl("internships/drone-technology/brochure-preview.jpg");
+const trailerUrl = publicStorageUrl("internships/drone-technology/Aerocadmy_Drone_Internship_trailer.mp4");
 const weeks = [
   { title: "Drone foundations & airspace", topics: ["Drone types & components", "Lift, thrust & stability", "Introduction to DGCA rules & Digital Sky", "Mission planning & waypoints", "Live quiz & airspace exploration"] },
   { title: "Aerodynamics & virtual drone design", topics: ["Thrust-to-weight ratio", "Motor, propeller & battery selection", "Frame layouts, weight distribution & balance", "3D modelling in Tinkercad", "Virtual flight physics experiments"] },
@@ -49,7 +51,7 @@ export default function InternshipPage() {
       summary="Build your understanding through live classes, practical activities, and an ESP32 drone kit you keep."
       facts={[{ icon: "calendar", label: "6 weeks" }, { icon: "video", label: "Live classes + recordings" }, { icon: "kit", label: "ESP32 kit included" }]}
       sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Six-week journey" }, { id: "brochure", label: "Brochure" }, { id: "project", label: "Practical learning" }, { id: "kit", label: "Your kit" }, { id: "instructor", label: "Instructor" }, { id: "reviews", label: "Reviews" }]}
-      sidebar={<CourseSummaryCard featuredVisual visual={{ src: "/images/courses/foundations.png", quadrant: 3, alt: "Hands assembling a compact educational micro-drone" }} caption="Illustrative learning scene · Final kit may differ">
+      sidebar={<CourseSummaryCard featuredVisual media={<InternshipTrailer src={trailerUrl} />}>
         <p className={styles.eyebrow}>Training + ESP32 drone kit</p>
         <div className={styles.discountPrice}><del className={styles.oldPrice}>₹11,999</del><strong className={styles.price}>₹6,999</strong></div>
         <p className={styles.batch}>Next batch · 15 November 2026</p>
