@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, BookOpen, CalendarDays, Package, Radio } from "lucide-react";
 import { courseGroups, recordedCourses, type CourseGroup } from "@/data/courses";
@@ -22,12 +23,10 @@ export function CourseCatalogue({ headingAs = "h2", initialGroup = "All recorded
         </div>
       </header>
       <aside className={styles.live} aria-label="Live internship program">
-        <figure className={styles.liveVisual}>
+        <figure className={`${styles.liveVisual} ${styles.fill}`}>
           <Link href="/programs/drone-technology-internship" aria-label="Explore the drone kit and live internship">
-            <CourseImage visual={{ src: "/images/courses/foundations.png", quadrant: 3, alt: "Hands assembling an educational ESP32 micro-drone on a workbench" }} />
-            <span className={styles.kitBadge}><Package size={12} aria-hidden="true" />Kit + training</span>
+            <div className={styles.image}><Image src="/images/courses/internship-trailer-poster.jpg" alt="Six-week live drone internship: Build. Code. Fly." fill quality={90} sizes="(max-width: 600px) 100vw, 340px" /></div>
           </Link>
-          <figcaption>Illustrative kit and learning scene</figcaption>
         </figure>
         <div className={styles.liveBody}>
           <span className={styles.liveLabel}><Radio size={13} aria-hidden="true" />Live online · Enrolment open</span>

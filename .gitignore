@@ -38,3 +38,6 @@ next-env.d.ts
 
 # local SEO audit output
 /aerocadmy.com-audit/
+
+# Claude Code local config
+.claude/
