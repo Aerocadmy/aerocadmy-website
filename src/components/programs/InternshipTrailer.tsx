@@ -6,7 +6,7 @@ import { Maximize, Minimize, Pause, Play, RotateCcw, Volume2, VolumeX } from "lu
 import { track } from "@/lib/analytics";
 import styles from "./InternshipTrailer.module.css";
 
-const poster = "/images/courses/internship-trailer-poster.jpg";
+const defaultPoster = "/images/courses/internship-trailer-poster.jpg";
 const speeds = [1, 1.25, 1.5, 2, 0.75];
 const IDLE_MS = 2600;
 
@@ -16,20 +16,35 @@ function clock(seconds: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
-/** Shows the trailer thumbnail; the video only loads once the visitor clicks it. */
-export function InternshipTrailer({ src }: { src: string }) {
+type PlayerProps = {
+  src: string;
+  /** Thumbnail shown before play. Defaults to the internship trailer poster. */
+  poster?: string;
+  posterAlt?: string;
+  /** Accessible label for the play button and the player group. */
+  label?: string;
+  /** CSS aspect-ratio of the frame, e.g. "20 / 9". Defaults to 16 / 9. */
+  aspect?: string;
+  /** next/image `sizes` hint for the poster. */
+  sizes?: string;
+  /** Analytics event fired when the visitor presses play. */
+  event?: string;
+};
+
+/** Shows the thumbnail; the video only loads once the visitor clicks it. */
+export function InternshipTrailer({ src, poster = defaultPoster, posterAlt = "Aerocadmy 6-week online drone internship: Build. Code. Fly.", label = "Play the 6-week drone internship trailer (5 min 12 s)", aspect, sizes = "(max-width: 900px) 100vw, 350px", event = "trailer_played" }: PlayerProps) {
   const [started, setStarted] = useState(false);
-  return <div className={styles.player}>
+  return <div className={styles.player} style={aspect ? { aspectRatio: aspect } : undefined}>
     {started
-      ? <TrailerPlayer src={src} />
-      : <button type="button" className={styles.cover} aria-label="Play the 6-week drone internship trailer (5 min 12 s)" onClick={() => { track("trailer_played", { program: "drone-technology-internship" }); setStarted(true); }}>
-        <Image src={poster} alt="Aerocadmy 6-week online drone internship: Build. Code. Fly." width={1920} height={1080} priority sizes="(max-width: 900px) 100vw, 350px" />
+      ? <TrailerPlayer src={src} poster={poster} label={label} />
+      : <button type="button" className={styles.cover} aria-label={label} onClick={() => { track(event, { program: "drone-technology-internship" }); setStarted(true); }}>
+        <Image src={poster} alt={posterAlt} width={1920} height={1080} priority={poster === defaultPoster} sizes={sizes} />
         <span className={styles.play} aria-hidden="true"><Play size={22} fill="currentColor" strokeWidth={0} /></span>
       </button>}
   </div>;
 }
 
-function TrailerPlayer({ src }: { src: string }) {
+function TrailerPlayer({ src, poster, label }: { src: string; poster: string; label: string }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -113,7 +128,7 @@ function TrailerPlayer({ src }: { src: string }) {
     className={`${styles.stage} ${idle && !paused ? styles.idle : ""} ${fullscreen ? styles.full : ""}`}
     tabIndex={0}
     role="group"
-    aria-label="Drone internship trailer video player. Space plays or pauses, arrow keys seek, M mutes, F toggles fullscreen."
+    aria-label={`${label.replace(/^Play /, "")} player. Space plays or pauses, arrow keys seek, M mutes, F toggles fullscreen.`}
     onKeyDown={onKeyDown}
     onPointerMove={wake}
     onPointerLeave={() => { if (videoRef.current && !videoRef.current.paused) setIdle(true); }}

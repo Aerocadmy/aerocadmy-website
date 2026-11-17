@@ -8,6 +8,7 @@ import { CourseAction, CourseCurriculum, CourseDetailLayout, CourseSummaryCard }
 import { InternshipInstructor } from "@/components/programs/InternshipInstructor";
 import { InternshipEnrolment } from "@/components/programs/InternshipEnrolment";
 import { InternshipEnrollButton } from "@/components/programs/InternshipEnrollButton";
+import { InternshipDemoClass } from "@/components/programs/InternshipDemoClass";
 import { InternshipTrailer } from "@/components/programs/InternshipTrailer";
 import { StudentShowcase } from "@/components/testimonials/StudentShowcase";
 import { ReviewRating } from "@/components/testimonials/ReviewRating";
@@ -50,7 +51,7 @@ export default function InternshipPage() {
       reviewSummary={<ReviewRating />}
       summary="Build your understanding through live classes, practical activities, and an ESP32 drone kit you keep."
       facts={[{ icon: "calendar", label: "6 weeks" }, { icon: "video", label: "Live classes + recordings" }, { icon: "kit", label: "ESP32 kit included" }]}
-      sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Six-week journey" }, { id: "brochure", label: "Brochure" }, { id: "project", label: "Practical learning" }, { id: "kit", label: "Your kit" }, { id: "instructor", label: "Instructor" }, { id: "reviews", label: "Reviews" }]}
+      sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Six-week journey" }, { id: "demo-class", label: "Demo class" }, { id: "brochure", label: "Brochure" }, { id: "project", label: "Practical learning" }, { id: "kit", label: "Your kit" }, { id: "instructor", label: "Instructor" }, { id: "reviews", label: "Reviews" }]}
       sidebar={<CourseSummaryCard featuredVisual media={<InternshipTrailer src={trailerUrl} />}>
         <p className={styles.eyebrow}>Training + ESP32 drone kit</p>
         <div className={styles.discountPrice}><del className={styles.oldPrice}>₹11,999</del><strong className={styles.price}>₹6,999</strong></div>
@@ -74,6 +75,7 @@ export default function InternshipPage() {
         <div className={styles.sectionHeader}><h2>Your six-week journey</h2><span>6 weeks · Live online</span></div>
         <CourseCurriculum modules={weeks} label="Week" />
       </section>
+      <InternshipDemoClass />
       <section id="brochure" className={styles.brochure} aria-labelledby="brochure-title">
         <a className={styles.brochurePreview} href={brochureUrl} target="_blank" rel="noreferrer" aria-label="Open the internship brochure PDF">
           <Image src={brochurePreviewUrl} alt="Cropped 16:9 preview of the Aerocadmy six-week drone internship brochure cover" width={1620} height={911} quality={100} sizes="(max-width: 600px) 100vw, (max-width: 900px) 80vw, 40vw" />
