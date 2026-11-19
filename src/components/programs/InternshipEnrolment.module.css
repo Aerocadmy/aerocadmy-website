@@ -12,7 +12,7 @@
 .total b { font-size: 29px; font-weight: 500; white-space: nowrap; }
 .totalPrice { display: flex; align-items: baseline; gap: 9px; white-space: nowrap; }
 .totalPrice del { color: #718078; font-size: 14px; text-decoration-color: #9d665e; text-decoration-thickness: 1.5px; }
-.couponField { margin-top: 18px; }
+.couponField { margin: 0 0 18px; }
 .couponField > label { display: block; margin-bottom: 8px; color: #304a43; font-size: 13px; font-weight: 500; }
 .couponRow { display: flex; align-items: stretch; gap: 9px; }
 .couponRow input { flex: 1; min-width: 0; min-height: 46px; padding: 10px 13px; border: 1px solid #ceded5; border-radius: 9px; background: #fff; color: #132636; font-size: 14px; text-transform: uppercase; }
@@ -25,7 +25,7 @@
 .couponSuccess { color: #087957; }
 .discountLine { display: flex; justify-content: space-between; margin-top: 9px; color: #087957; font-size: 13px; }
 .discountLine strong { font-weight: 600; }
-.form { margin-top: 28px; }
+.form { margin-top: 24px; }
 .form fieldset { min-width: 0; margin: 0 0 26px; padding: 0; border: 0; }
 .form legend { font-size: 16px; font-weight: 500; margin-bottom: 18px; }
 .grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
@@ -50,7 +50,8 @@
 .paymentScreen h2 { max-width: 500px; }
 .paymentScreen > p:not(.eyebrow) { max-width: 440px; margin-top: 14px; color: #61747e; font-size: 14px; line-height: 1.8; }
 .paymentScreen .eyebrow { margin: 18px 0 10px; }
-.paymentHint { max-width: 440px; margin-top: 22px; color: #758780; font-size: 12px; line-height: 1.7; }
+.paymentHint { display: flex; align-items: flex-start; justify-content: center; gap: 7px; max-width: 420px; margin-top: 20px; color: #758780; font-size: 12px; line-height: 1.7; text-align: left; }
+.paymentHint svg { flex-shrink: 0; margin-top: 4px; color: #087957; }
 .paymentIssue { color: #765526; }
 .resultIcon { width: 34px; height: 34px; color: #087957; }
 .paymentIssue .resultIcon { color: #a46a28; }
@@ -65,3 +66,41 @@
 @media(max-width:600px) { .grid { grid-template-columns: 1fr; }.actions { flex-direction: column; }.actions a,.actions button { width: 100%; }.total { align-items: flex-start; }.total b { font-size: 25px; } }
 .couponToggle { padding: 0; border: 0; background: transparent; color: #52685f; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
 .earlyBird { padding: 9px 12px; border-radius: 9px; background: #eff8f2; color: #087957; font-size: 13px; font-weight: 500; }
+
+.proof { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 16px; color: #52685f; font-size: 13px; }
+.rating { display: inline-flex; align-items: center; gap: 7px; }
+.rating b { color: #132636; font-weight: 600; }
+.seatsLeft { display: inline-flex; align-items: center; gap: 7px; color: #9a4d35; font-weight: 600; }
+.seatsLeft i { width: 8px; height: 8px; border-radius: 50%; background: #d4553a; animation: seats-pulse 1.6s ease-in-out infinite; }
+@keyframes seats-pulse { 50% { opacity: .35; } }
+.totalRight { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.save { padding: 3px 10px; border-radius: 99px; background: #fff; color: #087957; font-size: 12px; font-style: normal; font-weight: 600; white-space: nowrap; }
+.benefits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; margin: 20px 0 0; padding: 0; list-style: none; }
+.benefits li { display: flex; align-items: flex-start; gap: 9px; color: #304a43; font-size: 14px; line-height: 1.5; }
+.benefits svg { flex-shrink: 0; margin-top: 3px; color: #087957; }
+.payBar { position: sticky; bottom: calc(-1 * clamp(24px, 5vw, 44px)); z-index: 2; margin: 18px calc(-1 * clamp(24px, 5vw, 44px)) calc(-1 * clamp(24px, 5vw, 44px)); padding: 14px clamp(24px, 5vw, 44px) 16px; border-top: 1px solid #d7e7df; background: #fffffff2; backdrop-filter: blur(8px); box-shadow: 0 -12px 28px #13263612; }
+.payRow { display: flex; align-items: center; gap: 16px; }
+.payPrice { display: flex; flex-direction: column; }
+.payPrice span { color: #61747e; font-size: 12px; }
+.payPrice strong { font-size: 24px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; white-space: nowrap; }
+.payRow .actions { flex: 1; margin-top: 0; }
+.payRow .actions button { width: 100%; min-height: 52px; font-weight: 600; }
+.payBar .security { justify-content: center; margin-top: 10px; text-align: center; }
+@media (prefers-reduced-motion: reduce) { .seatsLeft i { animation: none; } }
+@media (max-width: 600px) { .benefits { grid-template-columns: 1fr; } .payBar .security { font-size: 11px; } .payPrice strong { font-size: 20px; } .payRow .actions button { padding: 14px 40px 14px 18px; } }
+
+.steps { display: flex; align-items: flex-start; justify-content: center; gap: 0; width: min(100%, 440px); margin: 26px 0 0; padding: 0; list-style: none; }
+.steps li { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #8a9a93; font-size: 12px; font-weight: 500; }
+.steps li::before { content: ""; position: absolute; top: 14px; right: 50%; width: 100%; height: 2px; background: #dbe8e0; }
+.steps li:first-child::before { display: none; }
+.steps li span { position: relative; z-index: 1; display: grid; place-items: center; width: 30px; height: 30px; border: 2px solid #dbe8e0; border-radius: 50%; background: #fff; color: #8a9a93; font-size: 13px; font-weight: 600; }
+.steps .stepDone { color: #087957; }
+.steps .stepDone::before, .steps .stepActive::before { background: #087957; }
+.steps .stepDone span { border-color: #087957; background: #087957; color: #fff; }
+.steps .stepActive { color: #132636; }
+.steps .stepActive span { border-color: #087957; color: #087957; animation: step-pulse 1.6s ease-in-out infinite; }
+@keyframes step-pulse { 50% { box-shadow: 0 0 0 6px #18cb9626; } }
+.orderChip { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: min(100%, 440px); margin-top: 26px; padding: 14px 18px; border: 1px solid #cfe5da; border-radius: 14px; background: #ecf8f1; text-align: left; font-size: 14px; }
+.orderChip small { display: block; margin-top: 3px; color: #61747e; font-size: 12px; }
+.orderChip b { font-size: 20px; font-weight: 600; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .steps .stepActive span { animation: none; } }

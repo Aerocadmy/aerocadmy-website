@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import { AlertCircle, ArrowRight, CheckCircle2, ShieldCheck, X } from "lucide-react";
+import { AlertCircle, ArrowRight, Award, Box, CheckCircle2, Compass, ShieldCheck, Users, Video, X } from "lucide-react";
 import { track } from "@/lib/analytics";
+import { RatingStars } from "@/components/testimonials/ReviewRating";
+import { participantReviews, reviewAverage } from "@/components/testimonials/participant-reviews";
 import { BATCH, PRICING, isScratchCode } from "@/lib/batch";
 import { readReward, rewardActive } from "./useScratchReward";
 import styles from "./InternshipEnrolment.module.css";
@@ -33,9 +35,9 @@ function loadCheckout() {
 }
 
 const phaseCopy: Partial<Record<PaymentPhase, string>> = {
-  preparing: "Opening secure Razorpay checkout…",
-  waiting: "Waiting for your payment to complete. Keep this window open.",
-  verifying: "Payment submitted. We’re confirming it securely with Razorpay…",
+  preparing: "Saving your details and opening the secure Razorpay window. This takes a few seconds.",
+  waiting: "Finish the payment in the Razorpay window. If you can’t see it, check your browser for a blocked pop-up.",
+  verifying: "Payment received by Razorpay. We’re confirming it securely so your seat is reserved.",
   pending: "Razorpay has not confirmed this payment yet. Check its status before trying again.",
   failed: "Payment wasn’t completed. You can retry, or check the status if money was deducted.",
   review: "Payment received. This enrollment needs a manual review; please contact a counsellor.",
@@ -58,6 +60,7 @@ export function InternshipEnrolment() {
   const [couponBusy, setCouponBusy] = useState(false);
   const [couponMessage, setCouponMessage] = useState("");
   const [showCoupon, setShowCoupon] = useState(false);
+  const [seats, setSeats] = useState<number | null>(null);
 
   function setPhase(next: PaymentPhase) {
     phaseRef.current = next;
@@ -110,6 +113,14 @@ export function InternshipEnrolment() {
     startedRef.current = true;
     track("enrol_form_started", { program: "drone-technology-internship", source: sourceRef.current });
   }
+
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch("/api/enrolment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "offer" }) })
+      .then(response => response.ok ? response.json() as Promise<{ seatsLeft: number | null }> : null)
+      .then(result => { if (result && typeof result.seatsLeft === "number") setSeats(result.seatsLeft); })
+      .catch(() => { /* The seat count is optional. */ });
+  }, [isOpen]);
 
   useEffect(() => {
     // Auto-apply the visitor's personal scratch offer so they never need to type a code.
@@ -329,9 +340,15 @@ export function InternshipEnrolment() {
       </> : processing ? <div className={styles.paymentScreen} role="status" aria-live="polite">
         <span className={`${styles.spinner} ${styles.spinnerLarge}`} aria-hidden="true" />
         <p className={styles.eyebrow}>Secure payment</p>
-        <h2 id="enrolment-title">{phase === "verifying" ? "Confirming your payment" : "Waiting for payment"}</h2>
+        <h2 id="enrolment-title">{phase === "verifying" ? "Confirming your payment" : phase === "waiting" ? "Complete your payment" : "Setting up secure checkout"}</h2>
         <p>{phaseCopy[phase]}</p>
-        <span className={styles.paymentHint}>Your enrollment details are saved. Please don’t close this window or retry payment while confirmation is in progress.</span>
+        <ol className={styles.steps} aria-label="Enrollment progress">
+          <li className={styles.stepDone}><span aria-hidden="true"><CheckCircle2 size={16} /></span>Details saved</li>
+          <li className={phase === "verifying" ? styles.stepDone : styles.stepActive}><span aria-hidden="true">{phase === "verifying" ? <CheckCircle2 size={16} /> : "2"}</span>Payment</li>
+          <li className={phase === "verifying" ? styles.stepActive : ""}><span aria-hidden="true">3</span>Seat confirmed</li>
+        </ol>
+        <div className={styles.orderChip}><span>Drone Technology Internship<small>Batch starts {BATCH.startLabel}</small></span><b>{formatINR(payableAmount)}</b></div>
+        <span className={styles.paymentHint}><ShieldCheck size={14} aria-hidden="true" /> Your details are saved. Please keep this window open until you see your confirmation.</span>
       </div> : resultState ? <div className={`${styles.paymentScreen} ${phase === "failed" ? styles.paymentIssue : ""}`} role="status" aria-live="polite">
         {phase === "failed" ? <AlertCircle className={styles.resultIcon} aria-hidden="true" /> : phase === "review" ? <AlertCircle className={styles.resultIcon} aria-hidden="true" /> : <ShieldCheck className={styles.resultIcon} aria-hidden="true" />}
         <p className={styles.eyebrow}>{phase === "failed" ? "Payment not completed" : phase === "review" ? "Payment received" : "Payment status"}</p>
@@ -343,10 +360,32 @@ export function InternshipEnrolment() {
           {session && <button className={styles.status} type="button" onClick={checkStatus} disabled={busy || checkoutActive}>{busy ? "Checking payment…" : "Check payment status"}</button>}
         </div>
       </div> : <>
-        <p className={styles.eyebrow}>Your next step</p><h2 id="enrolment-title">Enroll in the Drone Technology Internship</h2>
-        <p className={styles.intro}>Register for the six-week live online internship, including an ESP32 drone kit you keep.</p>
-        <div className={styles.total}><span>Training + ESP32 kit<strong>Next batch · {BATCH.startLabel}</strong></span><span className={styles.totalPrice}><del>{formatINR(PRICING.anchor)}</del><b>{formatINR(payableAmount)}</b></span></div>
+        <p className={styles.eyebrow}>Drone Technology Internship</p><h2 id="enrolment-title">Build and fly your own drone in 6 weeks</h2>
+        <div className={styles.proof}>
+          <span className={styles.rating}><RatingStars rating={reviewAverage} /><b>{reviewAverage.toFixed(1)}</b><span>({participantReviews.length} reviews)</span></span>
+          <span>Live with Yash Kansal</span>
+          {seats !== null && seats > 0 && seats <= BATCH.showSeatsBelow && <span className={styles.seatsLeft}><i aria-hidden="true" />Only {seats} of {BATCH.seatCap} seats left</span>}
+        </div>
+        <div className={styles.total}>
+          <span>Training + ESP32 kit<strong>Batch starts · {BATCH.startLabel}</strong></span>
+          <span className={styles.totalRight}>
+            <span className={styles.totalPrice}><del>{formatINR(PRICING.anchor)}</del><b>{formatINR(payableAmount)}</b></span>
+            <em className={styles.save}>You save {formatINR(PRICING.anchor - payableAmount)}</em>
+          </span>
+        </div>
+        <ul className={styles.benefits} aria-label="What you get">
+          <li><Video size={16} aria-hidden="true" />6 weeks of live classes + recordings</li>
+          <li><Box size={16} aria-hidden="true" />ESP32 drone kit, yours to keep</li>
+          <li><Award size={16} aria-hidden="true" />Internship certificate</li>
+          <li><Users size={16} aria-hidden="true" />Lifetime community access</li>
+          <li><Compass size={16} aria-hidden="true" />Mentor feedback and career guidance</li>
+        </ul>
         <form onSubmit={submit} onFocus={trackFormStarted} className={styles.form}>
+          <fieldset disabled={busy} onBlur={captureLead}><legend>Your contact details</legend><div className={styles.grid}>
+            <label>Full name<input name="name" autoComplete="name" required minLength={2} maxLength={100} value={formValues.name} onChange={event => setFormValues(current => ({ ...current, name: event.target.value }))} /></label>
+            <label>Phone number<input name="phone" type="tel" autoComplete="tel" required minLength={10} maxLength={25} value={formValues.phone} onChange={event => setFormValues(current => ({ ...current, phone: event.target.value }))} /></label>
+            <label className={styles.full}>Email address<input name="email" type="email" autoComplete="email" required maxLength={254} value={formValues.email} onChange={event => setFormValues(current => ({ ...current, email: event.target.value }))} /></label>
+          </div></fieldset>
           <div className={styles.couponField}>
             {isScratchCode(appliedCoupon?.code) && <p className={styles.earlyBird}>Your personal {formatINR(appliedCoupon?.discountAmount ?? 0)} offer is applied</p>}
             {!showCoupon && !appliedCoupon && <button type="button" className={styles.couponToggle} onClick={() => setShowCoupon(true)}>Have a code?</button>}
@@ -357,16 +396,16 @@ export function InternshipEnrolment() {
               {appliedCoupon && <button type="button" className={styles.removeCoupon} onClick={removeCoupon} disabled={busy || couponBusy || checkoutActive}>Remove</button>}
             </div></>}
             {couponMessage && !isScratchCode(appliedCoupon?.code) && <p className={`${styles.couponMessage} ${appliedCoupon ? styles.couponSuccess : ""}`} role="status">{couponMessage}</p>}
-            {appliedCoupon && <p className={styles.discountLine}><span>{appliedCoupon.code} discount</span><strong>−{formatINR(appliedCoupon.discountAmount)}</strong></p>}
+            {appliedCoupon && <p className={styles.discountLine}><span>{isScratchCode(appliedCoupon.code) ? "Your offer" : `${appliedCoupon.code} discount`}</span><strong>−{formatINR(appliedCoupon.discountAmount)}</strong></p>}
           </div>
-          <fieldset disabled={busy} onBlur={captureLead}><legend>Your contact details</legend><div className={styles.grid}>
-            <label>Full name<input name="name" autoComplete="name" required minLength={2} maxLength={100} value={formValues.name} onChange={event => setFormValues(current => ({ ...current, name: event.target.value }))} /></label>
-            <label>Email address<input name="email" type="email" autoComplete="email" required maxLength={254} value={formValues.email} onChange={event => setFormValues(current => ({ ...current, email: event.target.value }))} /></label>
-            <label>Phone number<input name="phone" type="tel" autoComplete="tel" required minLength={10} maxLength={25} value={formValues.phone} onChange={event => setFormValues(current => ({ ...current, phone: event.target.value }))} /></label>
-          </div></fieldset>
           <p className={styles.note}>We’ll use these details to manage your enrollment. Payment details are handled securely by Razorpay.</p>
-          <div className={styles.actions}><button className="dark-action" disabled={busy || couponBusy || checkoutActive} type="submit">{busy ? "Please wait…" : "Continue to payment"}<ArrowRight size={18} /></button></div>
-          <p className={styles.security}><ShieldCheck size={16} /> {formatINR(payableAmount)} · Secure checkout with Razorpay</p>
+          <div className={styles.payBar}>
+            <div className={styles.payRow}>
+              <div className={styles.payPrice}><span>Total today</span><strong>{formatINR(payableAmount)}</strong></div>
+              <div className={styles.actions}><button className="dark-action" disabled={busy || couponBusy || checkoutActive} type="submit">{busy ? "Please wait…" : `Pay ${formatINR(payableAmount)} securely`}<ArrowRight size={18} /></button></div>
+            </div>
+            <p className={styles.security}><ShieldCheck size={16} /> Pay by UPI, card or netbanking · Secure checkout with Razorpay · Takes about a minute</p>
+          </div>
         </form>
         {session && <button className={styles.status} type="button" onClick={checkStatus} disabled={busy || checkoutActive}>Already attempted payment? Check payment status</button>}
         {session && <p className={styles.note}>Resuming checkout uses the details saved with your first registration.</p>}
