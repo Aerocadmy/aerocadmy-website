@@ -75,3 +75,7 @@
 @media (prefers-reduced-motion: reduce) {
   .brandAction svg, .counsellorLink svg, .linkGroup a, .contactLink, .backToTop > span { transition: none; }
 }
+@media (max-width: 760px) {
+  .liveTag { font-size: 10px; }
+  .legalLinks a, .legalLinks button { display: inline-flex; align-items: center; min-height: 40px; font-size: 13px; }
+}

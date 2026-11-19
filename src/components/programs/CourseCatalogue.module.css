@@ -73,3 +73,17 @@
   .live { padding: 12px; }
   .cardFooter { flex-wrap: wrap; }
 }
+/* Phones: one swipeable row instead of ~4,000px of stacked cards. */
+@media (max-width: 540px) {
+  .grid { display: flex; gap: 16px; overflow-x: auto; contain: paint; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; margin: 0 -20px; padding: 0 20px 14px; scroll-padding-inline: 20px; scrollbar-width: none; }
+  .grid::-webkit-scrollbar { display: none; }
+  .card { flex: 0 0 84%; scroll-snap-align: start; }
+  .card h3 { font-size: 18px; line-height: 1.4; }
+  .summary { margin: 8px 0 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .resultCount::after { content: " · swipe to see all"; }
+}
+@media (max-width: 760px) {
+  .eyebrow { font-size: 11px; }
+  .badge { font-size: 11px; }
+  .meta { font-size: 12px; }
+}
