@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { BATCH } from "@/lib/batch";
 
 const size = { width: 1200, height: 630 };
 
@@ -74,6 +75,6 @@ export function internshipSocialImage() {
     title: "Drone Technology Internship",
     description: "Build your understanding through live classes, practical activities, and an ESP32 drone kit you keep.",
     highlights: ["Six weeks of guided learning", "Live classes and recordings", "ESP32 drone kit included"],
-    footer: "Next batch · 15 November 2026",
+    footer: `Next batch · ${BATCH.startLabel}`,
   });
 }

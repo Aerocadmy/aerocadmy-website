@@ -1,21 +1,61 @@
 import "server-only";
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { sendEnrollmentConfirmation } from "@/lib/email";
 import { supabaseAdmin } from "@/lib/supabase";
+import { BATCH, PRICING, isScratchCode } from "@/lib/batch";
 
 export const FEE = 699900;
-export const INTERNSHIP_COUPON = { code: "SPECIAL1000", discountAmount: 100000 } as const;
 export class CouponValidationError extends Error {}
+export async function seatsLeft() {
+  const { count, error } = await supabaseAdmin().from("enrolments").select("id", { count: "exact", head: true }).eq("status", "paid").gte("paid_at", BATCH.windowStart);
+  if (error || count === null) return null;
+  return Math.max(0, BATCH.seatCap - count - BATCH.externalRegistrations);
+}
 export type Registration = { name: string; email: string; phone: string };
 type Row = { id: string; reference_code: string; token: string; details: string; order_id: string | null; payment_id: string | null; status: string; amount: number; coupon_code: string | null; discount_amount: number; confirmation_email_sent_at: string | null; confirmation_email_claimed_at: string | null };
-export function validateInternshipCoupon(value: unknown) {
-  if (typeof value !== "string" || value.trim().toUpperCase() !== INTERNSHIP_COUPON.code) {
-    throw new CouponValidationError("That coupon code isn’t valid. Check the code and try again.");
+type ScratchRow = { code: string; expires_at: string; discount_amount: number };
+const SCRATCH_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const newScratchCode = () => `${PRICING.scratchPrefix}-${Array.from(randomBytes(6), byte => SCRATCH_ALPHABET[byte % SCRATCH_ALPHABET.length]).join("")}`;
+
+/**
+ * Creates (or returns) the visitor's personal offer. One offer per visitor token, valid for
+ * `scratchHours` from the moment it is first scratched; the expiry is enforced on the server.
+ */
+export async function claimScratchOffer(token: unknown) {
+  if (typeof token !== "string" || !/^[a-f0-9]{64}$/.test(token)) throw new Error("Invalid offer request.");
+  const admin = supabaseAdmin();
+  const tokenHash = hash(token);
+  const existing = async () => {
+    const { data } = await admin.from("internship_scratch_offers").select("code,expires_at,discount_amount").eq("token_hash", tokenHash).maybeSingle();
+    return data as ScratchRow | null;
+  };
+  let row = await existing();
+  for (let attempt = 0; !row && attempt < 3; attempt++) {
+    const expiresAt = new Date(Date.now() + PRICING.scratchHours * 3600 * 1000).toISOString();
+    const { error } = await admin.from("internship_scratch_offers").insert({ code: newScratchCode(), token_hash: tokenHash, discount_amount: PRICING.scratchDiscount, expires_at: expiresAt, batch_start: BATCH.startDate });
+    if (error && error.code !== "23505") { console.error("[scratch] insert failed:", error.code, error.message); throw new Error("Offer could not be created."); }
+    row = await existing(); // Also resolves a race on the same token, or a code collision on retry.
   }
-  return INTERNSHIP_COUPON;
+  if (!row) throw new Error("Offer could not be created.");
+  return { code: row.code, expiresAt: new Date(row.expires_at).getTime(), discountAmount: row.discount_amount };
 }
-export function couponQuote(value: unknown) {
-  const coupon = validateInternshipCoupon(value);
+
+export async function validateInternshipCoupon(value: unknown) {
+  const code = typeof value === "string" ? value.trim().toUpperCase() : "";
+  if (isScratchCode(code)) {
+    const admin = supabaseAdmin();
+    const { data } = await admin.from("internship_scratch_offers").select("code,expires_at,discount_amount").eq("code", code).maybeSingle();
+    const offer = data as ScratchRow | null;
+    if (!offer) throw new CouponValidationError("That coupon code isn\u2019t valid. Check the code and try again.");
+    if (new Date(offer.expires_at).getTime() <= Date.now()) throw new CouponValidationError("This offer has expired. The regular price applies.");
+    const { count } = await admin.from("enrolments").select("id", { count: "exact", head: true }).eq("coupon_code", code).eq("status", "paid");
+    if (count) throw new CouponValidationError("This offer has already been used.");
+    return { code: offer.code, discountAmount: offer.discount_amount };
+  }
+  throw new CouponValidationError("That coupon code isn’t valid. Check the code and try again.");
+}
+export async function couponQuote(value: unknown) {
+  const coupon = await validateInternshipCoupon(value);
   return { couponCode: coupon.code, discountAmount: coupon.discountAmount, amount: FEE - coupon.discountAmount, currency: "INR" };
 }
 export function credentials() {
@@ -76,7 +116,7 @@ export async function gateway(endpoint: string, body?: unknown) {
 export async function createOrder(id: string, token: string, input: Registration, requestedCouponCode?: string) {
   const { key } = credentials();
   const admin = supabaseAdmin();
-  const coupon = requestedCouponCode ? validateInternshipCoupon(requestedCouponCode) : null;
+  const requested = requestedCouponCode?.trim().toUpperCase() || null;
   const { error: insertError } = await admin.from("enrolments").upsert({ id, token_hash: hash(token), ...input }, { onConflict: "id", ignoreDuplicates: true });
   if (insertError) throw new Error("Registration could not be saved.");
   const row = await getRegistration(id, token);
@@ -87,9 +127,11 @@ export async function createOrder(id: string, token: string, input: Registration
   const saved = JSON.parse(row.details) as Registration;
   const prefill = { name: saved.name, email: saved.email, contact: saved.phone };
   if (row.order_id) {
-    if (coupon && row.coupon_code !== coupon.code) throw new CouponValidationError("A payment order already exists for this registration without that coupon. Check payment status or contact a counsellor before trying again.");
+    // An existing order keeps its price, even if the personal offer has since expired.
+    if (requested && row.coupon_code !== requested) throw new CouponValidationError("A payment order already exists for this registration without that coupon. Check payment status or contact a counsellor before trying again.");
     return { reference: row.reference_code, orderId: row.order_id, key, amount: row.amount, currency: "INR", couponCode: row.coupon_code, discountAmount: row.discount_amount, prefill };
   }
+  const coupon = requested ? await validateInternshipCoupon(requested) : null;
   // An unresolved remote request must not be retried automatically: it may have created an order.
   const discountAmount = coupon?.discountAmount ?? 0;
   const amount = FEE - discountAmount;
@@ -136,4 +178,19 @@ export async function reconcileOrderPayment(orderId: string) {
   const captured = payments.find(payment => payment.status === "captured" && typeof payment.id === "string");
   if (!captured || typeof captured.id !== "string") return null;
   return confirmPayment(orderId, captured.id);
+}
+
+/** Saves a partly filled enrolment form so the team can follow up if payment isn't completed. */
+export async function saveInternshipLead(value: Record<string, unknown>) {
+  const text = (key: string) => typeof value[key] === "string" ? (value[key] as string).trim() : "";
+  const name = text("name"), phone = text("phone"), email = text("email").toLowerCase(), source = text("source").slice(0, 40);
+  const digits = phone.replace(/\D/g, "");
+  if (name.length < 2 || name.length > 100 || /[\u0000-\u001f]/.test(name)) return false;
+  if (!/^[+\d ()-]{7,25}$/.test(phone) || digits.length < 10) return false;
+  if (email && (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) return false;
+  const { error } = await supabaseAdmin().from("internship_leads").upsert(
+    { name, phone, phone_key: digits.slice(-10), email, source, batch_start: BATCH.startDate, updated_at: new Date().toISOString() },
+    { onConflict: "phone_key,batch_start" },
+  );
+  return !error;
 }

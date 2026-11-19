@@ -8,6 +8,10 @@ import { CourseAction, CourseCurriculum, CourseDetailLayout, CourseSummaryCard }
 import { InternshipInstructor } from "@/components/programs/InternshipInstructor";
 import { InternshipEnrolment } from "@/components/programs/InternshipEnrolment";
 import { InternshipEnrollButton } from "@/components/programs/InternshipEnrollButton";
+import { InternshipOffer } from "@/components/programs/InternshipOffer";
+import { InternshipStickyBar } from "@/components/programs/InternshipStickyBar";
+import { InternshipScratchOffer } from "@/components/programs/InternshipScratchOffer";
+import { BATCH } from "@/lib/batch";
 import { InternshipDemoClass } from "@/components/programs/InternshipDemoClass";
 import { InternshipTrailer } from "@/components/programs/InternshipTrailer";
 import { StudentShowcase } from "@/components/testimonials/StudentShowcase";
@@ -16,7 +20,9 @@ import styles from "@/components/programs/CourseDetail.module.css";
 import { publicStorageUrl } from "@/lib/supabase";
 import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = pageMetadata({ title: "Six-week Live Drone Technology Internship | Aerocadmy", description: "Explore Aerocadmy’s six-week live online drone technology internship. ₹6,999 including an ESP32 drone kit to keep. Next batch starts 15 November 2026.", path: "/programs/drone-technology-internship", image: { url: "/programs/drone-technology-internship/opengraph-image", alt: "Six-week live Drone Technology Internship with Aerocadmy" } });
+export const metadata: Metadata = pageMetadata({ title: "Six-week Live Drone Technology Internship | Aerocadmy", description: `Explore Aerocadmy’s six-week live online drone technology internship. ₹6,999 including an ESP32 drone kit to keep. Next batch starts ${BATCH.startLabel}.`, path: "/programs/drone-technology-internship", image: { url: "/programs/drone-technology-internship/opengraph-image", alt: "Six-week live Drone Technology Internship with Aerocadmy" } });
+/** Re-render hourly so the auto-computed batch date and schema never go stale. */
+export const revalidate = 3600;
 const brochureUrl = publicStorageUrl("internships/drone-technology/Aerocadmy_Internship_Details.pdf");
 const brochurePreviewUrl = publicStorageUrl("internships/drone-technology/brochure-preview.jpg");
 const trailerUrl = publicStorageUrl("internships/drone-technology/Aerocadmy_Drone_Internship_trailer.mp4");
@@ -39,7 +45,7 @@ const courseSchema = {
   hasCourseInstance: {
     "@type": "CourseInstance",
     courseMode: "Online",
-    startDate: "2026-11-15",
+    startDate: BATCH.startDate,
     instructor: { "@type": "Person", name: "Yash Kansal" },
   },
 };
@@ -49,14 +55,13 @@ export default function InternshipPage() {
   return <div className={styles.page}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} /><TrackEvent event="course_viewed" props={{ course: "drone-technology-internship", title: "Drone Technology Internship", value: 6999, currency: "INR" }} /><Navbar />
     <CourseDetailLayout title="Drone Technology Internship" category="Live online program" eyebrow="Live online · Enrolment open"
       reviewSummary={<ReviewRating />}
-      summary="Build your understanding through live classes, practical activities, and an ESP32 drone kit you keep."
-      facts={[{ icon: "calendar", label: "6 weeks" }, { icon: "video", label: "Live classes + recordings" }, { icon: "kit", label: "ESP32 kit included" }]}
+      summary="Build, program and fly your own ESP32 drone in six live weeks, with the kit yours to keep."
+      facts={[{ icon: "calendar", label: "6 weeks" }, { icon: "video", label: "Live classes + recordings" }, { icon: "kit", label: "ESP32 kit included" }, { icon: "person", label: "Taught live by Yash Kansal" }]}
       sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Six-week journey" }, { id: "demo-class", label: "Demo class" }, { id: "brochure", label: "Brochure" }, { id: "project", label: "Practical learning" }, { id: "kit", label: "Your kit" }, { id: "instructor", label: "Instructor" }, { id: "reviews", label: "Reviews" }]}
       sidebar={<CourseSummaryCard featuredVisual media={<InternshipTrailer src={trailerUrl} />}>
-        <p className={styles.eyebrow}>Training + ESP32 drone kit</p>
-        <div className={styles.discountPrice}><del className={styles.oldPrice}>₹11,999</del><strong className={styles.price}>₹6,999</strong></div>
-        <p className={styles.batch}>Next batch · 15 November 2026</p>
-        <InternshipEnrollButton className={`${styles.heroAction} ${styles.centeredAction}`}>Enroll now</InternshipEnrollButton>
+        <p className={`${styles.eyebrow} ${styles.cardLabel}`}>Training + ESP32 drone kit</p>
+        <InternshipOffer />
+        <InternshipEnrollButton source="sidebar" className={`${styles.heroAction} ${styles.centeredAction}`}>Enroll now</InternshipEnrollButton>
         <CourseAction href="/#counselling" secondary centered>Talk to a counsellor</CourseAction>
         <h2 className={styles.includesTitle}>Your internship includes</h2>
         <ul className={styles.included}>
@@ -106,13 +111,13 @@ export default function InternshipPage() {
       <section id="kit" className={styles.section}>
         <h2>Your ESP32 kit & learning setup</h2>
         <p>The ₹6,999 fee includes an ESP32 drone kit that you keep.</p>
-        <p className={styles.note}>Questions about class timings or equipment for the batch starting 15 November 2026? Speak with the team before enrolling.</p>
+        <p className={styles.note}>Questions about class timings or equipment for the batch starting {BATCH.startLabel}? Speak with the team before enrolling.</p>
       </section>
       <InternshipInstructor />
       <StudentShowcase />
       <p className={styles.closing}>The included kit, fee and benefits on this page apply to the live internship. Upcoming recorded courses are separate offerings. Career guidance does not guarantee employment.</p>
     </CourseDetailLayout>
-    <InternshipEnrolment />
+    <InternshipEnrolment /><InternshipStickyBar /><InternshipScratchOffer />
     <Footer />
   </div>;
 }

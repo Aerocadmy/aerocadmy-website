@@ -9,6 +9,7 @@ import { ComponentImage } from "@/components/ui/ComponentImage";
 import { ASSETS } from "@/lib/assets";
 import { courseCategories } from "@/data/course-categories";
 import { recordedCourses } from "@/data/courses";
+import { BATCH } from "@/lib/batch";
 import styles from "./Navbar.module.css";
 
 const sectionLinks = [
@@ -25,6 +26,19 @@ export const Navbar: React.FC = () => {
   const [coursesOpen, setCoursesOpen] = useState(false);
   const [mobileCoursesOpen, setMobileCoursesOpen] = useState(false);
   const [mobileCategoryOpen, setMobileCategoryOpen] = useState<string | null>(null);
+  // Starts as the static line so server and first client render match; upgraded after mount.
+  const [announcement, setAnnouncement] = useState("Our live internship program is live now");
+
+  useEffect(() => {
+    let cancelled = false;
+    const base = `Live drone internship \u00b7 Batch starts ${BATCH.startLabel}`;
+    setAnnouncement(base);
+    fetch("/api/enrolment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "offer" }) })
+      .then(response => response.ok ? response.json() as Promise<{ seatsLeft: number | null }> : null)
+      .then(result => { if (!cancelled && result && typeof result.seatsLeft === "number" && result.seatsLeft > 0 && result.seatsLeft <= BATCH.showSeatsBelow) setAnnouncement(`${base} \u00b7 Only ${result.seatsLeft} seats left`); })
+      .catch(() => { /* The static line is fine without the seat count. */ });
+    return () => { cancelled = true; };
+  }, []);
   const headerRef = useRef<HTMLElement>(null);
   const coursesButtonRef = useRef<HTMLButtonElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
@@ -74,7 +88,7 @@ export const Navbar: React.FC = () => {
       <header ref={headerRef} className={`${styles.header} ${isScrolled ? styles.scrolled : ""}`}>
         <div className={styles.announcement}>
           <span className={styles.offerDot} aria-hidden="true" />
-          <span>Our live internship program is live now</span>
+          <Link href="/programs/drone-technology-internship" className={styles.announcementLink}>{announcement}</Link>
         </div>
         <div className={styles.row}>
           <Link href="/" aria-label="Aerocadmy home" onClick={closeMenus} className={styles.logo}>

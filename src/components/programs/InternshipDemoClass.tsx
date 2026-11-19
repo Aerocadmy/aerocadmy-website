@@ -1,4 +1,5 @@
 import { Clock, Radio, Sparkles, Users } from "lucide-react";
+import { BATCH } from "@/lib/batch";
 import { InternshipTrailer } from "./InternshipTrailer";
 import { InternshipEnrollButton } from "./InternshipEnrollButton";
 import { publicStorageUrl } from "@/lib/supabase";
@@ -48,8 +49,8 @@ export function InternshipDemoClass() {
     </ul>
 
     <div className={styles.cta}>
-      <p>Like what you see? The next batch starts 15 November 2026.</p>
-      <InternshipEnrollButton className={styles.enroll}>Enroll now</InternshipEnrollButton>
+      <p>Like what you see? The next batch starts {BATCH.startLabel}.</p>
+      <InternshipEnrollButton source="demo_class" className={styles.enroll}>Enroll now</InternshipEnrollButton>
     </div>
   </section>;
 }

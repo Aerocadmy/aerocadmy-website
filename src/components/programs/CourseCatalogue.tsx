@@ -1,5 +1,6 @@
 "use client";
 
+import { BATCH } from "@/lib/batch";
 import { useId, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -38,7 +39,7 @@ export function CourseCatalogue({ headingAs = "h2", initialGroup = "All recorded
             <li><Package size={14} aria-hidden="true" />ESP32 kit to keep</li>
             <li><BookOpen size={14} aria-hidden="true" />Live classes + recordings</li>
           </ul>
-          <p className={styles.batchDate}>Next batch starts 15 November 2026</p>
+          <p className={styles.batchDate}>Next batch starts {BATCH.startLabel}</p>
         </div>
         <div className={styles.liveAction}><span className={styles.feeLabel}>Training + ESP32 kit</span><strong>₹6,999</strong><Link className="dark-action" href="/programs/drone-technology-internship">Explore program <ArrowUpRight size={17} aria-hidden="true" /></Link></div>
       </aside>

@@ -1,4 +1,5 @@
 import "server-only";
+import { BATCH } from "@/lib/batch";
 import { Resend } from "resend";
 
 function requiredEnvironment(name: string) {
@@ -37,7 +38,7 @@ ${input.couponCode}: −${formatINR(input.discountAmount)}`
     from,
     to: input.email,
     subject: "You’re enrolled — Drone Technology Internship | Aerocadmy",
-    text: `Hi ${input.name},\n\nYour payment is confirmed and your place in the six-week Drone Technology Internship is reserved.\n\nENROLLMENT REFERENCE\n${input.reference}\n\nProgram fee paid: ${paidAmount}${discountLine}\nNext batch: 15 November 2026\nIncludes: ESP32 drone kit to keep\n\nOur admissions team will contact you with the next steps and batch details. Keep this email and your enrollment reference for support.\n\nWelcome aboard,\nAerocadmy`,
+    text: `Hi ${input.name},\n\nYour payment is confirmed and your place in the six-week Drone Technology Internship is reserved.\n\nENROLLMENT REFERENCE\n${input.reference}\n\nProgram fee paid: ${paidAmount}${discountLine}\nNext batch: ${BATCH.startLabel}\nIncludes: ESP32 drone kit to keep\n\nOur admissions team will contact you with the next steps and batch details. Keep this email and your enrollment reference for support.\n\nWelcome aboard,\nAerocadmy`,
     html: `<!doctype html>
 <html lang="en">
   <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Enrollment confirmed</title></head>
@@ -65,7 +66,7 @@ ${input.couponCode}: −${formatINR(input.discountAmount)}`
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
               <tr><td style="padding:12px 0;border-bottom:1px solid #e8efea;color:#71837b;font-size:13px;">Program</td><td align="right" style="padding:12px 0;border-bottom:1px solid #e8efea;color:#132636;font-size:13px;font-weight:700;">Drone Technology Internship</td></tr>
               <tr><td style="padding:12px 0;border-bottom:1px solid #e8efea;color:#71837b;font-size:13px;">Duration</td><td align="right" style="padding:12px 0;border-bottom:1px solid #e8efea;color:#132636;font-size:13px;font-weight:700;">6 weeks · Live online</td></tr>
-              <tr><td style="padding:12px 0;border-bottom:1px solid #e8efea;color:#71837b;font-size:13px;">Next batch</td><td align="right" style="padding:12px 0;border-bottom:1px solid #e8efea;color:#132636;font-size:13px;font-weight:700;">15 November 2026</td></tr>
+              <tr><td style="padding:12px 0;border-bottom:1px solid #e8efea;color:#71837b;font-size:13px;">Next batch</td><td align="right" style="padding:12px 0;border-bottom:1px solid #e8efea;color:#132636;font-size:13px;font-weight:700;">${BATCH.startLabel}</td></tr>
               ${discountRow}
               <tr><td style="padding:12px 0;color:#71837b;font-size:13px;">Payment received</td><td align="right" style="padding:12px 0;color:#132636;font-size:13px;font-weight:700;">${paidAmount} · ESP32 kit included</td></tr>
             </table>

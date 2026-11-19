@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { confirmPayment, couponQuote, CouponValidationError, createOrder, credentials, getRegistration, reconcileOrderPayment, sendPendingEnrollmentConfirmation, validRegistration, validSignature } from "@/lib/enrolment";
+import { claimScratchOffer, confirmPayment, couponQuote, CouponValidationError, createOrder, credentials, getRegistration, reconcileOrderPayment, saveInternshipLead, seatsLeft, sendPendingEnrollmentConfirmation, validRegistration, validSignature } from "@/lib/enrolment";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
@@ -18,7 +18,10 @@ export async function POST(request: Request) {
     } catch {
       return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
-    if (v.action === "coupon") return NextResponse.json(couponQuote(v.couponCode), { headers: { "Cache-Control": "no-store" } });
+    if (v.action === "offer") return NextResponse.json({ seatsLeft: await seatsLeft().catch(() => null) }, { headers: { "Cache-Control": "no-store" } });
+    if (v.action === "lead") return NextResponse.json({ saved: await saveInternshipLead(v).catch(() => false) }, { headers: { "Cache-Control": "no-store" } });
+    if (v.action === "scratch") return NextResponse.json(await claimScratchOffer(v.token), { headers: { "Cache-Control": "no-store" } });
+    if (v.action === "coupon") return NextResponse.json(await couponQuote(v.couponCode), { headers: { "Cache-Control": "no-store" } });
     if (typeof v.id !== "string" || !/^[a-f0-9-]{36}$/.test(v.id) || typeof v.token !== "string" || !/^[a-f0-9]{64}$/.test(v.token)) return NextResponse.json({ error: "Please restart registration." }, { status: 400 });
     if (v.action === "register") {
       const input = validRegistration(v.details);
@@ -46,6 +49,7 @@ export async function POST(request: Request) {
     return NextResponse.json(await confirmPayment(orderId, v.paymentId));
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
+    console.error("[enrolment] request failed:", message);
     if (error instanceof CouponValidationError) return NextResponse.json({ error: message }, { status: 400, headers: { "Cache-Control": "no-store" } });
     return NextResponse.json({ error: message.startsWith("Payments are not") || message.startsWith("Your payment order") ? message : "We couldn’t complete this step. If money was deducted, check payment status or contact the counsellor before paying again." }, { status: 503 });
   }

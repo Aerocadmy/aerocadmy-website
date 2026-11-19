@@ -1,8 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import { AlertCircle, ArrowRight, CheckCircle2, ShieldCheck, X } from "lucide-react";
+import { AlertCircle, ArrowRight, Award, Box, CheckCircle2, Compass, ShieldCheck, Users, Video, X } from "lucide-react";
 import { track } from "@/lib/analytics";
+import { RatingStars } from "@/components/testimonials/ReviewRating";
+import { participantReviews, reviewAverage } from "@/components/testimonials/participant-reviews";
+import { BATCH, PRICING, isScratchCode } from "@/lib/batch";
+import { readReward, rewardActive } from "./useScratchReward";
 import styles from "./InternshipEnrolment.module.css";
 
 type Session = { id: string; token: string; reference?: string };
@@ -12,6 +16,8 @@ type Checkout = { open(): void; on(event: string, callback: (response?: unknown)
 declare global { interface Window { Razorpay?: new (options: Record<string, unknown>) => Checkout } }
 
 const storageKey = "aerocadmy-internship-registration";
+/** Per-visitor codes are unique, so analytics reports them as one "scratch" bucket. */
+const couponLabel = (code?: string) => isScratchCode(code) ? "scratch" : code;
 const programFee = 699900;
 let checkoutScriptPromise: Promise<void> | null = null;
 const formatINR = (paise: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(paise / 100);
@@ -29,9 +35,9 @@ function loadCheckout() {
 }
 
 const phaseCopy: Partial<Record<PaymentPhase, string>> = {
-  preparing: "Opening secure Razorpay checkout…",
-  waiting: "Waiting for your payment to complete. Keep this window open.",
-  verifying: "Payment submitted. We’re confirming it securely with Razorpay…",
+  preparing: "Saving your details and opening the secure Razorpay window. This takes a few seconds.",
+  waiting: "Finish the payment in the Razorpay window. If you can’t see it, check your browser for a blocked pop-up.",
+  verifying: "Payment received by Razorpay. We’re confirming it securely so your seat is reserved.",
   pending: "Razorpay has not confirmed this payment yet. Check its status before trying again.",
   failed: "Payment wasn’t completed. You can retry, or check the status if money was deducted.",
   review: "Payment received. This enrollment needs a manual review; please contact a counsellor.",
@@ -53,6 +59,8 @@ export function InternshipEnrolment() {
   const [payableAmount, setPayableAmount] = useState(programFee);
   const [couponBusy, setCouponBusy] = useState(false);
   const [couponMessage, setCouponMessage] = useState("");
+  const [showCoupon, setShowCoupon] = useState(false);
+  const [seats, setSeats] = useState<number | null>(null);
 
   function setPhase(next: PaymentPhase) {
     phaseRef.current = next;
@@ -69,13 +77,66 @@ export function InternshipEnrolment() {
     });
   }
 
-  function openDialog() {
+  const formRef = useRef(formValues);
+  formRef.current = formValues;
+  const sourceRef = useRef("unknown");
+  const startedRef = useRef(false);
+  const leadSentRef = useRef("");
+  const leadTrackedRef = useRef(false);
+
+  function openDialog(source = "unknown") {
     previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    sourceRef.current = source;
+    startedRef.current = false;
+    track("enrol_modal_opened", { program: "drone-technology-internship", source });
     setIsOpen(true);
   }
 
+  /** Saves name + phone as soon as they are valid, so a follow-up is possible if payment isn't finished. */
+  function captureLead() {
+    const v = formRef.current;
+    if (v.name.trim().length < 2 || v.phone.replace(/\D/g, "").length < 10) return;
+    const signature = `${v.name}|${v.phone}|${v.email}`;
+    if (leadSentRef.current === signature) return;
+    leadSentRef.current = signature;
+    fetch("/api/enrolment", { method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true, body: JSON.stringify({ action: "lead", name: v.name, phone: v.phone, email: v.email, source: sourceRef.current }) })
+      .then(response => response.ok ? response.json() as Promise<{ saved?: boolean }> : null)
+      .then(result => {
+        if (!result?.saved) { leadSentRef.current = ""; return; }
+        if (!leadTrackedRef.current) { leadTrackedRef.current = true; track("lead_submitted", { form: "internship_enrolment", program: "drone-technology-internship" }); }
+      })
+      .catch(() => { leadSentRef.current = ""; });
+  }
+
+  function trackFormStarted() {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    track("enrol_form_started", { program: "drone-technology-internship", source: sourceRef.current });
+  }
+
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch("/api/enrolment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "offer" }) })
+      .then(response => response.ok ? response.json() as Promise<{ seatsLeft: number | null }> : null)
+      .then(result => { if (result && typeof result.seatsLeft === "number") setSeats(result.seatsLeft); })
+      .catch(() => { /* The seat count is optional. */ });
+  }, [isOpen]);
+
+  useEffect(() => {
+    // Auto-apply the visitor's personal scratch offer so they never need to type a code.
+    if (!isOpen || session || appliedCoupon || couponInput) return;
+    const reward = readReward();
+    if (reward && rewardActive(reward, Date.now())) void applyCoupon(reward.code, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   const closeDialog = useCallback(() => {
     if (checkoutActive || phaseRef.current === "preparing" || phaseRef.current === "verifying") return;
+    if (phaseRef.current !== "paid") {
+      const v = formRef.current;
+      track("enrol_modal_closed", { program: "drone-technology-internship", source: sourceRef.current, form_started: startedRef.current, had_contact: v.name.trim().length > 1 && v.phone.replace(/\D/g, "").length >= 10 });
+    }
+    window.dispatchEvent(new Event("close-internship-enrolment"));
     setIsOpen(false);
   }, [checkoutActive]);
 
@@ -89,7 +150,7 @@ export function InternshipEnrolment() {
   }, []);
 
   useEffect(() => {
-    const open = () => openDialog();
+    const open = (event: Event) => openDialog((event as CustomEvent<{ source?: string }>).detail?.source);
     window.addEventListener("open-internship-enrolment", open);
     return () => window.removeEventListener("open-internship-enrolment", open);
   }, []);
@@ -130,7 +191,7 @@ export function InternshipEnrolment() {
     if (phase !== "paid" || !session?.reference) return;
     const key = `aerocadmy-purchase-${session.reference}`;
     try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch { /* Worst case the purchase is reported twice. */ }
-    track("payment_completed", { program: "drone-technology-internship", value: payableAmount / 100, currency: "INR", reference: session.reference, coupon: appliedCoupon?.code });
+    track("payment_completed", { program: "drone-technology-internship", value: payableAmount / 100, currency: "INR", reference: session.reference, coupon: couponLabel(appliedCoupon?.code) });
   }, [phase, session?.reference, payableAmount, appliedCoupon?.code]);
 
   async function request(active: Session, values: Record<string, unknown>) {
@@ -145,14 +206,14 @@ export function InternshipEnrolment() {
     if (typeof result.discountAmount === "number" && result.discountAmount > 0 && result.couponCode) {
       setAppliedCoupon({ code: result.couponCode, discountAmount: result.discountAmount });
       setCouponInput(result.couponCode);
-      setCouponMessage(`${result.couponCode} applied — you save ${formatINR(result.discountAmount)}.`);
+      setCouponMessage(`${isScratchCode(result.couponCode) ? "Your scratch offer" : result.couponCode} applied — you save ${formatINR(result.discountAmount)}.`);
     } else if (typeof result.amount === "number") {
       setAppliedCoupon(null);
     }
   }
 
-  async function applyCoupon() {
-    const code = couponInput.trim().toUpperCase();
+  async function applyCoupon(auto?: string | unknown, silent = false) {
+    const code = (typeof auto === "string" ? auto : couponInput).trim().toUpperCase();
     if (!code) { setCouponMessage("Enter a coupon code first."); return; }
     setCouponBusy(true);
     setCouponMessage("");
@@ -160,10 +221,11 @@ export function InternshipEnrolment() {
       const quoteSession = session ?? { id: crypto.randomUUID(), token: Array.from(crypto.getRandomValues(new Uint8Array(32)), n => n.toString(16).padStart(2, "0")).join("") };
       const result = await request(quoteSession, { action: "coupon", couponCode: code });
       updateOffer(result);
+      if (isScratchCode(result.couponCode)) track("scratch_offer_applied", { program: "drone-technology-internship", auto: silent });
     } catch (error) {
       setAppliedCoupon(null);
       setPayableAmount(programFee);
-      setCouponMessage(error instanceof Error ? error.message : "Could not apply this code. Please try again.");
+      if (!silent) setCouponMessage(error instanceof Error ? error.message : "Could not apply this code. Please try again.");
     } finally { setCouponBusy(false); }
   }
 
@@ -213,7 +275,7 @@ export function InternshipEnrolment() {
       if (!window.Razorpay || !result.orderId || !result.key) throw new Error("Checkout is unavailable. Please contact a counsellor.");
 
       const current = active;
-      track("checkout_started", { program: "drone-technology-internship", value: (result.amount ?? payableAmount) / 100, currency: "INR", coupon: appliedCoupon?.code });
+      track("checkout_started", { program: "drone-technology-internship", value: (result.amount ?? payableAmount) / 100, currency: "INR", coupon: couponLabel(appliedCoupon?.code) });
       const checkout = new window.Razorpay({
         key: result.key,
         order_id: result.orderId,
@@ -278,9 +340,15 @@ export function InternshipEnrolment() {
       </> : processing ? <div className={styles.paymentScreen} role="status" aria-live="polite">
         <span className={`${styles.spinner} ${styles.spinnerLarge}`} aria-hidden="true" />
         <p className={styles.eyebrow}>Secure payment</p>
-        <h2 id="enrolment-title">{phase === "verifying" ? "Confirming your payment" : "Waiting for payment"}</h2>
+        <h2 id="enrolment-title">{phase === "verifying" ? "Confirming your payment" : phase === "waiting" ? "Complete your payment" : "Setting up secure checkout"}</h2>
         <p>{phaseCopy[phase]}</p>
-        <span className={styles.paymentHint}>Your enrollment details are saved. Please don’t close this window or retry payment while confirmation is in progress.</span>
+        <ol className={styles.steps} aria-label="Enrollment progress">
+          <li className={styles.stepDone}><span aria-hidden="true"><CheckCircle2 size={16} /></span>Details saved</li>
+          <li className={phase === "verifying" ? styles.stepDone : styles.stepActive}><span aria-hidden="true">{phase === "verifying" ? <CheckCircle2 size={16} /> : "2"}</span>Payment</li>
+          <li className={phase === "verifying" ? styles.stepActive : ""}><span aria-hidden="true">3</span>Seat confirmed</li>
+        </ol>
+        <div className={styles.orderChip}><span>Drone Technology Internship<small>Batch starts {BATCH.startLabel}</small></span><b>{formatINR(payableAmount)}</b></div>
+        <span className={styles.paymentHint}><ShieldCheck size={14} aria-hidden="true" /> Your details are saved. Please keep this window open until you see your confirmation.</span>
       </div> : resultState ? <div className={`${styles.paymentScreen} ${phase === "failed" ? styles.paymentIssue : ""}`} role="status" aria-live="polite">
         {phase === "failed" ? <AlertCircle className={styles.resultIcon} aria-hidden="true" /> : phase === "review" ? <AlertCircle className={styles.resultIcon} aria-hidden="true" /> : <ShieldCheck className={styles.resultIcon} aria-hidden="true" />}
         <p className={styles.eyebrow}>{phase === "failed" ? "Payment not completed" : phase === "review" ? "Payment received" : "Payment status"}</p>
@@ -292,28 +360,52 @@ export function InternshipEnrolment() {
           {session && <button className={styles.status} type="button" onClick={checkStatus} disabled={busy || checkoutActive}>{busy ? "Checking payment…" : "Check payment status"}</button>}
         </div>
       </div> : <>
-        <p className={styles.eyebrow}>Your next step</p><h2 id="enrolment-title">Enroll in the Drone Technology Internship</h2>
-        <p className={styles.intro}>Register for the six-week live online internship, including an ESP32 drone kit you keep.</p>
-        <div className={styles.total}><span>Training + ESP32 kit<strong>Next batch · 15 November 2026</strong></span><span className={styles.totalPrice}><del>{formatINR(appliedCoupon ? programFee : 1199900)}</del><b>{formatINR(payableAmount)}</b></span></div>
-        <form onSubmit={submit} className={styles.form}>
+        <p className={styles.eyebrow}>Drone Technology Internship</p><h2 id="enrolment-title">Build and fly your own drone in 6 weeks</h2>
+        <div className={styles.proof}>
+          <span className={styles.rating}><RatingStars rating={reviewAverage} /><b>{reviewAverage.toFixed(1)}</b><span>({participantReviews.length} reviews)</span></span>
+          <span>Live with Yash Kansal</span>
+          {seats !== null && seats > 0 && seats <= BATCH.showSeatsBelow && <span className={styles.seatsLeft}><i aria-hidden="true" />Only {seats} of {BATCH.seatCap} seats left</span>}
+        </div>
+        <div className={styles.total}>
+          <span>Training + ESP32 kit<strong>Batch starts · {BATCH.startLabel}</strong></span>
+          <span className={styles.totalRight}>
+            <span className={styles.totalPrice}><del>{formatINR(PRICING.anchor)}</del><b>{formatINR(payableAmount)}</b></span>
+            <em className={styles.save}>You save {formatINR(PRICING.anchor - payableAmount)}</em>
+          </span>
+        </div>
+        <ul className={styles.benefits} aria-label="What you get">
+          <li><Video size={16} aria-hidden="true" />6 weeks of live classes + recordings</li>
+          <li><Box size={16} aria-hidden="true" />ESP32 drone kit, yours to keep</li>
+          <li><Award size={16} aria-hidden="true" />Internship certificate</li>
+          <li><Users size={16} aria-hidden="true" />Lifetime community access</li>
+          <li><Compass size={16} aria-hidden="true" />Mentor feedback and career guidance</li>
+        </ul>
+        <form onSubmit={submit} onFocus={trackFormStarted} className={styles.form}>
+          <fieldset disabled={busy} onBlur={captureLead}><legend>Your contact details</legend><div className={styles.grid}>
+            <label>Full name<input name="name" autoComplete="name" required minLength={2} maxLength={100} value={formValues.name} onChange={event => setFormValues(current => ({ ...current, name: event.target.value }))} /></label>
+            <label>Phone number<input name="phone" type="tel" autoComplete="tel" required minLength={10} maxLength={25} value={formValues.phone} onChange={event => setFormValues(current => ({ ...current, phone: event.target.value }))} /></label>
+            <label className={styles.full}>Email address<input name="email" type="email" autoComplete="email" required maxLength={254} value={formValues.email} onChange={event => setFormValues(current => ({ ...current, email: event.target.value }))} /></label>
+          </div></fieldset>
           <div className={styles.couponField}>
-            <label htmlFor="internship-coupon">Coupon code</label>
+            {isScratchCode(appliedCoupon?.code) && <p className={styles.earlyBird}>Your personal {formatINR(appliedCoupon?.discountAmount ?? 0)} offer is applied</p>}
+            {!showCoupon && !appliedCoupon && <button type="button" className={styles.couponToggle} onClick={() => setShowCoupon(true)}>Have a code?</button>}
+            {(showCoupon || (appliedCoupon && !isScratchCode(appliedCoupon.code))) && <><label htmlFor="internship-coupon">Coupon code</label>
             <div className={styles.couponRow}>
               <input id="internship-coupon" name="couponCode" autoComplete="off" autoCapitalize="characters" maxLength={32} value={couponInput} onChange={event => { setCouponInput(event.target.value.toUpperCase()); setCouponMessage(""); if (appliedCoupon) { setAppliedCoupon(null); setPayableAmount(programFee); } }} placeholder="Enter code" disabled={busy || couponBusy || checkoutActive} />
-              <button type="button" onClick={applyCoupon} disabled={busy || couponBusy || checkoutActive}>{couponBusy ? "Checking…" : "Apply"}</button>
+              <button type="button" onClick={() => applyCoupon()} disabled={busy || couponBusy || checkoutActive}>{couponBusy ? "Checking…" : "Apply"}</button>
               {appliedCoupon && <button type="button" className={styles.removeCoupon} onClick={removeCoupon} disabled={busy || couponBusy || checkoutActive}>Remove</button>}
-            </div>
-            {couponMessage && <p className={`${styles.couponMessage} ${appliedCoupon ? styles.couponSuccess : ""}`} role="status">{couponMessage}</p>}
-            {appliedCoupon && <p className={styles.discountLine}><span>{appliedCoupon.code} discount</span><strong>−{formatINR(appliedCoupon.discountAmount)}</strong></p>}
+            </div></>}
+            {couponMessage && !isScratchCode(appliedCoupon?.code) && <p className={`${styles.couponMessage} ${appliedCoupon ? styles.couponSuccess : ""}`} role="status">{couponMessage}</p>}
+            {appliedCoupon && <p className={styles.discountLine}><span>{isScratchCode(appliedCoupon.code) ? "Your offer" : `${appliedCoupon.code} discount`}</span><strong>−{formatINR(appliedCoupon.discountAmount)}</strong></p>}
           </div>
-          <fieldset disabled={busy}><legend>Your contact details</legend><div className={styles.grid}>
-            <label>Full name<input name="name" autoComplete="name" required minLength={2} maxLength={100} value={formValues.name} onChange={event => setFormValues(current => ({ ...current, name: event.target.value }))} /></label>
-            <label>Email address<input name="email" type="email" autoComplete="email" required maxLength={254} value={formValues.email} onChange={event => setFormValues(current => ({ ...current, email: event.target.value }))} /></label>
-            <label>Phone number<input name="phone" type="tel" autoComplete="tel" required minLength={10} maxLength={25} value={formValues.phone} onChange={event => setFormValues(current => ({ ...current, phone: event.target.value }))} /></label>
-          </div></fieldset>
           <p className={styles.note}>We’ll use these details to manage your enrollment. Payment details are handled securely by Razorpay.</p>
-          <div className={styles.actions}><button className="dark-action" disabled={busy || couponBusy || checkoutActive} type="submit">{busy ? "Please wait…" : "Continue to payment"}<ArrowRight size={18} /></button></div>
-          <p className={styles.security}><ShieldCheck size={16} /> {formatINR(payableAmount)} · Secure checkout with Razorpay</p>
+          <div className={styles.payBar}>
+            <div className={styles.payRow}>
+              <div className={styles.payPrice}><span>Total today</span><strong>{formatINR(payableAmount)}</strong></div>
+              <div className={styles.actions}><button className="dark-action" disabled={busy || couponBusy || checkoutActive} type="submit">{busy ? "Please wait…" : `Pay ${formatINR(payableAmount)} securely`}<ArrowRight size={18} /></button></div>
+            </div>
+            <p className={styles.security}><ShieldCheck size={16} /> Pay by UPI, card or netbanking · Secure checkout with Razorpay · Takes about a minute</p>
+          </div>
         </form>
         {session && <button className={styles.status} type="button" onClick={checkStatus} disabled={busy || checkoutActive}>Already attempted payment? Check payment status</button>}
         {session && <p className={styles.note}>Resuming checkout uses the details saved with your first registration.</p>}

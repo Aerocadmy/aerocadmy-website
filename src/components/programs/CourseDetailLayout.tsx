@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowUpRight, BookOpen, Box, CalendarDays, ChevronDown, ChevronRight, Home, Laptop, Video } from "lucide-react";
+import { ArrowUpRight, BookOpen, Box, CalendarDays, ChevronDown, ChevronRight, Home, Laptop, User, Video } from "lucide-react";
 import type { CourseVisual } from "@/data/courses";
 import { CourseImage } from "./CourseImage";
+import { SectionNav } from "./SectionNav";
 import styles from "./CourseDetail.module.css";
 
-const factIcons = { video: Video, modules: BookOpen, kit: Box, calendar: CalendarDays, online: Laptop };
+const factIcons = { video: Video, modules: BookOpen, kit: Box, calendar: CalendarDays, online: Laptop, person: User };
 type Fact = { icon: keyof typeof factIcons; label: string };
 
 export function CourseDetailLayout({ title, category, eyebrow, summary, facts, sections, sidebar, children, reviewSummary }: {
@@ -28,10 +29,9 @@ export function CourseDetailLayout({ title, category, eyebrow, summary, facts, s
           const Icon = factIcons[fact.icon];
           return <li key={fact.label}><Icon size={17} aria-hidden="true" />{fact.label}</li>;
         })}</ul>
-        <nav className={styles.sectionNav} aria-label="On this page">{sections.map(section => <a key={section.id} href={`#${section.id}`}>{section.label}</a>)}</nav>
       </header>
       {sidebar}
-      <div className={styles.content}>{children}</div>
+      <div className={styles.content}><SectionNav sections={sections} />{children}</div>
     </div>
   </main>;
 }
