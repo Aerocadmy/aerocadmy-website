@@ -104,3 +104,20 @@
 .orderChip small { display: block; margin-top: 3px; color: #61747e; font-size: 12px; }
 .orderChip b { font-size: 20px; font-weight: 600; white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .steps .stepActive span { animation: none; } }
+@media (max-width: 600px) {
+  .proof { margin-top: 12px; gap: 6px 14px; }
+  .total { flex-direction: column; align-items: stretch; gap: 10px; margin-top: 16px; padding: 16px 18px; }
+  .total strong { margin-top: 4px; }
+  .totalRight { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; }
+  .benefits { margin-top: 16px; gap: 8px; }
+  .form { margin-top: 18px; }
+  .form legend { margin-bottom: 12px; }
+  .form fieldset { margin-bottom: 12px; }
+  .grid { gap: 12px; }
+  .grid label { gap: 6px; }
+  .grid input { min-height: 48px; }
+  .couponField { margin-bottom: 8px; }
+  .payBar { margin-top: 12px; }
+  .payBar .security { margin-top: 8px; }
+}
+@media (max-width: 480px) { .securely { display: none; } }

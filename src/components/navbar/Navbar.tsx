@@ -28,10 +28,12 @@ export const Navbar: React.FC = () => {
   const [mobileCategoryOpen, setMobileCategoryOpen] = useState<string | null>(null);
   // Starts as the static line so server and first client render match; upgraded after mount.
   const [announcement, setAnnouncement] = useState("Our live internship program is live now");
+  const [announcementLead, setAnnouncementLead] = useState("");
 
   useEffect(() => {
     let cancelled = false;
-    const base = `Live drone internship \u00b7 Batch starts ${BATCH.startLabel}`;
+    const base = `Batch starts ${BATCH.startLabel}`;
+    setAnnouncementLead("Live drone internship \u00b7 ");
     setAnnouncement(base);
     fetch("/api/enrolment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "offer" }) })
       .then(response => response.ok ? response.json() as Promise<{ seatsLeft: number | null }> : null)
@@ -88,7 +90,7 @@ export const Navbar: React.FC = () => {
       <header ref={headerRef} className={`${styles.header} ${isScrolled ? styles.scrolled : ""}`}>
         <div className={styles.announcement}>
           <span className={styles.offerDot} aria-hidden="true" />
-          <Link href="/programs/drone-technology-internship" className={styles.announcementLink}>{announcement}</Link>
+          <Link href="/programs/drone-technology-internship" className={styles.announcementLink}>{announcementLead && <span className={styles.announcementLead}>{announcementLead}</span>}{announcement}</Link>
         </div>
         <div className={styles.row}>
           <Link href="/" aria-label="Aerocadmy home" onClick={closeMenus} className={styles.logo}>
