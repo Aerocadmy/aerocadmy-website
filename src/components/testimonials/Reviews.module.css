@@ -45,3 +45,4 @@
   .score strong { font-size: 48px; }
   .card { padding: 20px; }
 }
+@media (max-width: 600px) { .topRating { min-height: 28px; margin-top: 6px; } }

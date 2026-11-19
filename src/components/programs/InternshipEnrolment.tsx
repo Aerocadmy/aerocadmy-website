@@ -225,7 +225,7 @@ export function InternshipEnrolment() {
     } catch (error) {
       setAppliedCoupon(null);
       setPayableAmount(programFee);
-      if (!silent) setCouponMessage(error instanceof Error ? error.message : "Could not apply this code. Please try again.");
+      if (!silent || isScratchCode(code)) setCouponMessage(error instanceof Error ? error.message : "Could not apply this code. Please try again.");
     } finally { setCouponBusy(false); }
   }
 
@@ -402,7 +402,7 @@ export function InternshipEnrolment() {
           <div className={styles.payBar}>
             <div className={styles.payRow}>
               <div className={styles.payPrice}><span>Total today</span><strong>{formatINR(payableAmount)}</strong></div>
-              <div className={styles.actions}><button className="dark-action" disabled={busy || couponBusy || checkoutActive} type="submit">{busy ? "Please wait…" : `Pay ${formatINR(payableAmount)} securely`}<ArrowRight size={18} /></button></div>
+              <div className={styles.actions}><button className="dark-action" disabled={busy || couponBusy || checkoutActive} type="submit">{busy ? "Please wait…" : <>Pay {formatINR(payableAmount)}<span className={styles.securely}> securely</span></>}<ArrowRight size={18} /></button></div>
             </div>
             <p className={styles.security}><ShieldCheck size={16} /> Pay by UPI, card or netbanking · Secure checkout with Razorpay · Takes about a minute</p>
           </div>

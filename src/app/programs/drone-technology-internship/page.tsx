@@ -56,7 +56,7 @@ export default function InternshipPage() {
     <CourseDetailLayout title="Drone Technology Internship" category="Live online program" eyebrow="Live online · Enrolment open"
       reviewSummary={<ReviewRating />}
       summary="Build, program and fly your own ESP32 drone in six live weeks, with the kit yours to keep."
-      facts={[{ icon: "calendar", label: "6 weeks" }, { icon: "video", label: "Live classes + recordings" }, { icon: "kit", label: "ESP32 kit included" }, { icon: "person", label: "Taught live by Yash Kansal" }]}
+      facts={[{ icon: "calendar", label: "6 weeks" }, { icon: "video", label: "Live classes + recordings" }, { icon: "kit", label: "ESP32 kit included" }, { icon: "person", label: "Taught by Yash Kansal" }]}
       sections={[{ id: "overview", label: "Overview" }, { id: "curriculum", label: "Six-week journey" }, { id: "demo-class", label: "Demo class" }, { id: "brochure", label: "Brochure" }, { id: "project", label: "Practical learning" }, { id: "kit", label: "Your kit" }, { id: "instructor", label: "Instructor" }, { id: "reviews", label: "Reviews" }]}
       sidebar={<CourseSummaryCard featuredVisual media={<InternshipTrailer src={trailerUrl} />}>
         <p className={`${styles.eyebrow} ${styles.cardLabel}`}>Training + ESP32 drone kit</p>

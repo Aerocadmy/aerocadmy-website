@@ -148,9 +148,10 @@
   .breadcrumb a { min-height: 36px; }
   .hero h1 { font-size: clamp(30px,8vw,38px); line-height: 1.16; text-wrap: initial; overflow-wrap: break-word; }
   .eyebrow { font-size: 9px; margin-bottom: 13px; }
-  .summary { font-size: 16px; line-height: 1.75; margin-top: 18px; }
-  .facts { font-size: 12px; gap: 8px; margin-top: 18px; }
-  .facts li { padding: 6px 12px; }
+  .summary { font-size: 16px; line-height: 1.6; margin-top: 8px; }
+  .facts { font-size: 12px; gap: 6px; margin-top: 14px; }
+  .facts li { padding: 5px 10px; gap: 6px; }
+  .facts svg { width: 15px; height: 15px; }
   .sectionNav { gap: 22px; margin-bottom: 26px; }
   .sectionNav a { font-size: 13px; }
   .summaryCard { display: block; }
