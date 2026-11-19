@@ -120,3 +120,9 @@
   .choice > span:not(.check) { flex-basis: auto; max-width: none; }
   .check { top: calc(50% - 8px); bottom: auto; }
 }
+@media (max-width: 760px) {
+  .eyebrow { font-size: 11px; }
+  .photoBadge { font-size: 11px; }
+  .formSteps li, .formSteps li > span, .form label > span { font-size: 12px; }
+  .contactNotice { font-size: 12px; }
+}

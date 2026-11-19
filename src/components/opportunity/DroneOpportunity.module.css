@@ -71,7 +71,7 @@
 }
 @media (max-width: 540px) {
   .container { padding: 0 24px; }
-  .eyebrow { font-size: 10px; margin-bottom: 15px; }
+  .eyebrow { font-size: 11px; margin-bottom: 15px; }
   .heading h2 { font-size: clamp(30px, 8vw, 40px); line-height: 1.14; }
   .tabs { gap: 24px; }
   .tabs button { font-size: 12px; }

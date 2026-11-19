@@ -28,7 +28,12 @@ export function imageBounds(src: string) {
 }
 
 // Crop transparent padding in CSS, leaving the original PNG intact.
-export function mountComponentImage(el: HTMLDivElement, src: string, width: number) {
+/**
+ * `compact` serves a 1080px-wide resized copy through Next's image optimizer. Phones draw
+ * these parts far smaller than the 1400-1700px originals, and the full-size decodes waste
+ * the limited GPU memory there. The crop maths below only uses ratios, so it is unaffected.
+ */
+export function mountComponentImage(el: HTMLDivElement, src: string, width: number, compact = false) {
   const crop = imageBounds(src);
   const viewport = document.createElement('div');
   viewport.style.position = 'relative';
@@ -54,6 +59,6 @@ export function mountComponentImage(el: HTMLDivElement, src: string, width: numb
   }
   viewport.appendChild(image);
   el.appendChild(viewport);
-  image.src = src;
+  image.src = compact ? `/_next/image?url=${encodeURIComponent(src)}&w=1080&q=90` : src;
   return image;
 }
