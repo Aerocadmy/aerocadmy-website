@@ -1,0 +1,16 @@
+.price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.price del { color: #718078; font-size: 15px; text-decoration-color: #9d665e; text-decoration-thickness: 1.5px; }
+.price strong { font-size: 34px; font-weight: 500; letter-spacing: -.04em; line-height: 1.25; }
+.tag { padding: 3px 9px; border-radius: 999px; background: #e1f2e8; color: #087957; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.save { margin-top: 6px; color: #52685f; font-size: 12px; line-height: 1.6; }
+.timer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; padding: 10px 13px; border: 1px solid #cfe5da; border-radius: 10px; background: #f3faf6; }
+.timerLabel { color: #304a43; font-size: 12px; font-weight: 500; }
+.clock { display: inline-flex; align-items: baseline; gap: 2px; font-variant-numeric: tabular-nums; color: #132636; }
+.clock b { font-size: 16px; font-weight: 600; }
+.clock i { margin-right: 5px; color: #718078; font-size: 11px; font-style: normal; }
+.seats { display: flex; align-items: center; gap: 8px; margin-top: 12px; color: #9a4d35; font-size: 13px; font-weight: 500; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #d4553a; animation: pulse 1.6s ease-in-out infinite; }
+.batch { margin-top: 12px; color: #087957; font-size: 12px; }
+@keyframes pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+.placeholder { min-height: 190px; }

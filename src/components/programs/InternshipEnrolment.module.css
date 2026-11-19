@@ -63,3 +63,5 @@
 @keyframes payment-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } }
 @media(max-width:600px) { .grid { grid-template-columns: 1fr; }.actions { flex-direction: column; }.actions a,.actions button { width: 100%; }.total { align-items: flex-start; }.total b { font-size: 25px; } }
+.couponToggle { padding: 0; border: 0; background: transparent; color: #52685f; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.earlyBird { padding: 9px 12px; border-radius: 9px; background: #eff8f2; color: #087957; font-size: 13px; font-weight: 500; }

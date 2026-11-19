@@ -1,0 +1,7 @@
+.bar { position: fixed; right: 0; bottom: 0; left: 0; z-index: 40; display: none; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 84px calc(10px + env(safe-area-inset-bottom)) 16px; border-top: 1px solid #cfe5da; background: #fffffff2; backdrop-filter: blur(10px); box-shadow: 0 -8px 24px #13263614; }
+.info { display: flex; flex-direction: column; min-width: 0; }
+.info strong { color: #132636; font-size: 20px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+.info span { color: #9a4d35; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.cta { flex-shrink: 0; min-height: 46px; padding: 0 24px; border: 0; border-radius: 999px; background: #087957; color: #fff; font-size: 15px; font-weight: 600; }
+.cta:active { background: #066549; }
+@media (max-width: 900px) { .bar { display: flex; } }
