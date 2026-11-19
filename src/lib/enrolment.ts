@@ -33,7 +33,7 @@ export async function claimScratchOffer(token: unknown) {
   for (let attempt = 0; !row && attempt < 3; attempt++) {
     const expiresAt = new Date(Date.now() + PRICING.scratchHours * 3600 * 1000).toISOString();
     const { error } = await admin.from("internship_scratch_offers").insert({ code: newScratchCode(), token_hash: tokenHash, discount_amount: PRICING.scratchDiscount, expires_at: expiresAt, batch_start: BATCH.startDate });
-    if (error && error.code !== "23505") throw new Error("Offer could not be created.");
+    if (error && error.code !== "23505") { console.error("[scratch] insert failed:", error.code, error.message); throw new Error("Offer could not be created."); }
     row = await existing(); // Also resolves a race on the same token, or a code collision on retry.
   }
   if (!row) throw new Error("Offer could not be created.");

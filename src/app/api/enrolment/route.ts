@@ -49,6 +49,7 @@ export async function POST(request: Request) {
     return NextResponse.json(await confirmPayment(orderId, v.paymentId));
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
+    console.error("[enrolment] request failed:", message);
     if (error instanceof CouponValidationError) return NextResponse.json({ error: message }, { status: 400, headers: { "Cache-Control": "no-store" } });
     return NextResponse.json({ error: message.startsWith("Payments are not") || message.startsWith("Your payment order") ? message : "We couldn’t complete this step. If money was deducted, check payment status or contact the counsellor before paying again." }, { status: 503 });
   }
