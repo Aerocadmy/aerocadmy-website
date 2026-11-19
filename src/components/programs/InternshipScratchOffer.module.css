@@ -18,3 +18,20 @@
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
 @media (max-width: 900px) { .pill { bottom: calc(86px + env(safe-area-inset-bottom)); right: 84px; } .pillMain { font-size: 13px; padding-left: 14px; } }
 @media (prefers-reduced-motion: reduce) { .pill { animation: none; } }
+
+.pillMain svg { animation: wiggle 2.6s ease-in-out infinite; transform-origin: 50% 80%; }
+@keyframes wiggle { 0%, 70%, 100% { transform: rotate(0); } 76% { transform: rotate(-14deg); } 84% { transform: rotate(12deg); } 92% { transform: rotate(-8deg); } }
+.confetti { position: absolute; left: 50%; top: 52%; width: 0; height: 0; z-index: 3; pointer-events: none; }
+.piece { position: absolute; left: 0; top: 0; width: var(--s); height: calc(var(--s) * .55); border-radius: 1.5px; background: var(--c); opacity: 0; animation: burst 1.7s cubic-bezier(.2, .7, .3, 1) var(--d) forwards; }
+@keyframes burst {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(.4); }
+  35% { opacity: 1; transform: translate(calc(var(--x) * .8), var(--y)) rotate(calc(var(--r) * .5)) scale(1); }
+  100% { opacity: 0; transform: translate(var(--x), calc(var(--y) + 330px)) rotate(var(--r)) scale(1); }
+}
+.won { border-color: #087957; box-shadow: 0 0 0 4px #18cb9633, 0 14px 40px #0879572e; animation: pop .6s cubic-bezier(.2, 1.4, .4, 1); }
+.won::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, #ffffffc0 50%, transparent 70%); transform: translateX(-120%); animation: shine 1.2s .25s ease-out forwards; pointer-events: none; }
+@keyframes pop { 0% { transform: scale(.9); } 55% { transform: scale(1.07); } 100% { transform: scale(1); } }
+@keyframes shine { to { transform: translateX(120%); } }
+.won .prize code, .won .prize span { animation: fade-up .5s .45s both; }
+@keyframes fade-up { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .pillMain svg, .won, .won::after, .won .prize code, .won .prize span { animation: none; } .won::after { display: none; } .confetti { display: none; } }

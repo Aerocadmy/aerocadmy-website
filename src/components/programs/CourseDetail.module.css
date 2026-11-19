@@ -10,16 +10,18 @@
 .eyebrow { display: flex; align-items: center; gap: 8px; color: #087957; font-size: 10px; font-weight: 600; line-height: 1.7; text-transform: uppercase; letter-spacing: .13em; margin-bottom: 15px; }
 .statusDot { width: 6px; height: 6px; border-radius: 50%; background: #11b786; box-shadow: 0 0 0 4px #11b78612; }
 .hero h1 { max-width: 830px; font-size: clamp(32px,3.3vw,48px); line-height: 1.16; font-weight: 600; letter-spacing: -.04em; text-wrap: balance; }
-.summary { max-width: 700px; margin-top: 22px; font-size: 17px; line-height: 1.8; color: #61747e; }
-.facts { display: flex; flex-wrap: wrap; gap: 14px 24px; margin-top: 28px; color: #48616a; font-size: 12px; }
-.facts li { display: flex; align-items: center; gap: 8px; line-height: 1.7; }
+.summary { max-width: 700px; margin-top: 16px; font-size: 17px; line-height: 1.8; color: #61747e; }
+.facts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; color: #304a43; font-size: 13px; font-weight: 500; }
+.facts li { display: flex; align-items: center; gap: 8px; padding: 7px 14px; border: 1px solid #d7e7df; border-radius: 999px; background: #f6fbf8; line-height: 1.5; }
 .facts svg { color: #087957; flex-shrink: 0; }
-.sectionNav { display: flex; gap: 24px; overflow-x: auto; margin-top: 38px; border-bottom: 1px solid #dde7e1; scrollbar-width: none; }
+.sectionNav { position: sticky; top: var(--nav-h); z-index: 20; display: flex; gap: 26px; overflow-x: auto; margin: 0 0 34px; border-bottom: 1px solid #dde7e1; background: #ffffffee; backdrop-filter: blur(8px); scrollbar-width: none; }
 .sectionNav::-webkit-scrollbar { display: none; }
-.sectionNav a { display: inline-flex; align-items: center; min-height: 50px; color: #526b70; font-size: 12px; white-space: nowrap; border-bottom: 2px solid transparent; }
+.sectionNav a { display: inline-flex; align-items: center; min-height: 50px; color: #48616a; font-size: 13px; white-space: nowrap; border-bottom: 2px solid transparent; }
+.sectionNav a[aria-current="true"] { color: #087957; font-weight: 600; border-bottom-color: #087957; }
 .sectionNav a:hover { color: #087957; border-bottom-color: #11b786; }
-.content { grid-area: content; padding-top: 38px; }
-.section { padding-bottom: 36px; margin-bottom: 36px; border-bottom: 1px solid #e0e8e3; scroll-margin-top: calc(var(--nav-h) + 24px) !important; }
+.content { grid-area: content; padding-top: 30px; }
+.content [id] { scroll-margin-top: calc(var(--nav-h) + 76px); }
+.section { padding-bottom: 36px; margin-bottom: 36px; border-bottom: 1px solid #e0e8e3; scroll-margin-top: calc(var(--nav-h) + 76px) !important; }
 .section h2, .waitlist h2 { font-size: 25px; line-height: 1.3; font-weight: 500; letter-spacing: -.025em; margin-bottom: 18px; }
 .section h3 { font-size: 16px; font-weight: 500; line-height: 1.5; margin-bottom: 10px; }
 .section p { color: #61747e; font-size: 15px; line-height: 1.85; }
@@ -139,7 +141,6 @@
   .cardVisual > div { aspect-ratio: auto; height: 100%; }
   .learningPoints, .audience { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; }
   .hero h1 { max-width: 700px; font-size: 40px; }
-  .sectionNav { margin-top: 28px; }
 }
 @media (max-width: 600px) {
   .container { padding: 20px 20px 56px; }
@@ -148,8 +149,9 @@
   .hero h1 { font-size: clamp(30px,8vw,38px); line-height: 1.16; text-wrap: initial; overflow-wrap: break-word; }
   .eyebrow { font-size: 9px; margin-bottom: 13px; }
   .summary { font-size: 16px; line-height: 1.75; margin-top: 18px; }
-  .facts { font-size: 12px; gap: 12px 20px; margin-top: 22px; }
-  .sectionNav { gap: 22px; margin-top: 22px; }
+  .facts { font-size: 12px; gap: 8px; margin-top: 18px; }
+  .facts li { padding: 6px 12px; }
+  .sectionNav { gap: 22px; margin-bottom: 26px; }
   .sectionNav a { font-size: 13px; }
   .summaryCard { display: block; }
   .cardVisual > div { aspect-ratio: 16/9; height: auto; }
@@ -182,3 +184,4 @@
   .formNote, .note, .curriculumNote, .projectFootnote { font-size: 12px !important; }
 }
 @media (prefers-reduced-motion: reduce) { .moduleChevron { transition: none; } }
+.cardLabel { font-size: 12px; letter-spacing: .1em; color: #304a43; margin-bottom: 8px; }

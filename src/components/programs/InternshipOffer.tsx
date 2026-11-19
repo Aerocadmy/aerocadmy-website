@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CalendarDays, Gift, Users } from "lucide-react";
 import { BATCH, PRICING, scratchPrice } from "@/lib/batch";
 import { formatINR, useScratchReward } from "./useScratchReward";
 import styles from "./InternshipOffer.module.css";
@@ -19,20 +20,32 @@ export function InternshipOffer() {
   const showSeats = seats !== null && seats <= BATCH.showSeatsBelow;
   if (!ready) return <div className={styles.placeholder} aria-hidden="true" />;
 
+  const price = reward ? scratchPrice : PRICING.regular;
+  const taken = seats === null ? 0 : Math.max(0, BATCH.seatCap - seats);
+  const filled = Math.min(100, (taken / BATCH.seatCap) * 100);
+
   return <>
     <div className={styles.price}>
       <del>{formatINR(PRICING.anchor)}</del>
-      <strong>{formatINR(reward ? scratchPrice : PRICING.regular)}</strong>
-      {reward && <span className={styles.tag}>Your offer</span>}
+      <strong>{formatINR(price)}</strong>
     </div>
-    {reward && <p className={styles.save}>Your personal {formatINR(reward.discountAmount)} discount is applied at checkout.</p>}
-    {reward && <div className={styles.timer} role="timer" aria-label="Your offer expires in">
-      <span className={styles.timerLabel}>Offer expires in</span>
-      <span className={styles.clock}><b>{remaining}</b></span>
-    </div>}
-    {showSeats && (seats > 0
-      ? <p className={styles.seats}><span aria-hidden="true" className={styles.dot} />Only {seats} of {BATCH.seatCap} seats left</p>
-      : <p className={styles.seats}>This batch is full — talk to a counsellor to join the waitlist.</p>)}
-    <p className={styles.batch}>Next batch starts · {BATCH.startLabel}</p>
+    {reward
+      ? <div className={styles.offerBox} role="timer" aria-label="Your offer expires in">
+          <div className={styles.offerHead}><Gift size={15} aria-hidden="true" /><span>Your offer</span><b>Save {formatINR(PRICING.anchor - price)}</b></div>
+          <div className={styles.offerTime}><span>Expires in</span><b>{remaining}</b></div>
+        </div>
+      : <p className={styles.savePill}>You save {formatINR(PRICING.anchor - price)}</p>}
+    {showSeats && seats === 0
+      ? <p className={styles.full}>This batch is full — talk to a counsellor to join the waitlist.</p>
+      : <ul className={styles.meta}>
+          {showSeats && <li className={styles.seatsBlock}>
+            <div className={styles.seatsTop}>
+              <span className={styles.seats}><Users size={16} aria-hidden="true" />{seats} of {BATCH.seatCap} seats left</span>
+              {filled >= 50 && <em className={styles.fast}>Filling fast</em>}
+            </div>
+            <div className={styles.bar} role="progressbar" aria-label="Seats filled" aria-valuemin={0} aria-valuemax={BATCH.seatCap} aria-valuenow={taken}><span style={{ width: `${filled}%` }} /></div>
+          </li>}
+          <li><CalendarDays size={16} aria-hidden="true" />Starts {BATCH.startLabel}</li>
+        </ul>}
   </>;
 }

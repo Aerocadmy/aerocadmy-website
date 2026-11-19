@@ -89,3 +89,5 @@
   .announcement { display: none; }
   .logoImage { height: 34px; }
 }
+.announcementLink { color: inherit; text-decoration: none; }
+.announcementLink:hover { text-decoration: underline; text-underline-offset: 3px; }

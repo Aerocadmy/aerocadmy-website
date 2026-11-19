@@ -10,6 +10,12 @@ import styles from "./InternshipScratchOffer.module.css";
 const DISMISS_KEY = "aerocadmy-scratch-dismissed";
 const CARD_W = 300, CARD_H = 150, CLEAR_TO_REVEAL = 0.45;
 type Phase = "idle" | "claiming" | "done" | "error";
+type Piece = { x: number; y: number; r: number; d: number; size: number; color: string };
+const CONFETTI_COLORS = ["#18cb96", "#087957", "#f5b83d", "#ff7a59", "#5b8def", "#ffffff"];
+const makeConfetti = (): Piece[] => Array.from({ length: 44 }, (_, i) => ({
+  x: (Math.random() - 0.5) * 340, y: -(50 + Math.random() * 190), r: Math.random() * 720 - 360,
+  d: Math.random() * 0.18, size: 6 + Math.random() * 6, color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+}));
 
 /**
  * A personal, one-time offer: a small prompt appears after ~50% scroll (or on desktop exit intent),
@@ -22,6 +28,8 @@ export function InternshipScratchOffer() {
   const [dismissed, setDismissed] = useState(true);
   const [enrolmentOpen, setEnrolmentOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
+  const [pieces, setPieces] = useState<Piece[]>([]);
+  const [shownAmount, setShownAmount] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const shownTracked = useRef(false);
@@ -86,11 +94,29 @@ export function InternshipScratchOffer() {
     ctx.fillStyle = gradient; ctx.fillRect(0, 0, CARD_W, CARD_H);
     ctx.fillStyle = "#ffffff30";
     for (let i = 0; i < 28; i++) { ctx.beginPath(); ctx.arc((i * 47) % CARD_W, (i * 29) % CARD_H, 3 + (i % 3), 0, Math.PI * 2); ctx.fill(); }
-    ctx.fillStyle = "#ffffff"; ctx.font = "600 17px system-ui, sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("Scratch here to reveal", CARD_W / 2, CARD_H / 2 - 2);
-    ctx.font = "13px system-ui, sans-serif"; ctx.fillStyle = "#ffffffd9";
-    ctx.fillText("your personal offer", CARD_W / 2, CARD_H / 2 + 20);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#ffffff"; ctx.font = "700 54px system-ui, sans-serif";
+    ctx.fillText("?", CARD_W / 2, CARD_H / 2 + 8);
+    ctx.font = "600 14px system-ui, sans-serif"; ctx.fillStyle = "#ffffffe6";
+    ctx.fillText("Scratch to reveal your mystery gift", CARD_W / 2, CARD_H / 2 + 38);
   }, [open, phase]);
+
+  useEffect(() => {
+    if (phase !== "done") { setShownAmount(0); setPieces([]); return; }
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (typeof navigator.vibrate === "function") navigator.vibrate([30, 40, 60]);
+    if (calm) { setShownAmount(PRICING.scratchDiscount); return; }
+    setPieces(makeConfetti());
+    const start = performance.now();
+    let frame = 0;
+    const tick = (time: number) => {
+      const progress = Math.min(1, (time - start) / 1100);
+      setShownAmount(Math.round((PRICING.scratchDiscount * (1 - Math.pow(1 - progress, 3))) / 100) * 100);
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [phase]);
 
   async function claim() {
     setPhase("claiming");
@@ -160,21 +186,22 @@ export function InternshipScratchOffer() {
 
   return <>
     {showPill && <div className={styles.pill} role="region" aria-label="Your personal offer">
-      <button type="button" className={styles.pillMain} onClick={openCard}><Gift size={17} aria-hidden="true" />Scratch to reveal your offer</button>
+      <button type="button" className={styles.pillMain} onClick={openCard}><Gift size={17} aria-hidden="true" />Mystery gift · Scratch to reveal</button>
       <button type="button" className={styles.pillClose} aria-label="Dismiss offer" onClick={dismiss}><X size={15} aria-hidden="true" /></button>
     </div>}
     {open && <div className={styles.overlay} onMouseDown={event => { if (event.target === event.currentTarget) close(); }}>
       <section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="scratch-title">
         <button ref={closeRef} type="button" className={styles.close} aria-label="Close" onClick={close}><X size={18} aria-hidden="true" /></button>
-        <p className={styles.eyebrow}>A gift for you</p>
-        <h2 id="scratch-title">{formatINR(PRICING.scratchDiscount)} off your enrollment</h2>
-        <div className={styles.card} style={{ width: CARD_W, height: CARD_H }}>
+        <p className={styles.eyebrow}>{phase === "done" ? "Congratulations" : "A gift for you"}</p>
+        <h2 id="scratch-title">{phase === "done" ? `You unlocked ${formatINR(PRICING.scratchDiscount)} off!` : "Scratch to unlock your mystery reward"}</h2>
+        {pieces.length > 0 && <div className={styles.confetti} aria-hidden="true">{pieces.map((piece, index) => <i key={index} className={styles.piece} style={{ "--x": `${piece.x}px`, "--y": `${piece.y}px`, "--r": `${piece.r}deg`, "--d": `${piece.d}s`, "--s": `${piece.size}px`, "--c": piece.color } as React.CSSProperties} />)}</div>}
+        <div className={`${styles.card} ${phase === "done" ? styles.won : ""}`} style={{ width: CARD_W, height: CARD_H }}>
           <div className={styles.prize} aria-live="polite">
-            <strong>{formatINR(PRICING.scratchDiscount)} OFF</strong>
+            <strong>{formatINR(phase === "done" ? shownAmount : PRICING.scratchDiscount)} OFF</strong>
             {phase === "done" && reward ? <><code>{reward.code}</code><span>Valid for 24 hours · expires in {remaining}</span></>
               : phase === "claiming" ? <span>Creating your personal code…</span>
               : phase === "error" ? <span>Something went wrong. Please try again.</span>
-              : <span>Your personal code is inside</span>}
+              : <span>Your mystery gift is hiding here</span>}
           </div>
           {phase === "idle" && <canvas ref={canvasRef} className={styles.canvas} style={{ width: CARD_W, height: CARD_H }} onPointerDown={startScratch} onPointerMove={scratchAt} onPointerUp={() => { drawing.current = null; }} onPointerCancel={() => { drawing.current = null; }} aria-hidden="true" />}
         </div>
