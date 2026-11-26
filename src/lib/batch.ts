@@ -9,7 +9,7 @@ const BATCH_DAY = 15;
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 const EXTERNAL_REGISTRATIONS: Record<string, number> = {
-  "2026-12-15": 5,
+  "2026-12-15": 23,
 };
 
 /** Midnight IST on the 15th of the given month, as a UTC timestamp. */
