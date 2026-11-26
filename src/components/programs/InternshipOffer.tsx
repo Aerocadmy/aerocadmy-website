@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { CalendarDays, Gift, Users } from "lucide-react";
-import { BATCH, PRICING, scratchPrice } from "@/lib/batch";
+import { BATCH, PRICING, SALE, salePrice, scratchPrice } from "@/lib/batch";
 import { formatINR, useScratchReward } from "./useScratchReward";
 import styles from "./InternshipOffer.module.css";
 
 export function InternshipOffer() {
-  const { ready, reward, remaining } = useScratchReward();
+  const { ready, sale, saleRemaining, reward, remaining } = useScratchReward();
   const [seats, setSeats] = useState<number | null>(null);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export function InternshipOffer() {
   const showSeats = seats !== null && seats <= BATCH.showSeatsBelow;
   if (!ready) return <div className={styles.placeholder} aria-hidden="true" />;
 
-  const price = reward ? scratchPrice : PRICING.regular;
+  const price = sale ? salePrice : reward ? scratchPrice : PRICING.regular;
   const taken = seats === null ? 0 : Math.max(0, BATCH.seatCap - seats);
   const filled = Math.min(100, (taken / BATCH.seatCap) * 100);
 
@@ -29,7 +29,12 @@ export function InternshipOffer() {
       <del>{formatINR(PRICING.anchor)}</del>
       <strong>{formatINR(price)}</strong>
     </div>
-    {reward
+    {sale
+      ? <div className={styles.offerBox} role="timer" aria-label={`${SALE.name} offer ends in`}>
+          <div className={styles.offerHead}><Gift size={15} aria-hidden="true" /><span>{SALE.name} · {SALE.code}</span><b>Save {formatINR(PRICING.anchor - price)}</b></div>
+          <div className={styles.offerTime}><span>Ends in</span><b>{saleRemaining}</b></div>
+        </div>
+      : reward
       ? <div className={styles.offerBox} role="timer" aria-label="Your offer expires in">
           <div className={styles.offerHead}><Gift size={15} aria-hidden="true" /><span>Your offer</span><b>Save {formatINR(PRICING.anchor - price)}</b></div>
           <div className={styles.offerTime}><span>Expires in</span><b>{remaining}</b></div>

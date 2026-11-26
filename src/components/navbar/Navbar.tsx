@@ -9,7 +9,7 @@ import { ComponentImage } from "@/components/ui/ComponentImage";
 import { ASSETS } from "@/lib/assets";
 import { courseCategories } from "@/data/course-categories";
 import { recordedCourses } from "@/data/courses";
-import { BATCH } from "@/lib/batch";
+import { BATCH, SALE, salePrice, saleActive } from "@/lib/batch";
 import styles from "./Navbar.module.css";
 
 const sectionLinks = [
@@ -32,6 +32,10 @@ export const Navbar: React.FC = () => {
 
   useEffect(() => {
     let cancelled = false;
+    if (saleActive()) {
+      setAnnouncement(`${SALE.name}: ₹${(salePrice / 100).toLocaleString("en-IN")} with code ${SALE.code}`);
+      return;
+    }
     const base = `Batch starts ${BATCH.startLabel}`;
     setAnnouncementLead("Live drone internship \u00b7 ");
     setAnnouncement(base);

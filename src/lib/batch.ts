@@ -60,5 +60,22 @@ export const PRICING = {
   scratchHours: 24,
 } as const;
 
+/**
+ * Time-boxed sale. It switches on and off by itself (IST); the server enforces the window.
+ * The code and discount must match the `enrolments_coupon_discount_valid` database constraint.
+ */
+export const SALE = {
+  name: "Black Friday",
+  code: "BLACKFRIDAY",
+  /** Flat discount in paise. */
+  discount: 300000,
+  /** Live as soon as it is deployed, through the end of Black Friday. */
+  startsAt: Date.parse("2026-11-26T00:00:00+05:30"),
+  endsAt: Date.parse("2026-11-28T00:00:00+05:30"),
+  startLabel: "26 November",
+} as const;
+
+export const salePrice = PRICING.regular - SALE.discount;
+export const saleActive = (now = Date.now()) => now >= SALE.startsAt && now < SALE.endsAt;
 export const scratchPrice = PRICING.regular - PRICING.scratchDiscount;
 export const isScratchCode = (code: string | null | undefined) => typeof code === "string" && code.toUpperCase().startsWith(`${PRICING.scratchPrefix}-`);

@@ -2,7 +2,7 @@ import "server-only";
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { sendEnrollmentConfirmation } from "@/lib/email";
 import { supabaseAdmin } from "@/lib/supabase";
-import { BATCH, PRICING, isScratchCode } from "@/lib/batch";
+import { BATCH, PRICING, SALE, isScratchCode } from "@/lib/batch";
 
 export const FEE = 699900;
 export class CouponValidationError extends Error {}
@@ -42,6 +42,11 @@ export async function claimScratchOffer(token: unknown) {
 
 export async function validateInternshipCoupon(value: unknown) {
   const code = typeof value === "string" ? value.trim().toUpperCase() : "";
+  if (code === SALE.code) {
+    if (Date.now() < SALE.startsAt) throw new CouponValidationError(`${SALE.code} starts on ${SALE.startLabel}.`);
+    if (Date.now() >= SALE.endsAt) throw new CouponValidationError(`The ${SALE.name} offer has ended. The regular price applies.`);
+    return { code: SALE.code, discountAmount: SALE.discount };
+  }
   if (isScratchCode(code)) {
     const admin = supabaseAdmin();
     const { data } = await admin.from("internship_scratch_offers").select("code,expires_at,discount_amount").eq("code", code).maybeSingle();

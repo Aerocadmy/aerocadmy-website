@@ -77,6 +77,8 @@ export const DroneHeroAssembly: React.FC = () => {
     let cachedTrackTop = track.offsetTop;
     const navHeight = () => cachedNavHeight;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Phones and tablets have a small GPU memory budget; skip costly effects there.
+    const lowPower = window.innerWidth <= 900 || window.matchMedia("(pointer: coarse)").matches;
 
     const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -359,6 +361,22 @@ export const DroneHeroAssembly: React.FC = () => {
     orbitClone.style.display = "block";
     stage.appendChild(orbitClone);
 
+    // Every animated element gets its own GPU layer only while it is visible. Keeping ~50
+    // layers alive at once (most of them transparent) exceeds the GPU budget on phones,
+    // which then skips drawing tiles and leaves parts cut off or missing.
+    const layers: { el: HTMLElement; hint: string; on: boolean }[] = [];
+    const trackLayer = (el: HTMLElement, hint: string) => { layers.push({ el, hint, on: true }); };
+    const syncLayers = () => {
+      for (const layer of layers) {
+        const opacity = layer.el.style.opacity;
+        const visible = opacity !== "0" && opacity !== "0.000";
+        if (visible === layer.on) continue;
+        layer.on = visible;
+        layer.el.style.willChange = visible ? layer.hint : "auto";
+        layer.el.style.visibility = visible ? "" : "hidden";
+      }
+    };
+
     // Floating decorative symbols
     const decosData = [
       { x: 500, y: 65, from: "top", type: "ring" },
@@ -383,6 +401,7 @@ export const DroneHeroAssembly: React.FC = () => {
       el.style.opacity = "0";
       el.style.opacity = "0";
       el.style.willChange = "transform, opacity";
+      trackLayer(el, "transform, opacity");
       const w = d.w || 19;
       el.style.width = w + "px";
       el.style.height = w + "px";
@@ -468,11 +487,12 @@ export const DroneHeroAssembly: React.FC = () => {
       el.style.width = w + "px";
       el.style.backgroundColor = "transparent";
       el.style.zIndex = String(z);
-      if (src === ASSETS.frameBody) {
+      trackLayer(el, "transform, opacity");
+      if (src === ASSETS.frameBody && !lowPower) {
         el.style.filter = "blur(0.55px) saturate(0.96)";
       }
 
-      const im = mountComponentImage(el, src, w);
+      const im = mountComponentImage(el, src, w, lowPower);
       el.dataset.assemblyAsset = src;
       stage.appendChild(el);
       return { el, im, w };
@@ -490,6 +510,7 @@ export const DroneHeroAssembly: React.FC = () => {
       el.style.width = size + "px";
       el.style.height = size + "px";
       el.style.zIndex = String(z);
+      trackLayer(el, "transform, opacity");
 
       if (cls === "pop-glow") {
         el.style.background =
@@ -578,6 +599,7 @@ export const DroneHeroAssembly: React.FC = () => {
       el.style.pointerEvents = "none";
       el.style.width = (p.W || p.w) + "px";
       el.style.zIndex = String(p.z);
+      trackLayer(el, "transform");
 
       let halo: HTMLDivElement | null = null;
       if (p.halo) {
@@ -601,7 +623,7 @@ export const DroneHeroAssembly: React.FC = () => {
       if (p.svg) {
         el.insertAdjacentHTML("beforeend", pinsSVG);
       } else if (p.img) {
-        imgEl = mountComponentImage(el, p.img, p.W || p.w);
+        imgEl = mountComponentImage(el, p.img, p.W || p.w, lowPower);
         imgEl.dataset.initialAsset = "true";
         el.dataset.component = p.tag?.title || p.role || 'Hardware';
 
@@ -627,6 +649,7 @@ export const DroneHeroAssembly: React.FC = () => {
         tag.style.whiteSpace = "nowrap";
         tag.style.minWidth = p.tag.w + "px";
         tag.style.zIndex = "8";
+        trackLayer(tag, "transform, opacity");
         tag.innerHTML = `
           <i style="width:9px;height:9px;border-radius:50%;background:#18CB96;margin-top:6px;flex:none;position:relative;display:block"></i>
           <div>
@@ -1536,6 +1559,7 @@ export const DroneHeroAssembly: React.FC = () => {
         ).toFixed(2)}deg) scale(${(1 + f * 0.35).toFixed(3)})`;
       });
 
+      syncLayers();
       scheduleFrame();
     }
 

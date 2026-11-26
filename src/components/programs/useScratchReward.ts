@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { SALE, saleActive } from "@/lib/batch";
 
 export const formatINR = (paise: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(paise / 100);
 
@@ -42,6 +43,12 @@ export function formatRemaining(ms: number) {
   return `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
 }
 
+/** Countdown that stays readable when more than a day is left. */
+function formatSaleRemaining(ms: number) {
+  const days = Math.floor(ms / 86_400_000);
+  return days ? `${days}d ${formatRemaining(ms % 86_400_000)}` : formatRemaining(ms);
+}
+
 /**
  * The visitor's personal offer. `ready` is false until mounted, so the server and first client
  * render match; render anything offer-dependent only once it is true.
@@ -61,6 +68,8 @@ export function useScratchReward() {
   }, []);
 
   const ready = now !== null;
-  const active = ready && rewardActive(stored, now);
-  return { ready, now: now ?? 0, stored, reward: active ? stored : null, remaining: active && stored ? formatRemaining(stored.expiresAt - now!) : "" };
+  // A running sale replaces the personal offer, so the two never show (or stack) together.
+  const sale = ready && saleActive(now);
+  const active = ready && !sale && rewardActive(stored, now);
+  return { ready, now: now ?? 0, stored, sale, saleRemaining: sale ? formatSaleRemaining(SALE.endsAt - now!) : "", reward: active ? stored : null, remaining: active && stored ? formatRemaining(stored.expiresAt - now!) : "" };
 }

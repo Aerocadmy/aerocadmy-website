@@ -5,7 +5,7 @@ import { AlertCircle, ArrowRight, Award, Box, CheckCircle2, Compass, ShieldCheck
 import { track } from "@/lib/analytics";
 import { RatingStars } from "@/components/testimonials/ReviewRating";
 import { participantReviews, reviewAverage } from "@/components/testimonials/participant-reviews";
-import { BATCH, PRICING, isScratchCode } from "@/lib/batch";
+import { BATCH, PRICING, SALE, isScratchCode, saleActive } from "@/lib/batch";
 import { readReward, rewardActive } from "./useScratchReward";
 import styles from "./InternshipEnrolment.module.css";
 
@@ -123,8 +123,9 @@ export function InternshipEnrolment() {
   }, [isOpen]);
 
   useEffect(() => {
-    // Auto-apply the visitor's personal scratch offer so they never need to type a code.
+    // Auto-apply the running sale, otherwise the visitor's scratch offer, so nobody has to type a code.
     if (!isOpen || session || appliedCoupon || couponInput) return;
+    if (saleActive()) { void applyCoupon(SALE.code, true); return; }
     const reward = readReward();
     if (reward && rewardActive(reward, Date.now())) void applyCoupon(reward.code, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -225,7 +226,7 @@ export function InternshipEnrolment() {
     } catch (error) {
       setAppliedCoupon(null);
       setPayableAmount(programFee);
-      if (!silent || isScratchCode(code)) setCouponMessage(error instanceof Error ? error.message : "Could not apply this code. Please try again.");
+      if (!silent || isScratchCode(code) || code === SALE.code) setCouponMessage(error instanceof Error ? error.message : "Could not apply this code. Please try again.");
     } finally { setCouponBusy(false); }
   }
 
