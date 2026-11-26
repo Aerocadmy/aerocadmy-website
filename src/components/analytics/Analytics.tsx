@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Script from "next/script";
 import posthog from "posthog-js";
 import { CONSENT_EVENT, OPEN_SETTINGS_EVENT, analyticsConfig, analyticsEnabled, getConsent, setConsent, type Consent } from "@/lib/analytics";
+import { identifyCampaignVisitor, takeCampaignCode } from "@/lib/campaignLink";
 
 const { posthogKey, posthogHost, gaId, metaPixelId } = analyticsConfig;
 
@@ -30,6 +31,7 @@ export function Analytics() {
 
   // PostHog always runs. Without the analytics choice it is cookieless, keeps no IP and records no sessions.
   useEffect(() => {
+    takeCampaignCode();
     if (!posthogKey || posthog.__loaded) return;
     const analytics = getConsent()?.analytics === true;
     hadAnalytics.current = analytics;
@@ -42,6 +44,7 @@ export function Analytics() {
       disable_session_recording: !analytics,
       ip: false,
     });
+    if (analytics) identifyCampaignVisitor();
   }, []);
 
   useEffect(() => {
@@ -51,6 +54,7 @@ export function Analytics() {
       if (analytics) {
         posthog.set_config({ persistence: "localStorage+cookie", disable_session_recording: false, ip: true });
         posthog.startSessionRecording();
+        identifyCampaignVisitor();
       } else {
         posthog.stopSessionRecording();
         posthog.reset();
@@ -84,7 +88,7 @@ export function Analytics() {
       <p className="text-base font-bold text-[#081C2B]">Help us build a better Aerocadmy</p>
       <p className="mt-1.5 text-sm leading-relaxed text-[#3d5560]">Cookies let us see which lessons and pages help students most, and show our programs to people who&apos;d enjoy them. Essential cookies are always on. Everything else is your choice and you can change it anytime from “Cookie settings” in the footer. <a href="/privacy-policy" className="font-semibold text-[#087957] underline">Learn more</a></p>
       {customising && <div className="mt-3 space-y-3 text-sm text-[#081C2B]">
-        <label className="flex items-start gap-3"><input type="checkbox" className="mt-1 h-4 w-4 accent-[#087957]" checked={draft.analytics} onChange={event => setDraft({ ...draft, analytics: event.target.checked })} /><span><strong>Analytics</strong><br /><span className="text-[#3d5560]">Remembers you between visits, records anonymised sessions and lets us test improvements (PostHog, Google Analytics).</span></span></label>
+        <label className="flex items-start gap-3"><input type="checkbox" className="mt-1 h-4 w-4 accent-[#087957]" checked={draft.analytics} onChange={event => setDraft({ ...draft, analytics: event.target.checked })} /><span><strong>Analytics</strong><br /><span className="text-[#3d5560]">Remembers you between visits, records sessions and lets us test improvements (PostHog, Google Analytics).</span></span></label>
         <label className="flex items-start gap-3"><input type="checkbox" className="mt-1 h-4 w-4 accent-[#087957]" checked={draft.ads} onChange={event => setDraft({ ...draft, ads: event.target.checked })} /><span><strong>Advertising</strong><br /><span className="text-[#3d5560]">Measures our Meta (Facebook and Instagram) ads and shows our programs to relevant people. For visitors aged 18 or older only.</span></span></label>
       </div>}
       <div className="mt-4 flex flex-wrap gap-2">
