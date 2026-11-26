@@ -22,7 +22,7 @@ const makeConfetti = (): Piece[] => Array.from({ length: 44 }, (_, i) => ({
  * the visitor scratches a card, and the server issues a unique code that expires 24 hours later.
  */
 export function InternshipScratchOffer() {
-  const { ready, stored, reward, remaining } = useScratchReward();
+  const { ready, sale, stored, reward, remaining } = useScratchReward();
   const [shown, setShown] = useState(false);
   const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState(true);
@@ -36,7 +36,7 @@ export function InternshipScratchOffer() {
   const drawing = useRef<{ x: number; y: number } | null>(null);
   const moves = useRef(0);
 
-  const eligible = ready && !stored && !dismissed;
+  const eligible = ready && !sale && !stored && !dismissed;
 
   useEffect(() => {
     try { setDismissed(sessionStorage.getItem(DISMISS_KEY) === "1"); } catch { setDismissed(false); }
