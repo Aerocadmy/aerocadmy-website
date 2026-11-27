@@ -123,9 +123,9 @@ export function InternshipEnrolment() {
   }, [isOpen]);
 
   useEffect(() => {
-    // Auto-apply the running sale, otherwise the visitor's scratch offer, so nobody has to type a code.
+    // During a sale the visitor enters the code themselves, so only open the field. Otherwise auto-apply their scratch offer.
     if (!isOpen || session || appliedCoupon || couponInput) return;
-    if (saleActive()) { void applyCoupon(SALE.code, true); return; }
+    if (saleActive()) { setShowCoupon(true); return; }
     const reward = readReward();
     if (reward && rewardActive(reward, Date.now())) void applyCoupon(reward.code, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -255,6 +255,8 @@ export function InternshipEnrolment() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    // A typed but unapplied code would otherwise be ignored and the full price charged.
+    if (couponInput.trim() && !appliedCoupon) { setShowCoupon(true); setCouponMessage("Tap Apply to use your code, or clear the field to pay without it."); document.getElementById("internship-coupon")?.scrollIntoView({ block: "center" }); return; }
     setBusy(true);
     setMessage("");
     setPhase("preparing");
@@ -371,7 +373,7 @@ export function InternshipEnrolment() {
           <span>Training + ESP32 kit<strong>Batch starts · {BATCH.startLabel}</strong></span>
           <span className={styles.totalRight}>
             <span className={styles.totalPrice}><del>{formatINR(PRICING.anchor)}</del><b>{formatINR(payableAmount)}</b></span>
-            <em className={styles.save}>You save {formatINR(PRICING.anchor - payableAmount)}</em>
+            <em className={styles.save}>{!saleActive() ? `You save ${formatINR(PRICING.anchor - payableAmount)}` : appliedCoupon?.code === SALE.code ? `You save ${formatINR(SALE.discount)}` : `${formatINR(SALE.discount)} off available`}</em>
           </span>
         </div>
         <ul className={styles.benefits} aria-label="What you get">
@@ -396,6 +398,7 @@ export function InternshipEnrolment() {
               <button type="button" onClick={() => applyCoupon()} disabled={busy || couponBusy || checkoutActive}>{couponBusy ? "Checking…" : "Apply"}</button>
               {appliedCoupon && <button type="button" className={styles.removeCoupon} onClick={removeCoupon} disabled={busy || couponBusy || checkoutActive}>Remove</button>}
             </div></>}
+            {saleActive() && !appliedCoupon && !couponMessage && <p className={styles.saleHint}>Don’t miss <b>{formatINR(SALE.discount)} off</b>: enter <b>{SALE.code}</b> and tap Apply before the {SALE.name} sale ends.</p>}
             {couponMessage && !isScratchCode(appliedCoupon?.code) && <p className={`${styles.couponMessage} ${appliedCoupon ? styles.couponSuccess : ""}`} role="status">{couponMessage}</p>}
             {appliedCoupon && <p className={styles.discountLine}><span>{isScratchCode(appliedCoupon.code) ? "Your offer" : `${appliedCoupon.code} discount`}</span><strong>−{formatINR(appliedCoupon.discountAmount)}</strong></p>}
           </div>

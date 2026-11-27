@@ -5,6 +5,8 @@
 .offerBox { margin-top: 14px; overflow: hidden; border: 1px solid #cfe5da; border-radius: 12px; background: #f3faf6; }
 .offerHead { display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: #e1f2e8; color: #087957; font-size: 13px; font-weight: 600; }
 .offerHead b { margin-left: auto; font-weight: 700; }
+.offerCode { margin: 0; padding: 10px 14px 0; color: #304a43; font-size: 13px; line-height: 1.6; }
+.offerCode b { color: #132636; font-weight: 700; letter-spacing: .02em; }
 .offerTime { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; color: #304a43; font-size: 13px; }
 .offerTime b { color: #132636; font-size: 22px; font-weight: 600; letter-spacing: .01em; font-variant-numeric: tabular-nums; }
 .meta { display: flex; flex-direction: column; gap: 9px; margin: 16px 0 0; padding: 0; list-style: none; color: #304a43; font-size: 13px; font-weight: 500; }

@@ -9,7 +9,7 @@ import { ComponentImage } from "@/components/ui/ComponentImage";
 import { ASSETS } from "@/lib/assets";
 import { courseCategories } from "@/data/course-categories";
 import { recordedCourses } from "@/data/courses";
-import { BATCH, SALE, salePrice, saleActive } from "@/lib/batch";
+import { BATCH, SALE, saleActive } from "@/lib/batch";
 import styles from "./Navbar.module.css";
 
 const sectionLinks = [
@@ -33,7 +33,7 @@ export const Navbar: React.FC = () => {
   useEffect(() => {
     let cancelled = false;
     if (saleActive()) {
-      setAnnouncement(`${SALE.name}: ₹${(salePrice / 100).toLocaleString("en-IN")} with code ${SALE.code}`);
+      setAnnouncement(`${SALE.name}: Get ₹${(SALE.discount / 100).toLocaleString("en-IN")} off with code ${SALE.code}`);
       return;
     }
     const base = `Batch starts ${BATCH.startLabel}`;
